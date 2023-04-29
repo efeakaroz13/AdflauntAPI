@@ -136,4 +136,5 @@ class Auth:
         open("data.json","w").write(json.dumps(data,indent=4))
         return locdata
     
-
+if __name__ == "__main__":
+    app.run(debug=True)

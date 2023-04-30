@@ -138,9 +138,37 @@ class Auth:
         open("data.json","w").write(json.dumps(data,indent=4))
         return locdata
 
+class Listing:
 
 
-    @app.route("/api/listing",methods=["POST"])
+    @app.route("/search")
+    def search():
+        q = request.args.get("q")
+        if q == None or q == "":
+            try:
+                return data["Listings"]
+            except:
+                return {}
+        results = []
+        try:
+             data["Listings"]
+        except:
+            return {}
+        for a in list(data["Listings"].keys()):
+            d_c = data["Listings"][a]
+            values = list(d_c.values())
+            for v in values:
+                if str(q) in str(v):
+                    return d_c 
+        return {}
+    
+
+
+
+
+
+
+    @app.route("/api/listing",methods=["POST","GET","DELETE"])
     def get_and_create_listing_user():
         if request.method == "POST":
             email = request.form.get("email")
@@ -234,6 +262,9 @@ class Auth:
                 "maxGuestsPerBooking":maxGuestsPerBooking,
                 "manuallyAcceptNewBookings":manuallyAcceptNewBookings,
                 "agreeToConditions":agreeConditions,
+                "email":email,
+                "machineTime":time.time(),
+                "user":user
 
             }
             try:
@@ -254,7 +285,25 @@ class Auth:
                 return {"SCC":False,"err":"Could not find listing"}
 
         
-        
+        if request.method == "DELETE":
+            email = request.form.get("email")
+            password = request.form.get("password")
+            scc,user = loginInternal(email,password)
+            if scc == False:
+                return {"SCC":False,"err":"email and password is not correct"}
+            PID = request.form.get("id")
+            try:
+                if data["Listings"][PID]["email"] == email:
+                    del data["Listings"][PID]
+
+                else:
+                    return {"SCC":False,"err":"This element doesn't belong to this email. "}
+                
+                open("data.json","w").write(json.dumps(data,indent=4))
+                return {"SCC":True}
+            except:
+                return {"SCC":False,"err":"Data does not exist"}
+
 
 
         """
@@ -288,6 +337,47 @@ class Auth:
 
         """
                 
+
+class Reviews:
+    @app.route("/add_review/<listingID>",method=["POST"])
+    def add_review_with_listing_id(listingID):
+        if request.method == "POST":
+            email = request.form.get("email")
+            password = request.form.get("password")
+            scc,user = loginInternal(email,password)
+            if scc == False:
+                return {"SCC":False,"err":"check email and password"}
+            date = request.form.get("date")
+            review = request.form.get("review")
+            try:
+                stars = float(request.form.get("stars"))
+            except:
+                return {"SCC":False,"err":"Specify stars as float"}
+            
+            c_data=  {
+                "review":review,
+                "mtime":time.time(),
+                "stars":stars,
+                "date":date,
+                "user":user
+            }
+            try:
+                data["Listing"][listingID]["Reviews"]
+            except:
+                data["Listing"][listingID]["Reviews"] = {}
+            reviewID = IDCREATOR_internal(12)
+            
+            data["Listing"][listingID]["Reviews"][reviewID] = c_data 
+
+            #Add review to the listing
+            try:
+                data["Users"][data["Listing"][listingID]["user"]["UID"]]["Reviews"]
+            except:
+                data["Users"][data["Listing"][listingID]["user"]["UID"]]["Reviews"] = {}
+
+            #Add review to host of the post.
+            data["Users"][data["Listing"][listingID]["user"]["UID"]]["Reviews"][reviewID] = c_data
+
 
 
 

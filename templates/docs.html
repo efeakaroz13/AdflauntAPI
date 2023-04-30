@@ -110,6 +110,16 @@
         /api/listing?id=PID GET<br>
         Returns the same thing as the input other than email and password<br>
         <br>
+        /api/listing DELETE<br>
+        Arguments as form:<br>
+        email,password,id<br>
+        Returns just success value. Deletes the listing, anyone other than user can't delete the listing.
+        <br><br>
+        /search?q=search GET<br>
+        returns searched listings <br>
+        if you don't specify anything, it will return all
+        
+
 
 
     </code>

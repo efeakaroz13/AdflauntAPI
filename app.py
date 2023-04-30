@@ -248,6 +248,10 @@ class Auth:
         
         if request.method == "GET":
             PID = request.args.get("id")
+            try:
+                return data["Listings"][PID]
+            except:
+                return {"SCC":False,"err":"Could not find listing"}
 
         
         

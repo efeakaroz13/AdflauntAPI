@@ -10,6 +10,7 @@
 
 <body>
     <h1>Welcome to the original documentation</h1>
+    <h2>Auth</h2>
     <code>
         /login - Method POST<br>
         Arguments: 
@@ -64,7 +65,54 @@
 
 
     </code>
+    <br>
+    <h2>Listing</h2>
+    <code>
+        /api/listing POST<br>
+        Arguments:<br>
+        {<br>
+            "email":email,<br>
+            "password":password,<br>
+            "title":title,<br>
+            "PID":PID,<br>
+            "price":price,<br>
+            "location":location,<br>
+            "type":type_,<br>
+            "revisions":revisions,<br>
+            "digital":digital,<br>
+            "sqfeet":printsqfeet,<br>
+            "sqfootage":printsqfootage,<br>
+            "category":category,<br>
+            "population":population,<br>
+            "discountAvailable":discountAvailable,<br>
+            "installationDate":installationDate,<br>
+            "removalDate":removalDate,<br>
+            "tags":tags,<br>
+            "image":file,<br>
+            "extras":extras,<br>
+            "requirements":requirements,<br>
+            "description":description,<br>
+            "bookingNote":bookingNote,<br>
+            "bookingOffset":bookingOffset,<br>
+            "bookingWindow":bookingWindow,<br>
+            "maxBookingDuration":maxBookingDuration,<br>
+            "minBookingDuration":minBookingDuration,<br>
+            "minGuestsPerBooking":minGuestsPerBooking,<br>
+            "maxGuestsPerBooking":maxGuestsPerBooking,<br>
+            "manuallyAcceptNewBookings":manuallyAcceptNewBookings,<br>
+            "agreeToConditions":agreeConditions,<br>
 
+        }<br>
+        Note:the key values are arguments<br>
+        Output:{"PID":pid}+input data<br>
+
+        <br>
+        /api/listing?id=PID GET<br>
+        Returns the same thing as the input other than email and password<br>
+        <br>
+
+
+    </code>
 </body>
 
 </html>

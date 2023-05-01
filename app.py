@@ -58,9 +58,10 @@ class Auth:
     def login():
         email = request.form.get("email")
         password = request.form.get("password")
+        data=json.loads(open("data.json","r").read())
         try:
             if data["short_auth"][email] != password:
-                return {"SCC":False,"err":"Password is not correct."}
+                return {"SCC":False,"err":"Password is not correct."},401
 
         except Exception as e:
 
@@ -68,7 +69,7 @@ class Auth:
                 "SCC":False,
                 "err":"This user does not exist.",
                 "e":str(e)
-            }
+            },404
         
         allkeys = list(data["Users"].keys())
         for a in allkeys:
@@ -88,6 +89,7 @@ class Auth:
         ip_ = request.form.get("ip")
         dateBirth = request.form.get("dateBirth")
         allUsers = data["Users"].keys()
+
         for u in allUsers:
             cdata = data["Users"][u]
             email_c = cdata["email"]

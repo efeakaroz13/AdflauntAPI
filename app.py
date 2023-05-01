@@ -3,7 +3,7 @@ Author:Efe Akaröz
 1st of may, monday 2023
 """
 import json
-from flask import Flask, render_template, request, redirect, make_response
+from flask import Flask, render_template, request, redirect, make_response,abort
 import cv2
 import requests
 import time
@@ -87,6 +87,12 @@ class Auth:
         password = request.form.get("password")
         ip_ = request.form.get("ip")
         dateBirth = request.form.get("dateBirth")
+        allUsers = data["Users"].keys()
+        for u in allUsers:
+            cdata = data["Users"][u]
+            email_c = cdata["email"]
+            if email_c == email:
+                return abort(409)
         try:
             file = request.files["file"]
             if file and allowed_file(file.filename):

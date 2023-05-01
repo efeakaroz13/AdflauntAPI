@@ -1,7 +1,6 @@
 """ 
 Author:Efe Akaröz
 1st of may, monday 2023
-
 """
 import json
 from flask import Flask, render_template, request, redirect, make_response
@@ -344,7 +343,7 @@ class Listing:
                 
 
 class Reviews:
-    @app.route("/add_review/<listingID>",method=["POST"])
+    @app.route("/add_review/<listingID>",methods=["POST"])
     def add_review_with_listing_id(listingID):
         if request.method == "POST":
             email = request.form.get("email")

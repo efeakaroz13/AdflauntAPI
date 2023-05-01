@@ -1,3 +1,8 @@
+""" 
+Author:Efe Akaröz
+1st of may, monday 2023
+
+"""
 import json
 from flask import Flask, render_template, request, redirect, make_response
 import cv2
@@ -378,7 +383,29 @@ class Reviews:
             #Add review to host of the post.
             data["Users"][data["Listing"][listingID]["user"]["UID"]]["Reviews"][reviewID] = c_data
 
+class OLD:
+    @app.route("/static/scaler")
+    def scaler():
+        filename = request.args.get("filename")
+        if filename == None:
+            return {"SCC":False,"err":"Filename required"}
+        try:
+            img = cv2.imread('static/{}'.format(filename), cv2.IMREAD_UNCHANGED)
+        except:
+            return {"SCC":False,"err":"file not found or could not be opened by cv2"}
 
+        try:
+            scale_percent = int(request.args.get("scalePer"))
+        except:
+            scale_percent = 60
+        width = int(img.shape[1] * scale_percent / 100)
+        height = int(img.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+        retval, buffer = cv2.imencode('.png', resized)
+        response = make_response(buffer.tobytes())
+        response.headers['Content-Type'] = 'image/png'
+        return response
 
 
 

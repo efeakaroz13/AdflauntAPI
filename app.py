@@ -62,10 +62,12 @@ class Auth:
             if data["short_auth"][email] != password:
                 return {"SCC":False,"err":"Password is not correct."}
 
-        except:
+        except Exception as e:
+
             return {
                 "SCC":False,
-                "err":"This user does not exist."
+                "err":"This user does not exist.",
+                "e":str(e)
             }
         
         allkeys = list(data["Users"].keys())

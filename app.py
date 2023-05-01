@@ -187,7 +187,7 @@ class Listing:
         if request.method == "POST":
             email = request.form.get("email")
             password = request.form.get("password")
-            scc,user = loginInternal(email)
+            scc,user = loginInternal(email,password)
             if scc == False:
                 return {"SCC":False,"err":"Email or password is not correct or missing"}
             

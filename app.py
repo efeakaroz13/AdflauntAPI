@@ -158,7 +158,7 @@ class Listing:
     @app.route("/search")
     def search():
         data = json.loads(open("data.json","r").read())
-        
+
         q = request.args.get("q")
         if q == None or q == "":
             try:
@@ -172,10 +172,16 @@ class Listing:
             return {}
         for a in list(data["Listings"].keys()):
             d_c = data["Listings"][a]
-            values = list(d_c.values())
-            for v in values:
-                if str(q) in str(v):
-                    results.append(d_c)
+            try:
+                title = d_c["title"]
+            except:
+                title = ""
+            try:
+                description = d_c["description"]
+            except:
+                description = ""
+            if (str(q).lower().strip() in title) or (str(q).lower().strip() in description):
+                results.append(d_c)
         return {"output":results}
     
 

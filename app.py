@@ -157,6 +157,8 @@ class Listing:
 
     @app.route("/search")
     def search():
+        data = json.loads(open("data.json","r").read())
+        
         q = request.args.get("q")
         if q == None or q == "":
             try:
@@ -173,8 +175,8 @@ class Listing:
             values = list(d_c.values())
             for v in values:
                 if str(q) in str(v):
-                    return d_c 
-        return {}
+                    results.append(d_c)
+        return {"output":results}
     
 
 

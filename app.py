@@ -152,6 +152,142 @@ class Auth:
         open("data.json","w").write(json.dumps(data,indent=4))
         return locdata
 
+    @app.route("/profile/update/<profileID>",methods=["POST"])
+    def updateProfileFunction(profileID):
+        data=json.loads(open("data.json","r").read())
+        email = request.form.get("email")
+        password = request.form.get("password")
+        ip_ = request.form.get("ip")
+        dateBirth = request.form.get("dateBirth")
+        allUsers = data["Users"].keys()
+        userExists = False
+        loggedIn = False
+        for u in allUsers:
+            c_data = data["Users"][u]
+            if c_data["email"] == email:
+                userExists = True 
+                if c_data["password"] == password:
+                    loggedIn = True 
+
+        if userExists == False or loggedIn == False:
+            return {"SCC":False,"UserExists":userExists,"loggedIn":loggedIn}
+        
+        
+        try:
+            file = request.files["file"]
+            if file and allowed_file(file.filename):
+                originalFile = secure_filename(file.filename)
+                ext = originalFile.split(".")[1]
+                ext = originalFile.split(".")[-1]
+
+                filename = ""
+                for i in range(10):
+                    ca = random.choice(alphabet)
+                    filename = filename + ca
+                    addNorNot = random.randint(0, 1)
+                    if addNorNot == 1:
+                        filename = filename + str(random.randint(12, 120))
+
+                try:
+                    file.save("static/" + filename + "." + ext)
+
+                    filename = filename + "." + ext
+
+                except Exception as e:
+                    filename = ""
+        except Exception as e:
+
+            filename = ""
+        
+        UID  = profileID
+
+        data["Users"][UID]["email"] = email 
+        data["Users"][UID]["password"] = password
+        if dateBirth != None:
+            data["Users"][UID]["dateOfBirth"] = dateBirth
+        if ip_ != None:
+            data["Users"][UID]["ip"] = ip_
+        if filename != "":
+            data["Users"][UID]["image"] = filename
+        
+        data["short_auth"][email]=password 
+        open("data.json","w").write(json.dumps(data,indent=4))
+        return data["Users"][UID]
+
+
+class Messaging:
+    @app.route("/messaging/createChat",methods=["POST"])
+    def createChat():
+        data = json.loads(open("data.json","r").read())
+        email = request.form.get("email")
+        password = request.form.get("password")
+        to = request.form.get("to") #As user id
+        try:
+            if data["short_auth"][email] != password:
+                return {"SCC":False,"err":"Check your password"},401
+        except:
+            return {"SCC":False,"err":"User does not exist"},404 
+        
+        allUsers = list(data["Users"].keys())
+        userFound = False
+        loggedIn = False
+        toExists = False 
+        cu = ""
+        for a in allUsers:
+            if a == to:
+                toExists = True
+            d_c = data["Users"][a]
+            if d_c["email"] == email:
+                userFound = True 
+                if d_c["password"] == password:
+                    loggedIn = True
+                    cu = a
+        
+        if userFound  == False or loggedIn == False:
+            return {"SCC":False,"userFound":userFound,"loggedIn":loggedIn},401
+        
+        if toExists == False:
+            return {"SCC":False,"err":"Couldn't find the reciever"},404
+        try:
+            data["Users"][cu]["inbox"]
+        except:
+            data["Users"][cu]["inbox"] = {}
+        
+        try:
+            data["Users"][to]["inbox"]
+        except:
+            data["Users"][to]["inbox"] = {}
+        
+        ChatID = IDCREATOR_internal(15)
+        chatData = {
+            "creator":cu,
+            "reciever":to,
+            "createdAt":time.time(),
+
+        }
+        data["Users"][to]["inbox"][ChatID] = chatData
+        data["Users"][cu]["inbox"][ChatID] = chatData
+
+        open("data.json","w").write(json.dumps(data,indent=4))
+
+        return {"SCC":True,"chatData":chatData}
+
+
+
+        
+
+
+        
+        
+
+
+        
+
+
+        
+
+
+
 class Listing:
 
 
@@ -192,6 +328,7 @@ class Listing:
 
     @app.route("/api/listing",methods=["POST","GET","DELETE"])
     def get_and_create_listing_user():
+        data=json.loads(open("data.json","r").read())
         if request.method == "POST":
             email = request.form.get("email")
             password = request.form.get("password")
@@ -328,36 +465,7 @@ class Listing:
 
 
 
-        """
-            Needed data for this part:
-            Title, --done
-            thumbnail,
-            price,--done
-            location,--done
-            category,--done
-            revisions(optional), --done
-            digital(checkbox),--done
-            print(optional)->sqfeet and footage,--done
-            Type,--done
-            Population,--done
-             Discount available,--done
-            installation date,--done
-            removal date,--done
-            tags,--done
-            extras(title,price,per x),--done
-            Requirements:array,--done
-            Description,--done
-            booking note,--done
-            booking offset,--done
-            booking window,--done
-            minimum booking duration,--done
-            maximum booking duration,--done
-            minimum guests per booking,--done
-            maximum guests per booking,--done
-            Manually accept new bookings,--done
-            Agree to conditions.
-
-        """
+       
                 
 
 class Reviews:

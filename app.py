@@ -273,8 +273,14 @@ class Messaging:
 
         return {"SCC":True,"chatData":chatData}
 
+
+
+
+
+
     @app.route("/msg/send",methods=["POST"])
     def msg_send_func():
+        data = json.loads(open("data.json","r").read())
         email = request.form.get("email")
         password = request.form.get("password")
         loggedIn,user = loginInternal(email,password)
@@ -350,6 +356,50 @@ class Messaging:
         return msgData
 
         
+    @app.route("/messaging/<chatID>",methods=["POST"])
+    def getChat(chatID):
+        email = request.form.get("email")
+        password = request.form.get("password")
+        try:
+            page = int(request.args.get("p"))
+        except:
+            page = 1
+        #Page is for getting a part of messages
+
+        loggedIn,user = loginInternal(email,password)
+        if loggedIn == False:
+            return {"SCC":False, "err":"Email or password is not correct"}
+        try:
+            allMessages = user["inbox"][chatID]["msgs"]
+            outputList = []
+            counter = (page-1)*10
+            orgCounter = 0
+            """ 
+            Quick note:
+            so with this method I created 2 counters, one is for page given by API User and the other one is for the for loop
+            so what it does is, when the current counter passes the user's number times ten it starts to add them to the list and
+            when it passes 10, it stops.
+            """
+            for a in allMessages:
+                
+                if orgCounter>counter and (orgCounter-counter)<10:
+                    outputList.append(a)
+                if (orgCounter-counter)>10:
+                    break 
+                orgCounter +=1
+            outputData = {
+                "SCC":True,
+                "Messages":outputList
+            }
+               
+        except:
+            outputData = {
+                "SCC":False,
+                "err":"Couldn't find chat"
+            }
+        
+
+        return outputData
 
 
         

@@ -263,6 +263,7 @@ class Messaging:
             "creator":cu,
             "reciever":to,
             "createdAt":time.time(),
+            "chatID":ChatID
 
         }
         data["Users"][to]["inbox"][ChatID] = chatData
@@ -272,7 +273,81 @@ class Messaging:
 
         return {"SCC":True,"chatData":chatData}
 
+    @app.route("/msg/send",methods=["POST"])
+    def msg_send_func():
+        email = request.form.get("email")
+        password = request.form.get("password")
+        loggedIn,user = loginInternal(email,password)
+        if loggedIn == False:
+            return {"SCC":False,"err":"Check credentials"},401
+        chatID = request.form.get("chatID")
+        checkChat = False
+        try:
+            chatData = user["inbox"][chatID]
+        except:
+            return {"SCC":False,"err":"This chat does not exist in the database"}
+        message = request.form.get("message")
 
+        try:
+            file = request.files['image']
+        except:
+            file = False 
+        if file and allowed_file(file.filename):
+            originalFile = secure_filename(file.filename)
+            ext = originalFile.split(".")[1]
+            ext = originalFile.split(".")[-1]
+
+            filename = ""
+            for i in range(10):
+                ca = random.choice(alphabet)
+                filename = filename+ca
+                addNorNot = random.randint(0, 1)
+                if addNorNot == 1:
+                    filename = filename + str(random.randint(12, 120))
+
+            try:
+                file.save("static/"+filename+"."+ext)
+                
+                file = filename+"."+ext
+
+            except Exception as e:
+                file =False
+        else:
+            file =False 
+        
+        msgData = {
+            "file":file,
+            "msg":message,
+            "sender":user["UID"],
+            "reciever":chatData["reciever"],
+            "senderEmail":email,
+            "at":time.time(),
+            
+        }
+        try:
+            data["Users"][chatData["reciever"]]["inbox"][chatID]
+        except:
+            return {"SCC":False,"err":"This chat does not exist"}
+        
+
+        try:
+            data["Users"][chatData["reciever"]]["inbox"][chatID]["msgs"]
+        except:
+            data["Users"][chatData["reciever"]]["inbox"][chatID]["msgs"] = []
+
+
+        try:
+            data["Users"][user["UID"]]["inbox"][chatID]["msgs"]
+        except:
+            data["Users"][user["UID"]]["inbox"][chatID]["msgs"] = []
+        
+
+        data["Users"][user["UID"]]["inbox"][chatID]["msgs"].append(msgData)
+        data["Users"][chatData["reciever"]]["inbox"][chatID]["msgs"].append(msgData)
+
+
+        open("data.json","w").write(json.dumps(data,indent=4))
+        return msgData
 
         
 

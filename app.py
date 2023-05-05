@@ -222,12 +222,18 @@ class Messaging:
         email = request.form.get("email")
         password = request.form.get("password")
         to = request.form.get("to") #As user id
+        loggedIn,user = loginInternal(email,password)
         try:
-            if data["short_auth"][email] != password:
-                return {"SCC":False,"err":"Check your password"},401
+            userInbox = list(user["inbox"].keys())
         except:
-            return {"SCC":False,"err":"User does not exist"},404 
-        
+            userInbox = []
+
+        for inub in userInbox:
+            
+            inu = user["inbox"][inub]
+            if inu["reciever"] == to or inu["reciever"] == to :
+                return {"SCC":False,"err":"This chat already exist","chatID":inub}
+            
         allUsers = list(data["Users"].keys())
         userFound = False
         loggedIn = False
@@ -385,7 +391,7 @@ class Messaging:
                 if orgCounter>counter and (orgCounter-counter)<10:
                     outputList.append(a)
                 if (orgCounter-counter)>10:
-                    break 
+                    break
                 orgCounter +=1
             outputData = {
                 "SCC":True,
@@ -400,6 +406,47 @@ class Messaging:
         
 
         return outputData
+    
+
+    @app.route("/api/inbox",methods=["POST","GET"])
+    def inboxLister():
+        data=json.loads(open("data.json","r").read())
+        email = request.form.get("email")
+        password = request.form.get("password")
+        loggedIn,user = loginInternal(email,password)
+        uid = user["UID"]
+        if loggedIn == False:
+            return {"SCC":False,"err":"Check credentials"}
+        inboxData = user["inbox"]
+        inboxOut = []
+        for id_ in list(inboxData.keys()):
+            cdata = inboxData[id_]
+            reciever = cdata["reciever"]
+            sender = cdata["sender"]
+            if reciever == uid:
+                opposite = sender
+            else:
+                opposite = reciever
+            
+            profilepic = data["Users"][uid]["image"]
+            try:
+                lastMessage = cdata["msgs"][-1]
+
+            except:
+                lastMessage = {
+                    "file":False,
+                    "msg":"",
+                    "sender":"",
+                    "reciever":"",
+                    "senderEmail":"",
+                    "at":0,
+                }
+            lastMessage["chatID"] = id_
+            lastMessage["profilePic"] = profilepic
+            inboxOut.append(lastMessage)
+
+        return {"SCC":True,"inbox":inboxOut}
+        
 
 
         

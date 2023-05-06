@@ -489,6 +489,11 @@ class Listing:
                 description = d_c["description"]
             except:
                 description = ""
+            if description == None:
+                description = ""
+            if title==None:
+                title = ""
+            
             if (str(q).lower().strip() in title) or (str(q).lower().strip() in description):
                 results.append(d_c)
         return {"output":results}

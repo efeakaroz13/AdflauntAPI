@@ -167,10 +167,10 @@ class Auth:
         ip_ = request.form.get("ip")
         dateBirth = request.form.get("dateBirth")
         loggedIn,user = loginInternal(email,password)
-        profileID = user["UID"]
+        
         if  loggedIn == False:
             return {"SCC":False,"loggedIn":loggedIn}
-        
+        profileID = user["UID"]
         
         try:
             file = request.files["file"]

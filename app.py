@@ -86,6 +86,13 @@ class Auth:
     def registrer():
         email = request.form.get("email")
         password = request.form.get("password")
+        if email == None or password == None:
+            return {"SCC":False,"err":"email or password is not specified"}
+        try:
+            email.split("@")[1].split(".")[1]
+        except:
+            return {"SCC":False,"err":"Email malformatted, use @ and a proper domain"}
+        
         ip_ = request.form.get("ip")
         dateBirth = request.form.get("dateBirth")
         allUsers = data["Users"].keys()
@@ -152,25 +159,17 @@ class Auth:
         open("data.json","w").write(json.dumps(data,indent=4))
         return locdata
 
-    @app.route("/profile/update/<profileID>",methods=["POST"])
-    def updateProfileFunction(profileID):
+    @app.route("/profile/update",methods=["POST"])
+    def updateProfileFunction():
         data=json.loads(open("data.json","r").read())
         email = request.form.get("email")
         password = request.form.get("password")
         ip_ = request.form.get("ip")
         dateBirth = request.form.get("dateBirth")
-        allUsers = data["Users"].keys()
-        userExists = False
-        loggedIn = False
-        for u in allUsers:
-            c_data = data["Users"][u]
-            if c_data["email"] == email:
-                userExists = True 
-                if c_data["password"] == password:
-                    loggedIn = True 
-
-        if userExists == False or loggedIn == False:
-            return {"SCC":False,"UserExists":userExists,"loggedIn":loggedIn}
+        loggedIn,user = loginInternal(email,password)
+        profileID = user["UID"]
+        if  loggedIn == False:
+            return {"SCC":False,"loggedIn":loggedIn}
         
         
         try:
@@ -212,7 +211,9 @@ class Auth:
         
         data["short_auth"][email]=password 
         open("data.json","w").write(json.dumps(data,indent=4))
-        return data["Users"][UID]
+        output = data["Users"][UID]
+        output["SCC"] = True
+        return output,200
 
 
 class Messaging:

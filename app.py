@@ -18,6 +18,7 @@ alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p"
 
 
 def loginInternal(email,password):
+    data=json.loads(open("data.json","r").read())
     try:
         if data["short_auth"][email] != password:
             return False,{"SCC":False,"err":"Password is not correct."}

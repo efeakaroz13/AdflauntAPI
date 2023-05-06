@@ -494,7 +494,7 @@ class Listing:
             if title==None:
                 title = ""
             
-            if (str(q).lower().strip() in title) or (str(q).lower().strip() in description):
+            if (str(q).lower().strip() in title.lower()) or (str(q).lower().strip() in description.lower()):
                 results.append(d_c)
         return {"output":results}
     

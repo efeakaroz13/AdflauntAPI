@@ -423,8 +423,8 @@ class Messaging:
             else:
                 opposite = reciever
             
-            profilepic = data["Users"][uid]["image"]
-            dBirth = data["Users"][uid]["dateOfBirth"]
+            profilepic = data["Users"][opposite]["image"]
+            dBirth = data["Users"][opposite]["dateOfBirth"]
             try:
                 lastMessage = cdata["msgs"][-1]
             

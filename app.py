@@ -410,6 +410,7 @@ class Messaging:
             }
                
         except Exception as e:
+            print(e)
             outputData = {
                 "SCC":False,
                 "err":"Couldn't find chat"

@@ -378,13 +378,14 @@ class Messaging:
         #Page is for getting a part of messages
 
         loggedIn,user = loginInternal(email,password)
+        UID = user["UID"]
         if loggedIn == False:
             return {"SCC":False, "err":"Email or password is not correct"}
         try:
             #Message returning couldn't find, now it is returning an empty array
-            allMessages = user["inbox"][chatID]
+            allMessages = data["Users"][UID]["inbox"][chatID]
             try:
-                allMessages = allMessages["msgs"]
+                allMessages = allMessages["msgs"].reverse()
             except:
                 return {"SCC":True,"Messages":[]}
             outputList = []
@@ -424,15 +425,16 @@ class Messaging:
         email = request.form.get("email")
         password = request.form.get("password")
         loggedIn,user = loginInternal(email,password)
-        uid = user["UID"]
+        
         if loggedIn == False:
             return {"SCC":False,"err":"Check credentials"}
+        uid = user["UID"]
         inboxData = user["inbox"]
         inboxOut = []
         for id_ in list(inboxData.keys()):
             cdata = inboxData[id_]
             reciever = cdata["reciever"]
-            sender = cdata["sender"]
+            sender = cdata["creator"]
             if reciever == uid:
                 opposite = sender
             else:

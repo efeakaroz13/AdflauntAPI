@@ -371,11 +371,6 @@ class Messaging:
         data=json.loads(open("data.json","r").read())
         email = request.form.get("email")
         password = request.form.get("password")
-        try:
-            page = int(request.args.get("p"))
-        except:
-            page = 1
-        #Page is for getting a part of messages
 
         loggedIn,user = loginInternal(email,password)
         UID = user["UID"]
@@ -385,28 +380,14 @@ class Messaging:
             #Message returning couldn't find, now it is returning an empty array
             allMessages = data["Users"][UID]["inbox"][chatID]
             try:
-                allMessages = allMessages["msgs"].reverse()
+                allMessages = allMessages["msgs"]
             except:
                 return {"SCC":True,"Messages":[]}
-            outputList = []
-            counter = (page-1)*10
-            orgCounter = 0
-            """ 
-            Quick note:
-            so with this method I created 2 counters, one is for page given by API User and the other one is for the for loop
-            so what it does is, when the current counter passes the user's number times ten it starts to add them to the list and
-            when it passes 10, it stops.
-            """
-            for a in allMessages:
-                
-                if orgCounter>counter and (orgCounter-counter)<10:
-                    outputList.append(a)
-                if (orgCounter-counter)>10:
-                    break
-                orgCounter +=1
+            
+            
             outputData = {
                 "SCC":True,
-                "Messages":outputList
+                "Messages":allMessages
             }
                
         except Exception as e:

@@ -76,8 +76,12 @@ class Auth:
         for a in allkeys:
             d = data["Users"][a]
             if d["email"] == email:
+                try:
+                    del d["inbox"]
+                except:
+                    pass
                 return d 
-        
+
         return {"SCC":False,"err":"There is an error with our side"}
 
 

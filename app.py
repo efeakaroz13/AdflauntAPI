@@ -272,7 +272,8 @@ class Messaging:
             "creator":cu,
             "reciever":to,
             "createdAt":time.time(),
-            "chatID":ChatID
+            "chatID":ChatID,
+            "msgs":[]
 
         }
         data["Users"][to]["inbox"][ChatID] = chatData
@@ -380,7 +381,12 @@ class Messaging:
         if loggedIn == False:
             return {"SCC":False, "err":"Email or password is not correct"}
         try:
-            allMessages = user["inbox"][chatID]["msgs"]
+            #Message returning couldn't find, now it is returning an empty array
+            allMessages = user["inbox"][chatID]
+            try:
+                allMessages = allMessages["msgs"]
+            except:
+                return {"SCC":True,"Messages":[]}
             outputList = []
             counter = (page-1)*10
             orgCounter = 0

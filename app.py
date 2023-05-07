@@ -357,9 +357,9 @@ class Messaging:
 
 
         try:
-            data["Users"][user["UID"]]["inbox"][chatID]["msgs"]
+            data["Users"][chatData["creator"]]["inbox"][chatID]["msgs"]
         except:
-            data["Users"][user["UID"]]["inbox"][chatID]["msgs"] = []
+            data["Users"][chatData["creator"]]["inbox"][chatID]["msgs"] = []
         
 
         data["Users"][user["UID"]]["inbox"][chatID]["msgs"].append(msgData)
@@ -711,6 +711,38 @@ class OLD:
         response.headers['Content-Type'] = 'image/png'
         return response
 
+
+class ProfilingAndNotifications:
+    @app.route("/profile/<UID>")
+    def getProfile(UID):
+        data = json.loads(open("data.json","r").read())
+        try:
+            udata = data["Users"][UID]
+            odata = {
+                "SCC":True,
+                "dateOfBirth":udata["dateOfBirth"],
+                "UID":UID,
+                "image":udata["image"]
+
+            }
+            try:
+                odata["notf"] = udata["notf"]
+            except:
+                pass 
+
+            return odata
+        except:
+            return {"SCC":False,"err":"Profile not found"},404
+    @app.route("/addNotificationId/<UID>",methods=["POST"])
+    def addNotificationId(UID):
+        data = json.loads(open("data.json","r").read())
+        notf = request.form.get("notf")
+        try:
+            data["Users"][UID]
+        except:
+            return {"SCC":False,"err":"Could not find the user"}
+        data["Users"][UID]["notf"] = notf 
+        return {"SCC":True,"UID":UID,"notf":notf}
 
 
 if __name__ == "__main__":

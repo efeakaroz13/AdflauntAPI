@@ -409,7 +409,7 @@ class Messaging:
                 "Messages":outputList
             }
                
-        except:
+        except Exception as e:
             outputData = {
                 "SCC":False,
                 "err":"Couldn't find chat"

@@ -441,9 +441,10 @@ class Messaging:
                 opposite = reciever
             
             profilepic = data["Users"][uid]["image"]
+            dBirth = data["Users"][uid]["dateOfBirth"]
             try:
                 lastMessage = cdata["msgs"][-1]
-
+            
             except:
                 lastMessage = {
                     "file":False,
@@ -453,6 +454,7 @@ class Messaging:
                     "senderEmail":"",
                     "at":0,
                 }
+            lastMessage["dateOfBirth"] = dBirth
             lastMessage["chatID"] = id_
             lastMessage["profilePic"] = profilepic
             inboxOut.append(lastMessage)

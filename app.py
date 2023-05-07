@@ -10,7 +10,7 @@ import time
 import random
 from werkzeug.utils import secure_filename
 
-data = json.loads(open("data.json", "r").read())
+
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
 alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
@@ -85,6 +85,7 @@ class Auth:
 
     @app.route("/register", methods=["POST"])
     def registrer():
+        data = json.loads(open("data.json").read())
         email = request.form.get("email")
         password = request.form.get("password")
         if email == None or password == None:
@@ -366,6 +367,7 @@ class Messaging:
         
     @app.route("/messaging/<chatID>",methods=["POST"])
     def getChat(chatID):
+        data=json.loads(open("data.json","r").read())
         email = request.form.get("email")
         password = request.form.get("password")
         try:
@@ -690,6 +692,7 @@ class Reviews:
 class OLD:
     @app.route("/static/scaler")
     def scaler():
+        data=json.loads(open("data.json","r").read())
         filename = request.args.get("filename")
         if filename == None:
             return {"SCC":False,"err":"Filename required"}

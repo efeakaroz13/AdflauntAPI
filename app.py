@@ -362,7 +362,7 @@ class Messaging:
             data["Users"][chatData["creator"]]["inbox"][chatID]["msgs"] = []
         
 
-        data["Users"][user["UID"]]["inbox"][chatID]["msgs"].append(msgData)
+        data["Users"][chatData["creator"]]["inbox"][chatID]["msgs"].append(msgData)
         data["Users"][chatData["reciever"]]["inbox"][chatID]["msgs"].append(msgData)
 
 
@@ -416,7 +416,10 @@ class Messaging:
         if loggedIn == False:
             return {"SCC":False,"err":"Check credentials"}
         uid = user["UID"]
-        inboxData = user["inbox"]
+        try:
+            inboxData = data["Users"][uid]["inbox"]
+        except:
+            inboxData = {}
         inboxOut = []
         for id_ in list(inboxData.keys()):
             cdata = inboxData[id_]

@@ -384,7 +384,7 @@ class Messaging:
             #Message returning couldn't find, now it is returning an empty array
             allMessages = data["Users"][UID]["inbox"][chatID]
             try:
-                allMessages = allMessages["msgs"].reverse()
+                allMessages = allMessages["msgs"]
             except:
                 return {"SCC":True,"Messages":[]}
             

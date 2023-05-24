@@ -81,7 +81,7 @@ class Auth:
                 "dateOfBirth":dateOfBirth,
                 "IPDATA":IPDATA,
                 "fullName":fullName,
-                "profileumage":profileImage,
+                "profileImage":profileImage,
                 "phoneNumber":phoneNumber,
                 "lastTimeLoggedIn":0,
                 "ipraw":ipraw
@@ -122,8 +122,10 @@ class Auth:
         }
         for a in allResults:
             output = a
+            users.update_one({'_id':output["_id"]},{"$set":{"lastTimeLoggedIn":time.time()}})
 
         output["SCC"]=True
+
         return output
 
 
@@ -169,5 +171,115 @@ class Upload:
 
 
 
+class Profile:
+    @app.route("/api/getprofile/<userID>")
+    def getProfileWithUserId(userID):
+        output = users.find({"_id":userID})
+        try:
+            return str(output) 
+        except:
+            pass
+        
+        return {"SCC":False,"err":"Could not find user."}
+    @app.route("/api/updateprofile",methods=["POST"])
+    def updateProfile():
+
+        #Notes:
+        #Email password and phone number is required for this field
+        #Updating the login credentials is in the other part
+        email = request.form.get("email")
+        password = request.form.get("password")
+        dateOfBirth = request.form.get("dateOfBirth")
+        try:
+            IPDATA = json.loads(request.form.get("IPDATA"))
+            try:
+                ipraw = IPDATA["query"]
+            except:
+                ipraw = None
+        except:
+            IPDATA = None
+            ipraw = None
+        #IPDATA = request.form.get("IPDATA")
+        fullName = request.form.get("fullName")
+        profileImage = request.form.get("profileImage")
+        phoneNumber = request.form.get("phoneNumber")
+        if phoneNumber != None:
+            phoneNumber = phoneNumber.replace("+","").replace("(","").replace(")","").replace(" ","")
+        #Login phase
+        allResults = users.find({"email":email,"password":password,"phoneNumber":phoneNumber})
+        try:
+            r = allResults[0]
+        except:
+            return {"SCC":False,"err":"Could not login"}
+        rid = r["_id"]
+
+        updateData = {}
+
+        if dateOfBirth != None and dateOfBirth!= r["dateOfBirth"]:
+            updateData["dateOfBirth"] = dateOfBirth
+        
+        if fullName != None and fullName != r["fullName"]:
+            updateData["fullName"]=fullName
+        if profileImage != None and profileImage != r["profileImage"]:
+            updateData["profileImage"] = profileImage
+        
+        if phoneNumber != None and phoneNumber != r["phoneNumber"]:
+            updateData["phoneNumber"] = phoneNumber
+        if ipraw != None and ipraw != r["ipraw"]:
+            updateData["ipraw"] = ipraw 
+        if IPDATA != None and IPDATA != r["IPDATA"]:
+            updateData["IPDATA"] = IPDATA 
+        
+    
+
+
+
+        users.update_one({'_id':rid},{"$set":updateData})
+        outputdata =allResults = users.find({"email":email,"password":password,"phoneNumber":phoneNumber})[0]
+        outputdata["SCC"]=True
+         
+
+        return outputdata
+
+    @app.route("/api/update_login_credentials",methods=["POST"])
+    def update_login_credentials():
+        #How it works?
+        #So you send whatevery you want to update and also authenticate, 
+        #we are checking if the information matches with the old ones and 
+        #replace them with the new ones
+        email =  request.form.get("email")
+        password = request.form.get("password")
+        new_email = request.form.get("new_email")
+        new_password = request.form.get("new_password")
+        new_phoneNumber = request.form.get("new_phoneNumber")
+        phoneNumber = request.form.get("phoneNumber")
+        queryData = {"password":password}
+        if phoneNumber != None:
+            queryData["phoneNumber"] = phoneNumber
+        if email != None:
+            queryData["email"] = email 
+        
+
+        searcher = users.find(queryData)
+        try:
+            udata = searcher[0]
+
+        except:
+            return {"SCC":False,"err":"Check the credentials for authentication"}
+        
+        if new_email != None:
+            udata["email"] = new_email
+        if new_password != None:
+            udata["password"] = new_password
+        if new_phoneNumber != None:
+            udata["phoneNumber"] = phoneNumber
+        
+        users.update_one({"_id":udata["_id"]},{"$set":udata})
+        udata["SCC"]= True
+
+        return udata
+
+
+        return {}
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

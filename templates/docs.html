@@ -39,5 +39,18 @@
         "phoneNumber" - Phone number, simple.<br>
         one of email and phone number should be mentioned while using the API, it can work with both.<br>
     </code>
+    <h1>Profile and Credential Updating</h1>
+    <h2>Profile update(you can't update phonenumber email or password)</h2>
+    <p>In this section '/api/updateprofile' you will send POST requests to this endpoint. You are able to use the same things in register, it will automatically understand the data you sent. IPDATA is not required but you are still able to send.</p>
+    <h2>Credential Updating</h2>
+    <code>
+        ENDPOINT: /api/update_login_credentials METHOD: POST <br>
+        # You are able to authenticate with just email or just phoneNumber or by using both <br>
+        # Required: email or phoneNumber,password <br>
+        # optional: <br>
+        #new_password, new_phoneNumber, new_email
+        # I'm not explain what they mean, they are very self explanatory.
+    </code>
+
 </body>
 </html>

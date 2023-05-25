@@ -511,7 +511,10 @@ class Listings:
             price = int(price)
         except:
             return {"SCC":False,"err":"Price should be an integer"}
+        
         try:
+            tags = ''.join([i if ord(i) < 128 else ' ' for i in tags])
+            #may give some errors
             tags = tags.split("|-|")
         except:
             tags = []

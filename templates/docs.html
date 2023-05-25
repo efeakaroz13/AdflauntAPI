@@ -89,6 +89,43 @@
     </code> <br>
     <br>
     <h1>Listings</h1>
-    <p>|-| is the splitter text for images</p>
+    <p><code>|-|</code> is the splitter text for images and tags. NOTE: EVERY TAG IS REGISTERED TO DATABASE AS TABLES, DON'T TYPE ANYTHING OTHER THAN LETTERS AND NUMBERS, FILTER.</p>
+    <code>
+        email,password and phoneNumber is the same as authentication
+        ("lat")#number, float <br>
+        ("long")#number, float <br>
+        ("images") <br>
+        ("title") <br>
+        ("price")#number integer <br>
+        ("location") <br>
+        ("revision_limit")#number integer <br>
+        ("digital") #Boolean - 1 for true, 0 for false <br>
+        ("sqfeet") #number integer <br>
+        ("square_footage")#number,int <br>
+        ("type") # number - between 1-6 <br>
+        ("check_in")#Date <br>
+        ("check_out") #Date <br>
+        ("population") #number <br>
+        ("discountAvailable")# Number between 1-4 <br>
+        """  <br>
+        Discount available: <br>
+        yes <br>
+        no <br>
+        long-term <br>
+        partial <br>
+        """ <br>
+        ("tags") <br>
+        ("extras")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY <br>
+        ("requirements")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY <br>
+        ("description")#STR <br>
+        ("bookingNote")#STR OPT <br>
+        ("bookingOffset") #INT OPT <br>
+        "Set how many days are required prior to the booking date" <br>
+        ("bookingWindow") #INT OPT <br>
+        "Set how many days in advance a booking can be made." <br>
+        ("minimumBookingDuration") <br>
+        ("BookingImportURL") <br>
+
+    </code>
 </body>
 </html>

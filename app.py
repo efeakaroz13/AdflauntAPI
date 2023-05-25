@@ -424,7 +424,119 @@ class IDVerification:
 class Listings:
     @app.route("/api/create/listing",methods=["POST"])
     def createlisting():
-        data = {}
+        lat = request.form.get("lat")#number, float
+        long = request.form.get("long")#number, float
+        images = request.form.get("images")
+        title = request.form.get("title")
+        price = request.form.get("price")#number integer
+        location = request.form.get("location")
+        revision_limit = request.form.get("revision_limit")#number integer
+        digital = request.form.get("digital") #Boolean - 1 for true, 0 for false
+        sqfeet = request.form.get("sqfeet") #number integer
+        square_footage = request.form.get("square_footage")#number,int
+        type_of_listing = request.form.get("type") # number - between 1-6
+        check_in = request.form.get("check_in")#Date
+        check_out = request.form.get("check_out") #Date
+        population = request.form.get("population") #number
+        discountAvailable = request.form.get("discountAvailable")# Number between 1-4
+        """ 
+        Discount available:
+        yes
+        no
+        long-term
+        partial
+        """
+        tags = request.form.get("tags")
+        extras = request.form.get("extras")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY
+        requirements = request.form.get("requirements")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY
+        description = request.form.get("description")#STR
+        bookingNote = request.form.get("bookingNote")#STR OPT
+        bookingOffset = request.form.get("bookingOffset") #INT OPT
+        "Set how many days are required prior to the booking date"
+        bookingWindow = request.form.get("bookingWindow") #INT OPT
+        "Set how many days in advance a booking can be made."
+        minimumBookingDuration = request.form.get("minimumBookingDuration")
+        BookingImportURL = request.form.get("BookingImportURL")
+
+
+        if images == None or lat==None or long==None or title==None or price==None or revision_limit==None or digital==None or sqfeet==None or location==None or square_footage==None or type_of_listing==None or check_in==None or check_out==None or population==None or discountAvailable==None or description==None or extras==None or requirements:
+            return {"SCC":False,"err":"some parameters are required"}
+        
+        lat = float(lat)
+        long = float(long)
+
+        images = images.split("|-|")
+        extras = json.loads(extras)
+        requirements = json.loads(requirements)
+        try:
+            bookingOffset = int(bookingOffset)
+        except:
+            bookingOffset = 0
+        try:
+            bookingWindow = int(bookingWindow)
+        except:
+            bookingWindow = 0
+
+        try:
+            minimumBookingDuration = int(minimumBookingDuration)
+        except:
+            minimumBookingDuration = 0
+
+        try:
+
+            population = int(population)
+        except:
+            return {"SCC":False,"err":"Population should be an integer"}
+        try:
+            price = int(price)
+        except:
+            return {"SCC":False,"err":"Price should be an integer"}
+        try:
+            tags = tags.split("|-|")
+        except:
+            tags = []
+        
+
+        if digital == "0":
+            digital = False
+
+        if digital == "1":
+            digital = True
+
+
+
+        if type_of_listing == "1":
+            type_of_listing = "1.5' X 2' Yard Sign"
+        
+        if type_of_listing == "2":
+            type_of_listing = "10' Banner"
+        
+        if type_of_listing == "3":
+            type_of_listing = "2'x 3' Floor Sign"
+
+        if type_of_listing == "4":
+            type_of_listing = "2'x 3' Poster"
+
+        
+        if type_of_listing == "5":
+            type_of_listing = "20'+ Bill Board"
+
+        if type_of_listing == "6":
+            type_of_listing = "1.5' X 2' Digital Signage"
+
+        if discountAvailable == "1":
+            discountAvailable = "Yes"
+
+        if discountAvailable == "2":
+            discountAvailable = "No"
+
+        if discountAvailable == "3":
+            discountAvailable = "Long-Term"
+        if discountAvailable == "4":
+            discountAvailable = "Partial"
+            
+
+        
         
         return data
 

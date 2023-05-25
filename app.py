@@ -12,7 +12,10 @@ from werkzeug.utils import secure_filename
 import pymongo
 import os
 from bson import ObjectId
+from twillioAuth import authToken,SID,phoneNumber_tw
+from twilio.rest import Client 
 
+twcl = Client(SID,authToken)
 
 
 client = pymongo.MongoClient()
@@ -281,5 +284,25 @@ class Profile:
 
 
         return {}
+
+
+class Verification:
+    @app.route("/api/verify/sms")
+    def sms_verification():
+        phoneNumber = request.args.get("phoneNumber")
+        code_verify = random.randint(1,1000000)
+        try:
+            message = twcl.messages.create(
+                body=f"Adflaunt Verification Code:{code_verify}",
+                from_=phoneNumber_tw,
+                to=phoneNumber
+            )
+        except Exception as e:
+            print(e)
+            return {"SCC":False,"err":str(e)}
+        return {"SCC":True,"m.body":message.body}
+    
+
+
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

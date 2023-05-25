@@ -89,7 +89,7 @@ class Auth:
                 "phoneNumber":phoneNumber,
                 "lastTimeLoggedIn":0,
                 "ipraw":ipraw,
-                "idVerfied":False
+                "idVerified":False
             }
 
             result = users.insert_one(data)
@@ -388,7 +388,7 @@ class ReportingSystem:
             return {"SCC":False,"err":"This endpoint does not support get requests yet."}
 
 class IDVerification:
-    @app.route("/api/verify/ID",methods=["POST","GET"])
+    @app.route("/api/verify/ID",methods=["POST"])
     def IDVERIFY():
         if request.method == "POST":
             email = request.form.get("email")
@@ -405,7 +405,7 @@ class IDVerification:
                 return {"SCC":False,"err":"Email or phonenumber is required for authentication"}
             
             try:
-                user = users.find(query_cr)
+                user = users.find(query_cr)[0]
             except:
                 return {"SCC":False,"err":"Could not authenticate"}
             

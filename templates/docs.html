@@ -77,6 +77,16 @@
         "phoneNumber" - for verification <br>
 
     </code>
+    <h1>Id verification</h1>
+    <p>So this is a long topic, I didn't do anything on serverside. You need to handle all data from app-side. From this endpoint you will be able to add ID verified state to the database and add the static image name.
+        Let me start by united states state identity cards: every state has their own card with different kind of layout and information. It is a little hard to get all the information turned into text. If you can crop the image of the person just directly from the ID card, it would be so cool.
+    </p>
+    <code>
+        <br>
+        /api/verify/ID - POST  <br>
+        email,password,phoneNumber(if you didn't pass email) <br>
+        photoOfId - You will need to just upload the photo to the upload url and give the returned name.
+    </code>
 
 </body>
 </html>

@@ -88,7 +88,8 @@ class Auth:
                 "profileImage":profileImage,
                 "phoneNumber":phoneNumber,
                 "lastTimeLoggedIn":0,
-                "ipraw":ipraw
+                "ipraw":ipraw,
+                "idVerfied":False
             }
 
             result = users.insert_one(data)
@@ -386,7 +387,46 @@ class ReportingSystem:
         if request.method == "GET":
             return {"SCC":False,"err":"This endpoint does not support get requests yet."}
 
+class IDVerification:
+    @app.route("/api/verify/ID",methods=["POST","GET"])
+    def IDVERIFY():
+        if request.method == "POST":
+            email = request.form.get("email")
+            password = request.form.get("password")
+            phoneNumber = request.form.get("phoneNumber")
+            if password == None:
+                return {"SCC":False,"err":"password can't be null."}
+            query_cr = {"password":password}
+            if email != None:
+                query_cr["email"] = email 
+            if phoneNumber != None:
+                query_cr["phoneNumber"] = phoneNumber
+            if email == None and phoneNumber == None:
+                return {"SCC":False,"err":"Email or phonenumber is required for authentication"}
+            
+            try:
+                user = users.find(query_cr)
+            except:
+                return {"SCC":False,"err":"Could not authenticate"}
+            
+            UID = user["_id"]
+            photoOfId = request.form.get("photoOfId")
+            if photoOfId == None:
+                return {"SCC":False,"err":"You need to specify photoOfId as a static filename"}
+            
+            users.update_one({"_id":UID},{"$set":{"photoOfId":photoOfId,"idVerified":True}}) 
+            user["photoOfId"] = photoOfId
+            user["idVerified"] = True
+            user["SCC"]= True
+            return user
+        
 
+class Listings:
+    @app.route("/api/create/listing",methods=["POST"])
+    def createlisting():
+        data = {}
+        
+        return data
 
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

@@ -51,6 +51,32 @@
         #new_password, new_phoneNumber, new_email
         # I'm not explain what they mean, they are very self explanatory.
     </code>
+    <h2>Profile View</h2>
+    <code>
+        /api/getprofile/userID GET <br>
+        this endpoint will give the user data from the database <br>
+    </code>
+    <h1>User report system</h1>
+    <code>
+        /api/report/-userID of the suspect- POST <br>
+        required form parameters: <br>
+        email,password,phoneNumber(of current user) <br>
+        title,description(of report) <br>
+        
+
+    </code>
+    <h1>Bug reporting system</h1>
+    <p>This endpoint is for the shake function on mobile and with this endpoint user will be able to trace bugs and reports with screenshot attachment.</p>
+    <code>
+        /api/report/bugs - POST - GET[not finished yet, it will be a admin panel url] <br>
+        "email" - for verification <br>
+        "password" - for verification <br>
+        "title" <br>
+        "description" <br>
+        "bugImage":as a static image url <br>
+        "phoneNumber" - for verification <br>
+
+    </code>
 
 </body>
 </html>

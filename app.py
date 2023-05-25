@@ -21,7 +21,8 @@ twcl = Client(SID,authToken)
 client = pymongo.MongoClient()
 db = client['Adflaunt']
 users = db['Users']
-
+reports =  db["Reports"]
+bugs = db["Bugs"]
 
 
 app = Flask(__name__)
@@ -179,7 +180,9 @@ class Profile:
     def getProfileWithUserId(userID):
         output = users.find({"_id":userID})
         try:
-            return str(output) 
+            output = output[0]
+            del output["password"]
+            return output
         except:
             pass
         
@@ -289,6 +292,7 @@ class Profile:
 class Verification:
     @app.route("/api/verify/sms")
     def sms_verification():
+        #NOTE : THIS SHIT JUST SUPPORTS US NUMBERS AS I UNDERSTOOD. DONT USE IT ELSEWHERE
         phoneNumber = request.args.get("phoneNumber")
         code_verify = random.randint(1,1000000)
         try:
@@ -301,7 +305,87 @@ class Verification:
             print(e)
             return {"SCC":False,"err":str(e)}
         return {"SCC":True,"m.body":message.body}
+
     
+class ReportingSystem:
+    @app.route("/api/report/<userID>",methods=["POST"])
+    def apireport(userID):
+        email  = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        querydata = {}
+        if email == None and phoneNumber == None:
+            return {"SCC":False,"err":"You need to specify email or phoneNumber"}
+        if email != None:
+            querydata["email"] = email
+        if phoneNumber != None:
+            querydata["password"] = password 
+        try:
+            user = users.find(querydata)[0]
+        except:
+            return {"SCC":False,"err":"Could not authenticate"}
+        title =  request.form.get("title")
+        description = request.form.get("description")
+        timeitreported= time.time()
+        try:
+            user_ = users.find({"_id":userID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find the user"}
+        if userID == user["_id"]:
+            return {"SCC":False,"err":"Users can't report themselves."}
+        data = {
+            "_id":IDCREATOR_internal(20),
+            "title":title,
+            "description":description,
+            "timereported":timeitreported,
+            "reporter":user["_id"],
+            "suspect":userID
+        }
+        reports.insert_one(data)
+        data["SCC"] = True
+        return data
+
+    @app.route("/api/report/bugs",methods=["POST","GET"])
+    def reportBugs():
+        if request.method == "POST":
+            email = request.form.get("email")
+            password = request.form.get("password")
+            title = request.form.get("title")
+            description = request.form.get("description")
+            bugImage = request.form.get("bugImage")
+            #Bug image should be a static filename
+            phoneNumber = request.form.get("phoneNumber")
+            data = {
+                "reportedAt":time.time(),
+                "email":email,
+                "title":title,
+                "description":description,
+                "bugImage":bugImage,
+                "phoneNumber":phoneNumber,
+                "_id":IDCREATOR_internal(20)
+            }
+
+            
+            querydata = {}
+            if email == None and phoneNumber == None:
+                return {"SCC":False,"err":"You need to specify email or phoneNumber"}
+            if email != None:
+                querydata["email"] = email
+            if phoneNumber != None:
+                querydata["password"] = password 
+            try:
+                user = users.find(querydata)[0]
+            except:
+                return {"SCC":False,"err":"Could not authenticate"}
+            uid = user["_id"]
+            data["userID"] = uid 
+            bugs.insert_one(data)
+            data["SCC"]=True 
+
+            return data
+        if request.method == "GET":
+            return {"SCC":False,"err":"This endpoint does not support get requests yet."}
+
 
 
 if __name__ == "__main__":

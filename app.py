@@ -23,7 +23,7 @@ db = client['Adflaunt']
 users = db['Users']
 reports =  db["Reports"]
 bugs = db["Bugs"]
-
+listings = db["Listings"]
 
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
@@ -424,6 +424,26 @@ class IDVerification:
 class Listings:
     @app.route("/api/create/listing",methods=["POST"])
     def createlisting():
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        if password == None:
+            return {"SCC":False,"err":"password can't be null."}
+        query_cr = {"password":password}
+        if email != None:
+            query_cr["email"] = email 
+        if phoneNumber != None:
+            query_cr["phoneNumber"] = phoneNumber
+        if email == None and phoneNumber == None:
+            return {"SCC":False,"err":"Email or phonenumber is required for authentication"}
+        
+        try:
+            user = users.find(query_cr)[0]
+        except:
+            return {"SCC":False,"err":"Could not authenticate"}
+        if user['idVerified'] == False:
+            return {"SCC":False,"err":"ID NOT VERIFIED."}
+        
         lat = request.form.get("lat")#number, float
         long = request.form.get("long")#number, float
         images = request.form.get("images")
@@ -534,8 +554,41 @@ class Listings:
             discountAvailable = "Long-Term"
         if discountAvailable == "4":
             discountAvailable = "Partial"
-            
+        
 
+        data = {
+            "title":title,
+            "price":price,
+            "lat":lat,
+            "long":long,
+            "images":images,
+            "location":location,
+            "revision_limit":revision_limit,
+            "digital":digital,
+            "sqfeet":sqfeet,
+            "square_footage":square_footage,
+            "type":type_of_listing,
+            "check_in":check_in,
+            "check_out":check_out,
+            "population":population,
+            "tags":tags,
+            "extras":extras,
+            "requirements":requirements,
+            "description":description,
+            "bookingNote":bookingNote,
+            "bookingOffset":bookingOffset,
+            "bookingWindow":bookingWindow,
+            "minimumBookingDuration":minimumBookingDuration,
+            "BookingImportURL":BookingImportURL,
+            "_id":IDCREATOR_internal(40),
+            "user":user['_id']
+        }
+        db["Listings"].insert_one(data)
+        for t in tags:
+            db[t].insert_one(data)
+
+        data["SCC"]=True
+        
         
         
         return data

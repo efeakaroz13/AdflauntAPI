@@ -444,6 +444,14 @@ class Listings:
         if user['idVerified'] == False:
             return {"SCC":False,"err":"ID NOT VERIFIED."}
         
+
+        typeOfAd = request.form.get("typeOfAd")#Number 0-1-2
+        """
+        0-outdoor
+        1-indoor
+        2-vehicle
+
+        """
         lat = request.form.get("lat")#number, float
         long = request.form.get("long")#number, float
         images = request.form.get("images")
@@ -479,7 +487,7 @@ class Listings:
         BookingImportURL = request.form.get("BookingImportURL")
 
 
-        if images == None or lat==None or long==None or title==None or price==None or revision_limit==None or digital==None or sqfeet==None or location==None or square_footage==None or type_of_listing==None or check_in==None or check_out==None or population==None or discountAvailable==None or description==None or extras==None or requirements:
+        if typeOfAd == None or images == None or lat==None or long==None or title==None or price==None or revision_limit==None or digital==None or sqfeet==None or location==None or square_footage==None or type_of_listing==None or check_in==None or check_out==None or population==None or discountAvailable==None or description==None or extras==None or requirements:
             return {"SCC":False,"err":"some parameters are required"}
         
         lat = float(lat)
@@ -557,7 +565,17 @@ class Listings:
             discountAvailable = "Long-Term"
         if discountAvailable == "4":
             discountAvailable = "Partial"
-        
+
+
+
+        if typeOfAd == "0":
+            typeOfAd = "Outdoor"
+        elif typeOfAd == "1":
+            typeOfAd = "Indoor"
+        elif typeOfAd == "2":
+            typeOfAd = "Vehicle"
+        else:
+            return {"SCC":False,"err":"typeOfAd Should be one of those: 0,1,2"}
 
         data = {
             "title":title,
@@ -584,11 +602,13 @@ class Listings:
             "minimumBookingDuration":minimumBookingDuration,
             "BookingImportURL":BookingImportURL,
             "_id":IDCREATOR_internal(40),
-            "user":user['_id']
+            "user":user['_id'],
+            "typeOfAdd":typeOfAd
         }
         db["Listings"].insert_one(data)
         for t in tags:
             db[t].insert_one(data)
+        db[typeOfAd].insert_one(data)
 
         data["SCC"]=True
         

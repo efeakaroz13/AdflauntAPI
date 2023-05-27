@@ -14,6 +14,7 @@ import os
 from bson import ObjectId
 from twillioAuth import authToken,SID,phoneNumber_tw
 from twilio.rest import Client 
+import math 
 
 twcl = Client(SID,authToken)
 
@@ -615,6 +616,54 @@ class Listings:
         
         
         return data
+
+    @app.route("/api/get/listings",methods=["GET"])
+    def get_listings():
+        data = {}
+        output = []
+        lat = request.args.get("lat")
+        long = request.args.get("long")
+        mode = request.args.get("mode")
+        distanceAsKm = request.args.get("km")
+        q = request.args.get("q")
+        if distanceAsKm == None:
+            distanceAsKm = 300 
+
+        try:
+            distanceAsKm = float(distanceAsKm)
+        except:
+            distanceAsKm = 300
+        
+
+        if mode == None:
+            return {"SCC":False,"err":"You need to specify mode to use this endpoint"}
+
+        if mode == "near":
+            for l in listings.find({}):
+                lat_listing = l["lat"]
+                long_listing = l["long"]
+                listingLocation = [lat_listing,long_listing]
+                originalLocation = [lat,long]
+
+                distance = math.dist(originalLocation,listingLocation)*111
+                l["distance"] = distance
+                if distance<distanceAsKm:
+                    output.append(l)
+        if mode == "search":
+            s_r = listings.aggregate([{
+                "$search":{
+                    "text":{
+                        "query":q
+                    }
+                }
+            }])
+            for s in s_r:
+                output.append(s)
+                
+        
+        data=  {"SCC":True,"output":output}
+        return data
+
 
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

@@ -65,6 +65,8 @@ class Auth:
             for a in allResults:
                 scc=False 
                 return{"SCC":False,"err":"This user exists!"}
+            
+
             password = request.form.get("password")
             dateOfBirth = request.form.get("dateOfBirth")
             IPDATA = json.loads(request.form.get("IPDATA"))
@@ -76,9 +78,15 @@ class Auth:
             fullName = request.form.get("fullName")
             profileImage = request.form.get("profileImage")
             phoneNumber = request.form.get("phoneNumber")
+
             if phoneNumber != None:
                 phoneNumber = phoneNumber.replace("+","").replace("(","").replace(")","").replace(" ","")
 
+            allResults = users.find({"phoneNumber":phoneNumber})
+            for a in allResults:
+                scc=False 
+                return{"SCC":False,"err":"This user exists!"}
+            
             data = {
                 "_id":IDCREATOR_internal(23),
                 "email":email,
@@ -133,6 +141,31 @@ class Auth:
         output["SCC"]=True
 
         return output
+    @app.route("/api/userCheck",methods=["POST","GET"])
+    def userCheckAPI():
+        email = request.form.get("email")
+        phoneNumber = request.form.get("phoneNumber")
+        output = {"phoneNumberExists":False,"emailExists":False,"SCC":True}
+        statusCode=200
+        if email == None and phoneNumber == None:
+            return {"SCC":False,"err":"You need to specify email or phoneNumber"}
+        if phoneNumber != None:
+            allResults = users.find({"phoneNumber":phoneNumber})
+            for a in allResults:
+                output["phoneNumberExists"] = True
+                output["SCC"] = False 
+                statusCode = 409
+        if email != None:
+            allResults = users.find({"email":email})
+            for a in allResults:
+                output["emailExists"] = True 
+                output["SCC"] = False
+                statusCode = 409
+
+        return output,statusCode
+
+
+
 
 
 class Upload:
@@ -411,7 +444,12 @@ class IDVerification:
                 return {"SCC":False,"err":"Could not authenticate"}
             
             UID = user["_id"]
+
             photoOfId = request.form.get("photoOfId")
+            fullName = request.form.get("fullName")
+            dateOfBirth = request.form.get("dateOfBirth")
+
+
             if photoOfId == None:
                 return {"SCC":False,"err":"You need to specify photoOfId as a static filename"}
             
@@ -649,16 +687,17 @@ class Listings:
                 l["distance"] = distance
                 if distance<distanceAsKm:
                     output.append(l)
-        if mode == "search":
-            s_r = listings.aggregate([{
-                "$search":{
-                    "text":{
-                        "query":q
-                    }
-                }
-            }])
-            for s in s_r:
-                output.append(s)
+        if mode == "search": 
+            for l in listings:
+                s_title = f""
+                s_title += str(l["title"])+" "
+                s_title += str(l["description"])+" "
+                s_title += str(l["title"])+" "
+                s_title += str(l["title"])+" "
+
+
+
+
                 
         
         data=  {"SCC":True,"output":output}

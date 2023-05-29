@@ -314,7 +314,7 @@ class Profile:
             udata["password"] = new_password
         if new_phoneNumber != None:
             udata["phoneNumber"] = new_phoneNumber
-            
+
         
         users.update_one({"_id":udata["_id"]},{"$set":udata})
         udata["SCC"]= True
@@ -525,7 +525,10 @@ class Listings:
         "Set how many days in advance a booking can be made."
         minimumBookingDuration = request.form.get("minimumBookingDuration")
         BookingImportURL = request.form.get("BookingImportURL")
-
+        city = request.form.get("city")
+        country = request.form.get("country")
+        state= request.form.get("state")
+        
 
         if typeOfAd == None or images == None or lat==None or long==None or title==None or price==None or revision_limit==None or digital==None or sqfeet==None or location==None or square_footage==None or type_of_listing==None or check_in==None or check_out==None or population==None or discountAvailable==None or description==None or extras==None or requirements==None:
             return {"SCC":False,"err":"some parameters are required"}
@@ -643,7 +646,10 @@ class Listings:
             "BookingImportURL":BookingImportURL,
             "_id":IDCREATOR_internal(40),
             "user":user['_id'],
-            "typeOfAdd":typeOfAd
+            "typeOfAdd":typeOfAd,
+            "city":city,
+            "state":state,
+            "country":country
         }
         db["Listings"].insert_one(data)
         for t in tags:
@@ -694,7 +700,7 @@ class Listings:
                 s_title += str(l["title"])+" "
                 s_title += str(l["description"])+" "
                 s_title += str(l["title"])+" "
-                s_title += str(l["title"])+" "
+                s_title += str(l["d"])+" "
 
 
 

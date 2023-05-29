@@ -313,7 +313,8 @@ class Profile:
         if new_password != None:
             udata["password"] = new_password
         if new_phoneNumber != None:
-            udata["phoneNumber"] = phoneNumber
+            udata["phoneNumber"] = new_phoneNumber
+            
         
         users.update_one({"_id":udata["_id"]},{"$set":udata})
         udata["SCC"]= True

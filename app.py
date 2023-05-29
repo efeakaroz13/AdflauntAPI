@@ -709,7 +709,7 @@ class Listings:
                         output.append(l)
 
             if mode == "search": 
-                for l in listings:
+                for l in listings.find({}):
                     s_title = f""
                     s_title += str(l["title"])+" "
                     s_title += str(l["description"])+" "

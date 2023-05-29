@@ -15,6 +15,10 @@ from bson import ObjectId
 from twillioAuth import authToken,SID,phoneNumber_tw
 from twilio.rest import Client 
 import math 
+import redis
+ 
+
+r = redis.Redis()
 
 twcl = Client(SID,authToken)
 
@@ -78,6 +82,7 @@ class Auth:
             fullName = request.form.get("fullName")
             profileImage = request.form.get("profileImage")
             phoneNumber = request.form.get("phoneNumber")
+            thirdParty = request.form.get("thirdParty")
 
             if phoneNumber != None:
                 phoneNumber = phoneNumber.replace("+","").replace("(","").replace(")","").replace(" ","")
@@ -98,7 +103,8 @@ class Auth:
                 "phoneNumber":phoneNumber,
                 "lastTimeLoggedIn":0,
                 "ipraw":ipraw,
-                "idVerified":False
+                "idVerified":False,
+                "thirdParty":thirdParty
             }
 
             result = users.insert_one(data)
@@ -108,6 +114,8 @@ class Auth:
 
 
             return data
+
+
     @app.route("/api/login",methods=["POST"])
     def login():
         try:
@@ -528,7 +536,7 @@ class Listings:
         city = request.form.get("city")
         country = request.form.get("country")
         state= request.form.get("state")
-        
+
 
         if typeOfAd == None or images == None or lat==None or long==None or title==None or price==None or revision_limit==None or digital==None or sqfeet==None or location==None or square_footage==None or type_of_listing==None or check_in==None or check_out==None or population==None or discountAvailable==None or description==None or extras==None or requirements==None:
             return {"SCC":False,"err":"some parameters are required"}
@@ -671,44 +679,92 @@ class Listings:
         mode = request.args.get("mode")
         distanceAsKm = request.args.get("km")
         q = request.args.get("q")
-        if distanceAsKm == None:
-            distanceAsKm = 300 
+        sessionName = request.args.get("session")
+        page = request.args.get("page")
+        if sessionName == None:
+            sessionName = IDCREATOR_internal(20)
 
-        try:
-            distanceAsKm = float(distanceAsKm)
-        except:
-            distanceAsKm = 300
-        
+            if distanceAsKm == None:
+                distanceAsKm = 300 
 
-        if mode == None:
-            return {"SCC":False,"err":"You need to specify mode to use this endpoint"}
+            try:
+                distanceAsKm = float(distanceAsKm)
+            except:
+                distanceAsKm = 300
+            
 
-        if mode == "near":
-            for l in listings.find({}):
-                lat_listing = l["lat"]
-                long_listing = l["long"]
-                listingLocation = [lat_listing,long_listing]
-                originalLocation = [lat,long]
+            if mode == None:
+                return {"SCC":False,"err":"You need to specify mode to use this endpoint"}
 
-                distance = math.dist(originalLocation,listingLocation)*111
-                l["distance"] = distance
-                if distance<distanceAsKm:
-                    output.append(l)
-        if mode == "search": 
-            for l in listings:
-                s_title = f""
-                s_title += str(l["title"])+" "
-                s_title += str(l["description"])+" "
-                s_title += str(l["title"])+" "
-                s_title += str(l["d"])+" "
+            if mode == "near":
+                for l in listings.find({}):
+                    lat_listing = l["lat"]
+                    long_listing = l["long"]
+                    listingLocation = [lat_listing,long_listing]
+                    originalLocation = [lat,long]
+
+                    distance = math.dist(originalLocation,listingLocation)*111
+                    l["distance"] = distance
+                    if distance<distanceAsKm:
+                        output.append(l)
+
+            if mode == "search": 
+                for l in listings:
+                    s_title = f""
+                    s_title += str(l["title"])+" "
+                    s_title += str(l["description"])+" "
+                    if l["country"] != None:
+                        s_title += str(l["country"])+" "
+                    if l["city"] != None:
+                        s_title += str(l["city"])+" "
+                    if l["state"] != None:
+                        s_title += str(l["state"])+" "
+
+                    if q.lower() in s_title.lower():
+                        output.append(l)
+
+            sdata = {"output":output,"q":q,"mode":mode}
+            r.mset({f"{sessionName}":json.dumps(sdata)})
+
+        else:
+            try:
+                cdata = json.loads(r.get(sessionName))
+                output = cdata["output"]
+                try:
+                    page = int(page)
+                except:
+                    return {"SCC":False,"err": "Send 'page' as INTEGER"} 
+                try:
+                    if len(output) - (page*10-10)>10:
+
+                        output = output[(page*10-10):]
+
+                        output = output[:10]
+                    elif len(output) - (page*10-10)<10 and len(output) - (page*10-10)>0:
+
+                        output = output[(page*10-10):]
+                    else:
+                        return {"SCC":False,"output":[]}
+                    return {"SCC":True,"output":output,"session":sessionName}
+                except:
+                    return {"SCC":False,"err":"over pagination"}
+            except:
+                return {"SCC":False,"err":"Session ID invalid"} 
 
 
 
 
+
+
+        dataCount = len(output)
+
+        if len(output)>10:
+            output = output[:10]
                 
         
-        data=  {"SCC":True,"output":output}
+        data=  {"SCC":True,"output":output,"session":sessionName,"dataCount":dataCount}
         return data
+
 
 
 if __name__ == "__main__":

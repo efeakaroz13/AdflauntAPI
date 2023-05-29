@@ -711,6 +711,11 @@ class Listings:
             if mode == "near":
                 if lat==None or long == None:
                     return {"SCC":False,"err":"We need lat and long to use near function."}
+                try:
+                    lat = float(lat)
+                    long = float(long)
+                except:
+                    return {"SCC":False,"err":"Lat and long as float"}
                 for l in listings.find({}):
                     lat_listing = l["lat"]
                     long_listing = l["long"]

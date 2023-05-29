@@ -87,10 +87,11 @@ class Auth:
             if phoneNumber != None:
                 phoneNumber = phoneNumber.replace("+","").replace("(","").replace(")","").replace(" ","")
 
-            allResults = users.find({"phoneNumber":phoneNumber})
-            for a in allResults:
-                scc=False 
-                return{"SCC":False,"err":"This user exists!"}
+            if phoneNumber != None and phoneNumber != "":
+                allResults = users.find({"phoneNumber":phoneNumber})
+                for a in allResults:
+                    scc=False 
+                    return{"SCC":False,"err":"This user exists!"}
             
             data = {
                 "_id":IDCREATOR_internal(23),
@@ -158,6 +159,7 @@ class Auth:
         if email == None and phoneNumber == None:
             return {"SCC":False,"err":"You need to specify email or phoneNumber"}
         if phoneNumber != None:
+            phoneNumber = phoneNumber.replace("+","").replace("(","").replace(")","").replace(" ","")
             allResults = users.find({"phoneNumber":phoneNumber})
             for a in allResults:
                 output["phoneNumberExists"] = True
@@ -172,6 +174,16 @@ class Auth:
 
         return output,statusCode
 
+    @app.route("/api/getuser/byid")
+    def getUserById():
+        id_user = request.args.get("id")
+        if id_user == None:
+            return {"SCC":False,"err":"you will need id argument for this route."}
+
+        allResults = users.find({"password":id_user})
+        for a in allResults:
+            return a
+        return {"SCC":False,"err":"User not found"},404
 
 
 
@@ -697,6 +709,8 @@ class Listings:
                 return {"SCC":False,"err":"You need to specify mode to use this endpoint"}
 
             if mode == "near":
+                if lat==None or long == None:
+                    return {"SCC":False,"err":"We need lat and long to use near function."}
                 for l in listings.find({}):
                     lat_listing = l["lat"]
                     long_listing = l["long"]
@@ -727,29 +741,30 @@ class Listings:
             r.mset({f"{sessionName}":json.dumps(sdata)})
 
         else:
-            try:
-                cdata = json.loads(r.get(sessionName))
-                output = cdata["output"]
+            if mode == "search":
                 try:
-                    page = int(page)
+                    cdata = json.loads(r.get(sessionName))
+                    output = cdata["output"]
+                    try:
+                        page = int(page)
+                    except:
+                        return {"SCC":False,"err": "Send 'page' as INTEGER"} 
+                    try:
+                        if len(output) - (page*10-10)>10:
+
+                            output = output[(page*10-10):]
+
+                            output = output[:10]
+                        elif len(output) - (page*10-10)<10 and len(output) - (page*10-10)>0:
+
+                            output = output[(page*10-10):]
+                        else:
+                            return {"SCC":False,"output":[]}
+                        return {"SCC":True,"output":output,"session":sessionName}
+                    except:
+                        return {"SCC":False,"err":"over pagination"}
                 except:
-                    return {"SCC":False,"err": "Send 'page' as INTEGER"} 
-                try:
-                    if len(output) - (page*10-10)>10:
-
-                        output = output[(page*10-10):]
-
-                        output = output[:10]
-                    elif len(output) - (page*10-10)<10 and len(output) - (page*10-10)>0:
-
-                        output = output[(page*10-10):]
-                    else:
-                        return {"SCC":False,"output":[]}
-                    return {"SCC":True,"output":output,"session":sessionName}
-                except:
-                    return {"SCC":False,"err":"over pagination"}
-            except:
-                return {"SCC":False,"err":"Session ID invalid"} 
+                    return {"SCC":False,"err":"Session ID invalid"} 
 
 
 

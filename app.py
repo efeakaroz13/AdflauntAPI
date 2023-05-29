@@ -141,7 +141,7 @@ class Auth:
         output["SCC"]=True
 
         return output
-    @app.route("/api/userCheck",methods=["POST","GET"])
+    @app.route("/api/userCheck",methods=["POST"])
     def userCheckAPI():
         email = request.form.get("email")
         phoneNumber = request.form.get("phoneNumber")
@@ -526,7 +526,7 @@ class Listings:
         BookingImportURL = request.form.get("BookingImportURL")
 
 
-        if typeOfAd == None or images == None or lat==None or long==None or title==None or price==None or revision_limit==None or digital==None or sqfeet==None or location==None or square_footage==None or type_of_listing==None or check_in==None or check_out==None or population==None or discountAvailable==None or description==None or extras==None or requirements:
+        if typeOfAd == None or images == None or lat==None or long==None or title==None or price==None or revision_limit==None or digital==None or sqfeet==None or location==None or square_footage==None or type_of_listing==None or check_in==None or check_out==None or population==None or discountAvailable==None or description==None or extras==None or requirements==None:
             return {"SCC":False,"err":"some parameters are required"}
         
         lat = float(lat)

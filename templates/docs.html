@@ -46,7 +46,7 @@
     <code>
         /api/getuser/byid GET <br>
         'id' as URL argument <br>
-        
+
 
     </code>
     <h1>Profile and Credential Updating</h1>
@@ -159,6 +159,42 @@
         ("q") #for mode search <br>
         ("session") #It will return you a session after search for pagination <br>
         ("page") #page <br>
+    </code>
+
+    <br><br>
+    <h1>Chatting</h1>
+    <code>
+        /api/create/chat POST <br>
+        email,password,phoneNumber, reciver<br>
+
+    </code>
+    <h1> Socket connection for chatting</h1>
+    <code>
+        /tests/chat - For example(credentials not gonna work, change them) <br>
+        NOTE: YOU CAN'T CREATE CHATS WITH SOCKET CONNECTIONS.<br>
+        NOTE: DON'T FORGET TO FILTER TRAFFIC FOR RECIEVING DATA, ALL USERS ARE IN THE SAME POOL.<br><br>
+        Send json to <strong>'join'</strong> socket. It does not have any URL it works on /.<br>
+        "email" <br>
+        "password" <br>
+        "phoneNumber" <br>
+        "ChatID" <br>
+        As json.<br>
+        NOTE:It will return you a session ID after it, you can use that id for sending messages and leaving.<br>
+        <br>
+        <strong>leave</strong> socket.<br>
+        Needed data: "SID" in json<br>
+        <br>
+        *****IMPORTANT******<br>
+        send_msg:<br>
+        SID,content,image<br>
+        it will be enough to send messages. It will be automatically saved into the mongo DB.<br>
+        <br><br>
+        receive - Receiving the sent information above. NOTE: WORKS AS A POOL.<br>
+
+
+
+
+
     </code>
 </body>
 </html>

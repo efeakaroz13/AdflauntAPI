@@ -16,7 +16,7 @@ from twillioAuth import authToken,SID,phoneNumber_tw
 from twilio.rest import Client 
 import math 
 import redis
- 
+from flask_socketio import SocketIO, send,emit
 
 r = redis.Redis()
 
@@ -29,13 +29,93 @@ users = db['Users']
 reports =  db["Reports"]
 bugs = db["Bugs"]
 listings = db["Listings"]
-
+chats = db["Chats"]
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
 alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+app.config["SECRET"]="123"
+
+socketio = SocketIO(app,cors_allowed_origins="*",async_mode='gevent')
+
+sids = []
+
+@socketio.on('join')
+def joinChat(data):
+
+    email = data["email"]
+    password = data["password"]
+    phoneNumber = data["phoneNumber"]
+    chatID = data["ChatID"]
+    user = False
+    if email !=None:
+        allResults = users.find({"email":email,"password":password})
+        for a in allResults:
+            user = a 
+            break 
+
+    if phoneNumber !=None:
+        allResults = users.find({"phoneNumber":phoneNumber,"password":password})
+        for a in allResults:
+            user = a 
+            break 
+    if user == False:
+        return {"SCC":False,"err":"Could not login"}
+    try:
+        chat = chats.find({"_id":chatID})[0]
+    except:
+        return {"SCC":False,"err":"Chat Not Found"}
+    if len(chat["messages"])>100:
+        chat["messages"] = chat["messages"][:100]
 
 
+    sid = IDCREATOR_internal(20)
 
+    sessionData = {"SCC":True,"SID":sid,"chat":chat,"chatID":chatID,"user":user} 
+    sids.append(sessionData)
+
+    return sessionData
+
+@socketio.on('leave')
+def leaveRoom(data):
+    sid = data["SID"]
+    for s in sids:
+        if s["SID"] == sid:
+            cin = sids.index(s)
+            sids.pop(cin)
+            return {"SCC":True,"msg":"Disconnected"}
+
+
+@socketio.on('send_msg')
+def socketiosendmsg(data):
+    print(sids)
+    sid = data["SID"]
+    content = data["content"]
+    image = data["image"]
+
+    for s in sids:
+        if s["SID"] == sid:
+            sender = s['user']['_id']
+            msgData = {
+                "content":content,
+                "image":image,
+                "sender":sender,
+                "at":time.time(),
+                "_id":IDCREATOR_internal(25)
+            }
+            chatData = chats.find({'_id':s["chatID"]})[0]
+            chatData["messages"].append(msgData)
+            chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
+            emit("receive",msgData)
+
+
+            return {"SCC":True,"msgData":msgData}
+    return {"SCC":False,"err":"Could not find session"}
+    
+
+
+@app.route("/tests/chat")
+def testChat():
+    return render_template("testchat.html")
 
 
 def IDCREATOR_internal(len_):
@@ -57,6 +137,91 @@ def allowed_file(filename):
 @app.route("/")
 def index():
     return render_template("docs.html")
+
+
+class Messaging:
+    @app.route("/api/create/chat",methods=["POST"])
+    def createChat():
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if password == None:
+            return {"SCC":False,"err":"password cannot be none"}
+        phoneNumber = request.form.get("phoneNumber")
+        user = False
+        if email !=None:
+            allResults = users.find({"email":email,"password":password})
+            for a in allResults:
+                user = a 
+                break 
+
+        if phoneNumber !=None:
+            allResults = users.find({"phoneNumber":phoneNumber,"password":password})
+            for a in allResults:
+                user = a 
+                break 
+        if user == False:
+            return {"SCC":False,"err":"Could not login"},401
+
+
+        reciever = request.form.get("reciever")
+        if reciever == None:
+            return {"SCC":False,"err":"reciever is required"}
+        try:
+            recieverUser = users.find({"_id":reciever})[0]
+        except:
+            return {"SCC":False,"err":"Could not find reciever"}
+
+
+        allChats = chats.find({})
+        for a in allChats:
+            members = a["members"]
+            recieverHere = False
+            senderHere = False
+            for m in members:
+                print(m)
+                if m["user"] == recieverUser["_id"]:
+                    recieverHere = True 
+                if m["user"] == user["_id"]:
+                    senderHere = True 
+
+            if recieverHere == True and senderHere == True:
+                del a["messages"]
+                return a
+
+
+
+
+
+        chatID = IDCREATOR_internal(30)
+        chatData = {
+            "members":[{"user":user["_id"],"profilePicture":user["profileImage"]},{"user":recieverUser["_id"],"profilePicture":recieverUser["profileImage"]}],
+            "createdAt":time.time(),
+            "messages":[],
+            "_id":chatID
+        }
+        chats.insert_one(chatData)
+        chatData["SCC"] = True
+        try:
+            u1inbox = user["inbox"]
+        except:
+            u1inbox = []
+        try:
+            u2inbox = recieverUser["inbox"]
+        except:
+            u2inbox = []
+
+        u1inbox.append(chatID)
+        u2inbox.append(chatID)
+
+        users.update_one({"_id":user["_id"]},{"$set":{"inbox":u1inbox}})
+        users.update_one({"_id":recieverUser["_id"]},{"$set":{"inbox":u2inbox}})
+        return chatData
+
+
+
+
+
 
 
 class Auth:

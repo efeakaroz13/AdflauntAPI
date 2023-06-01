@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Socket IO demo</title>
+    
+    </head>
+    <body>
+    <h1>Socketio chat</h1>
+    <input type="text" id="email"  placeholder="Email" value="efeakaroz13@gmail.com">
+    <input type="password" id="password" placeholder="password" value="password123">
+    <input type="text" id="phoneNumber" placeholder="phoneNumber" value="905465941944">
+    <input type="text" id="ChatID" placeholder="Chat ID"  value="i4zel1qxqhnpmybcrgfk6u3mjikv1xd5l7v7t8b1">
+    <button onclick="joinChat()">JOIN</button><br>
+    <input type="text" id="text" placeholder="Enter text..."><button onclick="sendMessage()">Send</button>
+    <div id="output"></div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.js" integrity="sha512-jMNwWSmjje4fjYut9MBGKXw5FZA6D67NHAuC9szpjbbjg51KefquNfvn4DalCbGfkcv/jHsHnPo1o47+8u4biA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/static/chat.js"></script>
+    </body>
+</html>

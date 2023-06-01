@@ -1,0 +1,34 @@
+<html>
+<head>
+	<title>Test App</title>
+	<script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.js" integrity="sha512-jMNwWSmjje4fjYut9MBGKXw5FZA6D67NHAuC9szpjbbjg51KefquNfvn4DalCbGfkcv/jHsHnPo1o47+8u4biA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+	<h1>Test App</h1>
+	<input type="chatid" id="chatid"  value="i4zel1qxqhnpmybcrgfk6u3mjikv1xd5l7v7t8b1" placeholder="chatid">
+	<input type="userid" name="password" id="userid" value="t1madk0idr2jujvhjbnh3l6y3oguq" placeholder="userid">
+	<input type="text" id="text" placeholder="Enter text"> <button onclick="sendData()">send</button>
+	<ul id="chat">
+
+	</ul>
+	<script>
+		var socket;
+		$(document).ready(function(){
+			socket = io.connect("http://127.0.0.1:8000/api/chat/socket");
+			socket.on('message',function(data){
+				document.getElementById("chat").innerHTMl = document.getElementById("chat").innerHTML+"<li>"+data+"</li>"
+			})
+
+		})
+		function sendData(){
+			chatid = document.getElementById("chatid").value;
+			userid = document.getElementById("userid").value;
+			text = document.getElementById("text").value;
+			out = socket.emit('message',{"chatID":chatid,"userID":userid,"text":text,"image":""})
+			console.log(out)
+
+		}
+	</script>
+</body>
+</html>

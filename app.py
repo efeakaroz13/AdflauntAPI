@@ -87,7 +87,7 @@ def leaveRoom(data):
 
 @socketio.on('send_msg')
 def socketiosendmsg(data):
-    print(sids)
+
     sid = data["SID"]
     content = data["content"]
     image = data["image"]
@@ -179,7 +179,7 @@ class Messaging:
             recieverHere = False
             senderHere = False
             for m in members:
-                print(m)
+
                 if m["user"] == recieverUser["_id"]:
                     recieverHere = True 
                 if m["user"] == user["_id"]:

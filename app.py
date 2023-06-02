@@ -17,6 +17,8 @@ from twilio.rest import Client
 import math 
 import redis
 from flask_socketio import SocketIO, send,emit
+import operator
+
 
 r = redis.Redis()
 
@@ -882,7 +884,10 @@ class Listings:
         q = request.args.get("q")
         sessionName = request.args.get("session")
         page = request.args.get("page")
+
+
         if sessionName == None:
+
             sessionName = IDCREATOR_internal(20)
 
             if distanceAsKm == None:
@@ -917,20 +922,51 @@ class Listings:
                         output.append(l)
                 output= sorted(output, key=operator.itemgetter('distance'))
                 
-            if mode == "search": 
-                for l in listings.find({}):
-                    s_title = f""
-                    s_title += str(l["title"])+" "
-                    s_title += str(l["description"])+" "
-                    if l["country"] != None:
-                        s_title += str(l["country"])+" "
-                    if l["city"] != None:
-                        s_title += str(l["city"])+" "
-                    if l["state"] != None:
-                        s_title += str(l["state"])+" "
+            if mode == "search":
+                if q==None:
+                    return {"SCC":False,"err":"for search mode, you need to send query(q)"}
 
-                    if q.lower() in s_title.lower():
+                for l in listings.find({}):
+                    title = l["title"].lower()
+                    description = l["description"].lower()
+                    priority = 0
+                    city = l["city"]
+                    if city == None:
+                        city = ""
+                    city = city.lower()
+
+                    state = l["state"]
+                    if state == None:
+                        state=""
+                    state = state.lower()
+
+                    splitter = q.lower().split(" ")
+                    for s in splitter:
+                        if s in title:
+                            priority += 0.05
+
+
+                        if s in description:
+                            priority += 0.04
+
+
+                        if s in state:
+                            priority += 0.03
+
+                        if s in city:
+                            priority += 0.03
+                    if priority>0:
+                        l["priority"] = priority
+
                         output.append(l)
+                output = sorted(output,key=operator.itemgetter('priority'))
+
+
+
+
+
+
+
 
             sdata = {"output":output,"q":q,"mode":mode}
             r.mset({f"{sessionName}":json.dumps(sdata)})
@@ -1076,7 +1112,7 @@ class Favorites:
                 "_id":UID
             }
         FAVDATA["SCC"]=True 
-        
+
         return FAVDATA
 
 

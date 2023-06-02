@@ -30,6 +30,8 @@ reports =  db["Reports"]
 bugs = db["Bugs"]
 listings = db["Listings"]
 chats = db["Chats"]
+favorites = db["Favorites"]
+
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
 alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
@@ -38,6 +40,28 @@ app.config["SECRET"]="123"
 socketio = SocketIO(app,cors_allowed_origins="*",async_mode='gevent')
 
 sids = []
+
+
+def login_internal(email,phoneNumber,password):
+    sq = {"password":password}
+
+    if password == None:
+        return False
+    if email != None:
+        sq["email"] = email
+    if phoneNumber != None:
+        sq["phoneNumber"] = phoneNumber
+
+    try:
+        user = users.find(sq)[0]
+        return user
+    except:
+        return False
+
+
+
+
+
 
 @socketio.on('join')
 def joinChat(data):
@@ -891,7 +915,8 @@ class Listings:
                     l["distance"] = distance
                     if distance<distanceAsKm:
                         output.append(l)
-
+                output= sorted(output, key=operator.itemgetter('distance'))
+                
             if mode == "search": 
                 for l in listings.find({}):
                     s_title = f""
@@ -930,12 +955,38 @@ class Listings:
                             output = output[(page*10-10):]
                         else:
                             return {"SCC":False,"output":[]}
+
+
                         return {"SCC":True,"output":output,"session":sessionName}
                     except:
                         return {"SCC":False,"err":"over pagination"}
                 except:
                     return {"SCC":False,"err":"Session ID invalid"} 
 
+            if mode == "near":
+                try:
+                    cdata = json.loads(r.get(sessionName))
+                    output = cdata["output"]
+                    try:
+                        page = int(page)
+                    except:
+                        return {"SCC":False,"err": "Send 'page' as INTEGER"} 
+                    try:
+                        if len(output) - (page*10-10)>10:
+
+                            output = output[(page*10-10):]
+
+                            output = output[:10]
+                        elif len(output) - (page*10-10)<10 and len(output) - (page*10-10)>0:
+
+                            output = output[(page*10-10):]
+                        else:
+                            return {"SCC":False,"output":[]}
+
+
+                        return {"SCC":True,"output":output,"session":sessionName}
+                except:
+                    return {"SCC":False,"err":"over pagination"}
 
 
 
@@ -949,6 +1000,84 @@ class Listings:
         
         data=  {"SCC":True,"output":output,"session":sessionName,"dataCount":dataCount}
         return data
+
+
+    @app.route("/api/home/listings",methods=["GET"])
+    def homeListings():
+        #Just takes coordinates
+        lat = request.args.get("lat")
+        long = request.args.get("long")
+        if lat==None or long ==None:
+            return {"SCC":False,"err":"lat and long can not be none."}
+        output = []
+        for l in listings.find({}):
+            lat_listing = l["lat"]
+            long_listing = l["long"]
+            listingLocation = [lat_listing,long_listing]
+            originalLocation = [lat,long]
+
+            distance = math.dist(originalLocation,listingLocation)*111
+            l["distance"] = distance
+
+            output.append(l)
+
+        output= sorted(output, key=operator.itemgetter('distance'))
+        return {"SCC":True,"output":output}
+
+
+class Favorites:
+    @app.route("/api/addto/favorites",methods=["POST"])
+    def addFavorites():
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+        if user == False:
+            return {"SCC":False,"err":"Login Failed."}
+
+        UID = user["_id"]
+        listingID = request.form.get("listingID")
+        if listingID == None:
+            return {"SCC":False,"err":"listingID form data is required to add that listing to favorites."}
+        try:
+            favDATA = favorites.find({"_id":UID})[0]
+        except:
+            favDATA = {
+                "forUser":UID,
+                "favorites":[],
+                "_id":UID
+
+            }
+            favorites.insert_one(favDATA)
+
+        try:
+            listingDATA = listings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find listing."}
+        favDATA["favorites"].append(listingDATA)
+        favorites.update_one({"_id":UID},{"$set":favDATA})
+
+        return {"SCC":True,"favDATA":favDATA}
+    @app.route("/api/get/favorites",methods=["POST"])
+    def getFavorites():
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+        if user == False:
+            return {"SCC":False,"err":"Login Failed."}
+        try:
+
+            FAVDATA = favorites.find({"_id":user["_id"]})[0]
+        except:
+            FAVDATA = {
+                "forUser":UID,
+                "favorites":[],
+                "_id":UID
+            }
+        FAVDATA["SCC"]=True 
+        
+        return FAVDATA
 
 
 

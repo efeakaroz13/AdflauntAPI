@@ -1217,18 +1217,20 @@ class Favorites:
             except:
                 return {"SCC":False,"err":"You don't have any favorites"}
             AllFavorites = favDATA["favorites"]
-            cindex = False
+            
             for f in AllFavorites:
-                print(f["_id"], listingID)
+                
                 if f["_id"] == listingID:
+                    print(f["_id"], listingID)
                     cindex = AllFavorites.index(f)
-                    break 
-            if cindex == False:
-                return {"SCC":False,"err":"It is not in your favorites"}
-            AllFavorites.pop(cindex)
 
-            favorites.update_one({"_id":UID},{"$set":{"favorites":AllFavorites}})
-            return {"SCC":True,"deleted":listingID}
+            
+                    AllFavorites.pop(cindex)
+
+                    favorites.update_one({"_id":UID},{"$set":{"favorites":AllFavorites}})
+                    return {"SCC":True,"deleted":listingID}
+
+            return {"SCC":False,"err":"Could not find listing in your favorites"}
 
 
 

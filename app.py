@@ -290,7 +290,7 @@ class Messaging:
                         opposition = users.find({"_id":m["user"]})[0]
                         del opposition["password"]
 
-                mdata = {"lastMessage":lastMessage,"them":opposition}
+                mdata = {"lastMessage":lastMessage,"them":opposition,"chatID":chatD["_id"]}
                 output.append(mdata)
 
 

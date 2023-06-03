@@ -166,6 +166,9 @@
     <code>
         /api/create/chat POST <br>
         email,password,phoneNumber, reciver<br>
+        <strong>/api/get/inbox - POST</strong>
+        <br>
+        email,password,phoneNumber.<br>
 
     </code>
     <h1> Socket connection for chatting</h1>
@@ -193,6 +196,20 @@
 
 
 
+
+
+
+    </code>
+
+    <h1>Favorites(wishlist)</h1>
+    <code>
+        /api/addto/favorites POST <br>
+        email,phoneNumber,password,listingID<br>
+        <br>
+        //And for getting the wishlist back:<br>
+        /api/get/favorites POST<br>
+        email,phoneNumber,password <br>
+        And you are good to go.<br>
 
 
     </code>

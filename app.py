@@ -140,7 +140,7 @@ def socketiosendmsg(data):
             
             chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
             msgData["chatID"] = chatData["_id"]
-            
+
             socketio.emit("receive",msgData)
 
 
@@ -256,6 +256,50 @@ class Messaging:
         return chatData
 
 
+    @app.route("/api/get/inbox",methods=["POST"])
+    def getInbox():
+        email = request.form.get("email")
+        password= request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+        output = []
+        if user == False:
+            return {"SCC":False,"err":"Login was not successfull"}
+        try:
+            inbox = user["inbox"]
+            for i in inbox:
+                try:
+                    chatD = chats.find({"_id":i})[0]
+
+                except:
+                    cindex = inbox.index(i)
+                    inbox.pop(i)
+                    continue
+
+                messages = chatD["messages"]
+                try:
+                    lastMessage = messages[-1]
+                except:
+                    lastMessage = ""
+                members = chatD["members"]
+                opposition = {}
+                for m in members:
+
+                    if m["user"] != user["_id"]:
+
+                        opposition = users.find({"_id":m["user"]})[0]
+                        del opposition["password"]
+
+                mdata = {"lastMessage":lastMessage,"them":opposition}
+                output.append(mdata)
+
+
+
+
+            users.update_one({"_id":user["_id"]},{"$set":{"inbox":inbox}})
+            return {"SCC":True,"output":output}
+        except Exception as e:
+            return {"SCC":True,"output":[],"reason":"no chat.","e":str(e)}
 
 
 

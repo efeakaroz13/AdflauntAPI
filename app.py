@@ -18,8 +18,7 @@ import math
 import redis
 from flask_socketio import SocketIO, send,emit
 import operator
-from gevent import monkey
-monkey.patch_all()
+
 
 r = redis.Redis()
 
@@ -140,7 +139,7 @@ def socketiosendmsg(data):
             chatData["messages"].append(msgData)
             emit("receive",msgData)
             chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
-            #send(msgData,broadcast=True)
+
 
 
             return {"SCC":True,"msgData":msgData}

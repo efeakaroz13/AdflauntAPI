@@ -1,4 +1,4 @@
-const sio = io("wss://adflaunt.com");
+const sio = io();
 function g(id_){
 	return document.getElementById(id_).value
 }
@@ -34,6 +34,6 @@ function sendMessage(){
 	})
 }
 
-sio.on('send_msg',(data) =>{
+sio.on('receive',(data) =>{
 	m("output",JSON.stringify(data))
 })

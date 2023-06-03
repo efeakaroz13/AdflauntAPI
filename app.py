@@ -1158,7 +1158,15 @@ class Listings:
 
         output= sorted(output, key=operator.itemgetter('distance'))
         return {"SCC":True,"output":output}
-
+    @app.route("/api/listing/<listingID>")
+    def listingIndividual(listingID):
+        try:
+            listingData = listings.find({"_id":listingID})[0]
+            userID = listingData["user"]
+            userData = users.find({"_id":userID})[0]
+            listingData["user"] = userData
+        except:
+            return {"SCC":False,"err":"Could not find listing"}
 
 class Favorites:
     @app.route("/api/addto/favorites",methods=["POST"])

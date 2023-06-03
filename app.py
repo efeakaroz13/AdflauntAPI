@@ -1173,8 +1173,9 @@ class Listings:
             return {"SCC":False,"err":"Could not find listing"}
 
 class Favorites:
-    @app.route("/api/addto/favorites",methods=["POST"])
+    @app.route("/api/addto/favorites",methods=["POST","DELETE"])
     def addFavorites():
+
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
@@ -1184,27 +1185,58 @@ class Favorites:
 
         UID = user["_id"]
         listingID = request.form.get("listingID")
-        if listingID == None:
-            return {"SCC":False,"err":"listingID form data is required to add that listing to favorites."}
-        try:
-            favDATA = favorites.find({"_id":UID})[0]
-        except:
-            favDATA = {
-                "forUser":UID,
-                "favorites":[],
-                "_id":UID
+        if request.method == "POST":
 
-            }
-            favorites.insert_one(favDATA)
+            if listingID == None:
+                return {"SCC":False,"err":"listingID form data is required to add that listing to favorites."}
+            try:
+                favDATA = favorites.find({"_id":UID})[0]
+            except:
+                favDATA = {
+                    "forUser":UID,
+                    "favorites":[],
+                    "_id":UID
 
-        try:
-            listingDATA = listings.find({"_id":listingID})[0]
-        except:
-            return {"SCC":False,"err":"Could not find listing."}
-        favDATA["favorites"].append(listingDATA)
-        favorites.update_one({"_id":UID},{"$set":favDATA})
+                }
+                favorites.insert_one(favDATA)
 
-        return {"SCC":True,"favDATA":favDATA}
+
+            try:
+                listingDATA = listings.find({"_id":listingID})[0]
+            except:
+                return {"SCC":False,"err":"Could not find listing."}
+
+            favDATA["favorites"].append(listingDATA)
+            favorites.update_one({"_id":UID},{"$set":favDATA})
+
+            return {"SCC":True,"favDATA":favDATA}
+        if request.method == "DELETE":
+            try:
+                favDATA = favorites.find({"_id":UID})[0]
+            except:
+                return {"SCC":False,"err":"You don't have any favorites"}
+            AllFavorties = favDATA["favorites"]
+            cindex = False
+            for f in AllFavorites:
+                if f["_id"] == listingID:
+                    cindex = AllFavorites.index(f)
+                    break 
+            if cindex == False:
+                return {"SCC":False,"err":"It is not in your favorites"}
+            AllFavorites.pop(cindex)
+
+            favorites.update({"_id":UID},{"$set":{"favorites":AllFavorites}})
+            return {"SCC":True,"deleted":listingID}
+            
+
+
+
+
+
+
+
+
+
     @app.route("/api/get/favorites",methods=["POST"])
     def getFavorites():
         email = request.form.get("email")

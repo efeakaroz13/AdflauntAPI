@@ -1,4 +1,4 @@
-const sio = io();
+const sio = io("wss://adflaunt.com");
 function g(id_){
 	return document.getElementById(id_).value
 }

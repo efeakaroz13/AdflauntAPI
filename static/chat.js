@@ -34,6 +34,6 @@ function sendMessage(){
 	})
 }
 
-sio.on('receive',(data) =>{
+sio.on('send_msg',(data) =>{
 	m("output",JSON.stringify(data))
 })

@@ -137,8 +137,9 @@ def socketiosendmsg(data):
                 "_id":IDCREATOR_internal(25)
             }
             chatData["messages"].append(msgData)
+            #emit("receive",msgData)
             chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
-            emit("receive",msgData)
+            send(msgData,broadcast=True)
 
 
             return {"SCC":True,"msgData":msgData}

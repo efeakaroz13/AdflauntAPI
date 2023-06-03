@@ -1219,6 +1219,7 @@ class Favorites:
             AllFavorites = favDATA["favorites"]
             cindex = False
             for f in AllFavorites:
+                print(f["_id"], listingID)
                 if f["_id"] == listingID:
                     cindex = AllFavorites.index(f)
                     break 

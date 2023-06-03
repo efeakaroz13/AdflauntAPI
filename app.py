@@ -16,7 +16,7 @@ from twillioAuth import authToken,SID,phoneNumber_tw
 from twilio.rest import Client 
 import math 
 import redis
-from flask_socketio import SocketIO, send,emit
+from flask_socketio import SocketIO
 import operator
 
 
@@ -137,7 +137,7 @@ def socketiosendmsg(data):
                 "_id":IDCREATOR_internal(25)
             }
             chatData["messages"].append(msgData)
-            emit("receive",msgData)
+            socketio.emit("receive",msgData)
             chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
 
 

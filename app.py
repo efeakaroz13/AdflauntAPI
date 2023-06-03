@@ -1216,7 +1216,7 @@ class Favorites:
                 favDATA = favorites.find({"_id":UID})[0]
             except:
                 return {"SCC":False,"err":"You don't have any favorites"}
-            AllFavorties = favDATA["favorites"]
+            AllFavorites = favDATA["favorites"]
             cindex = False
             for f in AllFavorites:
                 if f["_id"] == listingID:

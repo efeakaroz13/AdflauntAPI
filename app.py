@@ -121,14 +121,21 @@ def socketiosendmsg(data):
     for s in sids:
         if s["SID"] == sid:
             sender = s['user']['_id']
+            
+            chatData = chats.find({'_id':s["chatID"]})[0]
+            members = chatData["members"]
+            receiver = ""
+            for m in members:
+                if m != sender:
+                    receiver = m["user"]
             msgData = {
                 "content":content,
                 "image":image,
                 "sender":sender,
+                "receiver":receiver,
                 "at":time.time(),
                 "_id":IDCREATOR_internal(25)
             }
-            chatData = chats.find({'_id':s["chatID"]})[0]
             chatData["messages"].append(msgData)
             chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
             emit("receive",msgData)
@@ -1021,8 +1028,10 @@ class Listings:
 
 
                         return {"SCC":True,"output":output,"session":sessionName}
+                    except:
+                        return {"SCC":False,"err":"over pagination"}
                 except:
-                    return {"SCC":False,"err":"over pagination"}
+                    return {"SCC":False,"err":"Session ID invalid"}
 
 
 

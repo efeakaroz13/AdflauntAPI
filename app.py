@@ -90,8 +90,12 @@ def joinChat(data):
         chat = chats.find({"_id":chatID})[0]
     except:
         return {"SCC":False,"err":"Chat Not Found"}
-    if len(chat["messages"])>100:
-        chat["messages"] = chat["messages"][:100]
+    if len(chat["messages"])>0:
+        chat["messages"] = chat["messages"].reverse()
+    if len(chat["messages"])>30:
+
+        chat["messages"] = chat["messages"][:30]
+
 
 
     sid = IDCREATOR_internal(20)
@@ -300,6 +304,44 @@ class Messaging:
             return {"SCC":True,"output":output}
         except Exception as e:
             return {"SCC":True,"output":[],"reason":"no chat.","e":str(e)}
+
+    @app.route("/api/get/chat/<chatID>/<page>",methods=["POST"])
+    def getchat(page,chatID):
+        data2page = 30
+
+        email  =request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+        if user == False:
+            return {"SCC":False,"err":"Could not login"}
+        try:
+            UINBOX = user["inbox"]
+            if chatID not in UINBOX:
+                return {"SCC":False,"err":"Could not find chat in inbox"}
+        except:
+            return {"SCC":False,"err":"Could not find chat in inbox"}
+        try:
+            page = int(page)
+        except:
+            return {"SCC":False,"err":"Can't resolve page as an integer. Please enter a valid number"}
+
+
+
+        try:
+            chatData = chats.find({"_id":chatID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find chat in the database. This error can be on our hand."}
+        messages = chatData["messages"]
+        messages = messages.reverse()
+        startFrom = data2page*page 
+        messages = messages[startFrom:]
+        messages = messages[:data2page]
+        chatData["messages"] = messages
+        chatData["page"] = page 
+        chatData["dataPerPage"] = data2page
+        chatData["cindex"] = f"{data2page*page} - {data2page*(page-1)}"
+
 
 
 

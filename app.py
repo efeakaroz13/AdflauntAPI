@@ -18,7 +18,8 @@ import math
 import redis
 from flask_socketio import SocketIO, send,emit
 import operator
-
+import eventlet 
+eventlet.monkey_patch()
 
 r = redis.Redis()
 
@@ -39,7 +40,7 @@ ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
 alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
 app.config["SECRET"]="123"
 
-socketio = SocketIO(app,cors_allowed_origins="*",async_mode='gevent')
+socketio = SocketIO(app,cors_allowed_origins="*",async_mode='eventlet')
 
 sids = []
 
@@ -137,9 +138,9 @@ def socketiosendmsg(data):
                 "_id":IDCREATOR_internal(25)
             }
             chatData["messages"].append(msgData)
-            #emit("receive",msgData)
+            emit("receive",msgData)
             chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
-            send(msgData,broadcast=True)
+            #send(msgData,broadcast=True)
 
 
             return {"SCC":True,"msgData":msgData}

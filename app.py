@@ -90,8 +90,8 @@ def joinChat(data):
         chat = chats.find({"_id":chatID})[0]
     except:
         return {"SCC":False,"err":"Chat Not Found"}
-    if len(chat["messages"])>0:
-        chat["messages"] = chat["messages"].reverse()
+
+    chat["messages"].reverse()
     if len(chat["messages"])>30:
 
         chat["messages"] = chat["messages"][:30]
@@ -333,7 +333,7 @@ class Messaging:
         except:
             return {"SCC":False,"err":"Could not find chat in the database. This error can be on our hand."}
         messages = chatData["messages"]
-        messages = messages.reverse()
+        messages.reverse()
         startFrom = data2page*page 
         messages = messages[startFrom:]
         messages = messages[:data2page]

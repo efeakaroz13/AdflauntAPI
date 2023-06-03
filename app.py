@@ -18,8 +18,8 @@ import math
 import redis
 from flask_socketio import SocketIO, send,emit
 import operator
-import eventlet 
-eventlet.monkey_patch()
+from gevent import monkey
+monkey.patch_all()
 
 r = redis.Redis()
 
@@ -40,7 +40,7 @@ ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
 alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
 app.config["SECRET"]="123"
 
-socketio = SocketIO(app,cors_allowed_origins="*",async_mode='eventlet')
+socketio = SocketIO(app,cors_allowed_origins="*",async_mode='gevent')
 
 sids = []
 

@@ -1221,7 +1221,7 @@ class Favorites:
             for f in AllFavorites:
                 
                 if f["_id"] == listingID:
-                    print(f["_id"], listingID)
+
                     cindex = AllFavorites.index(f)
 
             

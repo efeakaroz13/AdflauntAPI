@@ -137,8 +137,11 @@ def socketiosendmsg(data):
                 "_id":IDCREATOR_internal(25)
             }
             chatData["messages"].append(msgData)
-            socketio.emit("receive",msgData)
+            
             chats.update_one({"_id":s["chatID"]},{"$set":{"messages":chatData["messages"]}})
+            msgData["chatID"] = chatData["_id"]
+            
+            socketio.emit("receive",msgData)
 
 
 

@@ -341,7 +341,8 @@ class Messaging:
         chatData["page"] = page 
         chatData["dataPerPage"] = data2page
         chatData["cindex"] = f"{data2page*page} - {data2page*(page-1)}"
-
+        chatData["SCC"] = True
+        return chatData
 
 
 
@@ -1165,6 +1166,9 @@ class Listings:
             userID = listingData["user"]
             userData = users.find({"_id":userID})[0]
             listingData["user"] = userData
+            listingData["SCC"] = True 
+
+            return listingData
         except:
             return {"SCC":False,"err":"Could not find listing"}
 

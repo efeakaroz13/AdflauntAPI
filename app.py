@@ -1226,7 +1226,7 @@ class Favorites:
                 return {"SCC":False,"err":"It is not in your favorites"}
             AllFavorites.pop(cindex)
 
-            favorites.update({"_id":UID},{"$set":{"favorites":AllFavorites}})
+            favorites.update_one({"_id":UID},{"$set":{"favorites":AllFavorites}})
             return {"SCC":True,"deleted":listingID}
 
 

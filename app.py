@@ -340,7 +340,7 @@ class Messaging:
         chatData["messages"] = messages
         chatData["page"] = page 
         chatData["dataPerPage"] = data2page
-        chatData["cindex"] = f"{data2page*page} - {data2page*(page-1)}"
+        chatData["cindex"] = f"{data2page*page} - {data2page*(page+1)}"
         chatData["SCC"] = True
         return chatData
 

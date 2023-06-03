@@ -294,13 +294,14 @@ class Messaging:
                         opposition = users.find({"_id":m["user"]})[0]
                         del opposition["password"]
 
-                mdata = {"lastMessage":lastMessage,"them":opposition,"chatID":chatD["_id"]}
+                mdata = {"lastMessage":lastMessage,"them":opposition,"chatID":chatD["_id"],"lastMessageTime":lastMessage['at']}
                 output.append(mdata)
 
 
 
 
             users.update_one({"_id":user["_id"]},{"$set":{"inbox":inbox}})
+            output= sorted(output, key=operator.itemgetter('lastMessageTime'))
             return {"SCC":True,"output":output}
         except Exception as e:
             return {"SCC":True,"output":[],"reason":"no chat.","e":str(e)}
@@ -1227,7 +1228,7 @@ class Favorites:
 
             favorites.update({"_id":UID},{"$set":{"favorites":AllFavorites}})
             return {"SCC":True,"deleted":listingID}
-            
+
 
 
 

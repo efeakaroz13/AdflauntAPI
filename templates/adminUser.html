@@ -1,0 +1,19 @@
+{% extends 'adminBase.html' %}
+{% block title %} Home {% endblock %}
+{% block title2 %} Home {% endblock %}
+{% block body %}
+<center>
+ <br><br>
+ <ul class="list-group w70">
+ 	{% if users %}
+ 		{% for u in users %}
+ 			<li class="list-group-item"><a class="flag">{{u["IPDATA"]["countryCode"]}}</a> <img width="30" loading="lazy" style="border-radius:15px;" src="/static/{{u['profileImage']}}"> {{u["fullName"]}} <a style="color:blue;" href="mailto: {{u["email"]}}">{{u["email"]}}</a> </li>
+ 		{% endfor %}
+ 	{% else %}
+ 		<li class="list-group-item">No Users Yet.</li>
+ 	{% endif %}
+
+</ul>
+</center>
+
+{% endblock %}

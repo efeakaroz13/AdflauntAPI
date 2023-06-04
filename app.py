@@ -18,12 +18,15 @@ import math
 import redis
 from flask_socketio import SocketIO
 import operator
+from cryptography.fernet import Fernet 
+import datetime
 
 
 r = redis.Redis()
 
 twcl = Client(SID,authToken)
-
+key = b'wlKSloOfyKju_DMzYvCygRI6X9KR5w9Ugp4BZ5wa7Dw='
+fernet = Fernet(key)
 
 client = pymongo.MongoClient()
 db = client['Adflaunt']
@@ -33,7 +36,7 @@ bugs = db["Bugs"]
 listings = db["Listings"]
 chats = db["Chats"]
 favorites = db["Favorites"]
-
+admin = db["Admin"]
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
 alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
@@ -60,7 +63,10 @@ def login_internal(email,phoneNumber,password):
     except:
         return False
 
-
+def encrypt(text):
+    return fernet.encrypt(text.encode()).decode()
+def decrypt(text):
+    return fernet.decrypt(text.encode()).decode()
 
 
 
@@ -173,6 +179,8 @@ def IDCREATOR_internal(len_):
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 
 
 @app.route("/")
@@ -1238,7 +1246,7 @@ class Favorites:
 
 
 
-
+ 
 
 
     @app.route("/api/get/favorites",methods=["POST"])
@@ -1263,6 +1271,60 @@ class Favorites:
         return FAVDATA
 
 
+class Admin:
+    @app.route("/admin")
+    def admin_main():
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username":username,"password":password})[0]
+        except Exception as e:
+
+
+            return redirect("/admin/login")
+        return render_template("adminIndex.html",adminData=adminData)
+
+    @app.route("/admin/login",methods=["POST","GET"])
+    def adminLogin():
+        if request.method == "GET":
+            return render_template("AdminLogin.html")
+        if request.method =="POST":
+
+            expire_date = datetime.datetime.now()
+            expire_date = expire_date + datetime.timedelta(days=2)
+            username = request.form.get("username")
+            password = request.form.get("password")
+            try:
+                admin.find({"username":username,"password":password})[0]
+            except:
+                return render_template("AdminLogin.html",err="Email or password is not correct.")
+
+            response = make_response(redirect("/admin"))
+            response.set_cookie("username",encrypt(username),expires=expire_date)
+            response.set_cookie("password",encrypt(password),expires=expire_date)
+
+            return response 
+
+
+    @app.route("/admin/users")
+    def adminViewUsers():
+        allUsers = users.find({})
+        output = []
+        for a in allUsers:
+            output.append(a)
+
+
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username":username,"password":password})[0]
+        except Exception as e:
+
+
+            return redirect("/admin/login")
+
+
+        return render_template("adminUser.html",users=output,adminData=adminData)
 
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

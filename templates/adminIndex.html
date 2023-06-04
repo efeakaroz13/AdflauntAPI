@@ -1,0 +1,16 @@
+{% extends 'adminBase.html' %}
+{% block title %} Home {% endblock %}
+{% block title2 %} Home {% endblock %}
+{% block body %}
+<center>
+ <br><br>
+ <ul class="list-group w70">
+  <li class="list-group-item" onclick="window.location.assign('/admin/users')">Users</li>
+  <li class="list-group-item">Listings</li>
+  <li class="list-group-item">Locations</li>
+  <li class="list-group-item">Designs to print</li>
+
+</ul>
+</center>
+
+{% endblock %}

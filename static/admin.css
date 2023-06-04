@@ -1,0 +1,26 @@
+.navbarImage{
+	margin-right:10px;
+	margin-left:10px;
+}
+nav{
+	font-family: 'Montserrat', sans-serif;
+}
+.loginCard{
+	width:500px;
+	margin-top:50px;
+}
+@media only screen and (max-width: 600px) {
+  .loginCard{
+	width:70%;
+	margin-top:30px;
+  }
+}
+.w70{
+	width:70%;
+}
+.flag{
+	text-decoration: none;
+}
+li{
+	text-align: left;
+}

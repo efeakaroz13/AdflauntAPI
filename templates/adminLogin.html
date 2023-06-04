@@ -1,0 +1,24 @@
+{% extends 'adminBase.html' %}
+{% block title %} Login {% endblock %}
+{% block title2 %} Login {% endblock %}
+{% block body %}
+<center>
+<div class="card loginCard">
+	<div class="card-body">
+		<h5 class="card-title">Log In</h5>
+		<p class="card-text">
+			<form action="" method="POST">
+				<input type="text" name="username"class="form-control"  placeholder="Username..."><br>
+				<input type="password" name="password" class="form-control" placeholder="Password..."> <br>
+				<button type="submit" class="btn btn-outline-dark">Log In</button>
+				{% if err %}
+				<br>
+				<p style="color:red;font-family: 'Montserrat', sans-serif;">{{err}}</p>
+				{% endif %}
+			</form>
+		</p>
+	</div>
+</div>
+</center>
+
+{% endblock %}

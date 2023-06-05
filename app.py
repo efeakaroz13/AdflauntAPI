@@ -20,7 +20,7 @@ from flask_socketio import SocketIO
 import operator
 from cryptography.fernet import Fernet 
 import datetime
-
+from kbook import Booker
 
 r = redis.Redis()
 
@@ -1325,6 +1325,86 @@ class Admin:
 
 
         return render_template("adminUser.html",users=output,adminData=adminData)
+
+
+class Booking():
+    @app.route("/api/book",methods=["POST"])
+    def book_it():
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+
+        if user == False:
+            return {"SCC":False,"err":"Authentication failed"},401
+
+        listingID = request.form.get("listingID")
+        try:
+            listingData = listings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find listing."}
+
+        pricePerDay = listingData["price"]
+
+        title = request.form.get("title")
+        description = request.form.get("description")
+
+
+
+        d1 = request.form.get("from")
+        d2 = request.form.get("to")
+        if d1 == None or d2 == None:
+            return {"SCC":False,"err":"'from' and 'to' are not definded, for booking you need to enter those correctly"}
+        d1 = d1.split("-")
+        d1y = int(d1[0])
+        try:
+            d1m = int(d1[1])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        
+        try:
+            d1d = int(d1[2])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        d1 = date(d1y,d1m,d1d)
+
+        d2 = d2.split("-")
+        d2y= int(d2[0])
+        try:
+            d2m = int(d2[1])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        try:
+            d2d=int(d2[2])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        d2 = date(d2y,d2m,d2d)
+        d = d2-d1
+        daysWantToBook = []
+        for i in range(d.days + 1):
+            day = d1 + timedelta(days=i)
+            #print(day)
+            day = day.strftime("%Y-%m-%d")
+            daysWantToBook.append(day)
+
+        price = pricePerDay*len(daysWantToBook)
+
+        orderData = {
+            "title":title,
+            "description":description,
+            "daysWantToBook":daysWantToBook,
+            "pricePerDay":pricePerDay,
+            "price":price,
+
+
+        }
+        try:
+            output = Booker.book(listingID,d1,d2,orderData)
+            return output
+        except Exception as e:
+            return {"SCC":False,"err":str(e)}
+        return {"SCC":True}
+
 
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

@@ -78,7 +78,7 @@ class Booker:
             current_booking_db_data = {
                 "_id":listingID,
                 "activeOrders":[],
-                "waitingForApproval":[]
+                "waitingForApproval":[],
                 "doneOrders":[]
             }
 

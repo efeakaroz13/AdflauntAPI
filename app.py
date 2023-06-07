@@ -21,6 +21,7 @@ import operator
 from cryptography.fernet import Fernet 
 import datetime
 from kbook import Booker
+from datetime import date,timedelta
 
 r = redis.Redis()
 

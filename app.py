@@ -48,6 +48,9 @@ socketio = SocketIO(app,cors_allowed_origins="*",async_mode='gevent')
 sids = []
 
 
+maploader = open("loader.txt","r").read()
+
+
 def login_internal(email,phoneNumber,password):
     sq = {"password":password}
 
@@ -1307,6 +1310,7 @@ class Admin:
             return response 
 
 
+
     @app.route("/admin/users")
     def adminViewUsers():
         allUsers = users.find({})
@@ -1326,6 +1330,32 @@ class Admin:
 
 
         return render_template("adminUser.html",users=output,adminData=adminData)
+
+
+
+
+    @app.route("/admin/user/<userID>")
+    def viewUserIndependently(userID):
+        userListings = listings.find({"user":userID})
+        userListingsArray = []
+        for ul in userListings:
+            userListingsArray.append(ul)
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username":username,"password":password})[0]
+        except Exception as e:
+
+
+            return redirect("/admin/login")
+
+
+        try:
+            userdata = users.find({"_id":userID})[0]
+            return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray)
+        except Exception as e:
+
+            return render_template("user404.html",error=e)
 
 
 class Booking():
@@ -1401,7 +1431,7 @@ class Booking():
         }
         d1 = request.form.get("from")
         d2 = request.form.get("to")
-        
+
         try:
             output = Booker.book(listingID,d1,d2,orderData)
             return output

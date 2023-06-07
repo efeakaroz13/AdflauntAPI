@@ -24,3 +24,10 @@ nav{
 li{
 	text-align: left;
 }
+
+path {fill: lightgray; stroke: white;}
+path:hover {fill: gray;}
+
+#cc{
+	style:display:none;
+}

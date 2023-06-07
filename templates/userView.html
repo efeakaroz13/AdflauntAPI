@@ -1,0 +1,41 @@
+{% extends 'adminBase.html' %}
+{% block title %} View User {% endblock %}
+{% block title2 %} View User {% endblock %}
+{% block body %}
+<center>
+ <br>
+ <!-- http://www.smashingmagazine.com/2015/09/making-svg-maps-from-natural-earth-data/ -->
+ {{maploader|safe}}
+ <br>
+ <p id="cc">{{data["IPDATA"]["countryCode"]}}</p>
+ <div class="card w70">
+ 	<div class="card-body">
+ 		<h5>{{data["fullName"]}}</h5>
+ 		<p class="card-text" style="text-align:left;">
+ 			<strong>IP</strong>:{{data["IPDATA"]["query"]}}<br>
+ 			<strong>Region and city</strong>: {{data["IPDATA"]["regionName"]}},{{data["IPDATA"]["city"]}} <br>
+ 			<strong>Email</strong>:{{data["email"]}}<br>
+ 			<strong>Password</strong>:<a id="password" style="display:none;">{{data["password"]}}</a><button id="showhide"onclick="showHidePassword()" class="btn btn-outline-dark">Show</button><br>
+
+
+ 		</p>
+ 	</div>
+ </div>
+ <br>
+ {% for ul in userListings %}
+ 	<div class="card">
+ 		 <img class="card-img-top" src="/static/{{ul["images"][0]}}" alt="Card image cap">
+ 		<div class="card-body">
+ 			<h5 class="card-title">{{ul["title"]}} <span class="badge badge-success">{{ul["price"]}}$</span> <span class="badge badge-success">{{ul["typeOfAd"]}}$</span></h5>
+ 			<p class="card-text">
+
+ 				<strong>Description</strong>:<p>{{ul["description"]}}</p>
+ 				<br>
+ 				<strong>Location</strong>:<p>{{ul["location"]}}</p>
+ 			</p>
+ 		</div>
+ 	</div>
+ {% endfor %}
+</center>
+
+{% endblock %}

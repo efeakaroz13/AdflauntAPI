@@ -1444,6 +1444,29 @@ class Booking():
         bookings = db["Bookings"]
         try:
             booking_data = bookings.find({"_id":listingID})[0]
+            datesList = []
+            activeOrders=  booking_data["activeOrders"]
+            waitingForApproval=  booking_data["waitingForApproval"]
+            doneOrders=  booking_data["doneOrders"]
+
+            for a in activeOrders:
+                daysWantToBook = a["daysWantToBook"]
+                for d in daysWantToBook:
+                    datesList.append(d)
+
+            for a in waitingForApproval:
+                daysWantToBook = a["daysWantToBook"]
+                for d in daysWantToBook:
+                    datesList.append(d)
+
+            for a in activeOrders:
+                daysWantToBook = a["daysWantToBook"]
+                for d in doneOrders:
+                    datesList.append(d)
+
+            return {"SCC":True,"output":datesList}
+
+
         except:
             return {"SCC":False,"err":"That id was invalid."}
 if __name__ == "__main__":

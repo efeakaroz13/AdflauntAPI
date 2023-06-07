@@ -1399,6 +1399,9 @@ class Booking():
 
 
         }
+        d1 = request.form.get("from")
+        d2 = request.form.get("to")
+        
         try:
             output = Booker.book(listingID,d1,d2,orderData)
             return output

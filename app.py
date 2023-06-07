@@ -1439,6 +1439,12 @@ class Booking():
             return {"SCC":False,"err":str(e)}
         return {"SCC":True}
 
-
+    @app.route("/api/booking/calendar/<listingID>")
+    def calendarAPI(listingID):
+        bookings = db["Bookings"]
+        try:
+            booking_data = bookings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"That id was invalid."}
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

@@ -1291,7 +1291,7 @@ class Admin:
     @app.route("/admin/login",methods=["POST","GET"])
     def adminLogin():
         if request.method == "GET":
-            return render_template("AdminLogin.html")
+            return render_template("adminLogin.html")
         if request.method =="POST":
 
             expire_date = datetime.datetime.now()
@@ -1301,7 +1301,7 @@ class Admin:
             try:
                 admin.find({"username":username,"password":password})[0]
             except:
-                return render_template("AdminLogin.html",err="Email or password is not correct.")
+                return render_template("adminLogin.html",err="Email or password is not correct.")
 
             response = make_response(redirect("/admin"))
             response.set_cookie("username",encrypt(username),expires=expire_date)

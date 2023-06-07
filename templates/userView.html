@@ -23,18 +23,18 @@
  </div>
  <br>
  {% for ul in userListings %}
- 	<div class="card">
- 		 <img class="card-img-top" src="/static/{{ul["images"][0]}}" alt="Card image cap">
+ 	<div class="card w70">
+ 		 <img class="card-img-top" src="/static/{{ul["images"][0]}}" style="width:100%" alt="Card image cap">
  		<div class="card-body">
  			<h5 class="card-title">{{ul["title"]}} <span class="badge badge-success">{{ul["price"]}}$</span> <span class="badge badge-success">{{ul["typeOfAd"]}}$</span></h5>
  			<p class="card-text">
 
  				<strong>Description</strong>:<p>{{ul["description"]}}</p>
  				<br>
- 				<strong>Location</strong>:<p>{{ul["location"]}}</p>
+ 				<strong>Location</strong>:<p>{{ul["location"]}}</p> 
  			</p>
  		</div>
- 	</div>
+ 	</div><br>
  {% endfor %}
 </center>
 

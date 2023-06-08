@@ -26,7 +26,7 @@
  	<div class="card w70">
  		 <img class="card-img-top" src="/static/{{ul["images"][0]}}/s50" style="width:100%" alt="Card image cap">
  		<div class="card-body">
- 			<h5 class="card-title">{{ul["title"]}} <span class="badge alert-success">{{ul["price"]}}$</span> </h5>
+ 			<h5 class="card-title">{{ul["title"]}} <span class="badge_kentel bg-green">{{ul["price"]}}$</span> </h5>
  			<p class="card-text">
 
  				<strong>Description</strong>:<p>{{ul["description"]}}</p>
@@ -43,7 +43,20 @@
 
  			{% for i in inbox %}
  				<div class="chat-line">
- 					{{i}}
+ 					<a href="/admin/user/{{i["oppositionData"]["_id"]}}">
+ 						<img class="profileImage" src="/static/{{i["oppositionData"]["profileImage"]}}/s20" width="30" alt="Profile Image">
+ 					</a>
+ 					<a>
+ 						<strong>{{i["oppositionData"]["fullName"]}}</strong>
+ 					</a>
+ 					<a>
+ 						{% if i["lastMessage"]["text"] | length >20 %}
+ 						<a style="color:gray">{{i["lastMessage"]["text"][20:]}}...</a>
+ 						{% else %}
+ 						<a style="color:gray">{{i["lastMessage"]["text"]}}</a>
+ 						{% endif %}
+ 					</a>
+ 					<a style="color:blue">{{ctime(i["lastMessage"]["createdAt"])}}</a>
  				</div>
 
  			{% endfor %}

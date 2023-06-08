@@ -37,3 +37,19 @@ path:hover {fill: gray;}
 	display:grid;
 	grid-template-columns:10% 20% 50% 20%;
 }
+
+.badge_kentel{
+	border-radius:10px;
+
+}
+.bg-black{
+	background:#2e2e2e;
+	color:white;
+}
+.bg-green{
+	color:white;
+	background:#008f07;
+}
+.profileImage{
+	border-radius: 50%;
+}

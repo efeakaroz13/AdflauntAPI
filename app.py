@@ -1382,7 +1382,7 @@ class Admin:
                 "chatID":u 
             }
             returnInbox.append(idata)
-        return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray,inbox=returnInbox)
+        return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray,inbox=returnInbox,ctime = time.ctime)
         #except Exception as e:
 
             #return render_template("user404.html",error=e)

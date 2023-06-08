@@ -1357,7 +1357,7 @@ class Admin:
 
         try:
             userdata = users.find({"_id":userID})[0]
-            userInbox = userData["inbox"]
+            userInbox = userdata["inbox"]
             returnInbox = []
             for u in userInbox:
                 try:

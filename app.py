@@ -1367,7 +1367,7 @@ class Admin:
             members_inbox = inboxData["members"]
             opposite = ""
             for m in members_inbox:
-
+                m = m["user"]
                 if m != u:
                     opposite = m
 

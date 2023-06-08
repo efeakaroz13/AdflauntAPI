@@ -50,13 +50,13 @@
  						<strong>{{i["oppositionData"]["fullName"]}}</strong>
  					</a>
  					<a>
- 						{% if i["lastMessage"]["text"] | length >20 %}
- 						<a style="color:gray">{{i["lastMessage"]["text"][20:]}}...</a>
+ 						{% if i["lastMessage"]["content"]["text"] | length >20 %}
+ 						<a style="color:gray">{{i["lastMessage"]["content"]["text"][20:]}}...</a>
  						{% else %}
- 						<a style="color:gray">{{i["lastMessage"]["text"]}}</a>
+ 						<a style="color:gray">{{i["lastMessage"]["content"]["text"]}}</a>
  						{% endif %}
  					</a>
- 					<a style="color:blue">{{ctime(i["lastMessage"]["createdAt"])}}</a>
+ 					<a style="color:blue">{{ctime(i["lastMessage"]["content"]["createdAt"])}}</a>
  				</div>
 
  			{% endfor %}

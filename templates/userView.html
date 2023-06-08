@@ -43,20 +43,20 @@
 
  			{% for i in inbox %}
  				<div class="chat-line">
- 					<a href="/admin/user/{{i["oppositionData"]["_id"]}}">
- 						<img class="profileImage" src="/static/{{i["oppositionData"]["profileImage"]}}/s20" width="30" alt="Profile Image">
- 					</a>
- 					<a>
+ 					<div onclick="window.location.assign('/admin/user/{{i["oppositionData"]["_id"]}}')">
+ 						<img class="profileImage" src="/static/{{i["oppositionData"]["profileImage"]}}/s20" width="50" height="50" alt="Profile Image">
+ 					</div>
+ 					<div>
  						<strong>{{i["oppositionData"]["fullName"]}}</strong>
- 					</a>
- 					<a>
+ 					</div>
+ 					<div>
  						{% if i["lastMessage"]["content"]["text"] | length >20 %}
  						<a style="color:gray">{{i["lastMessage"]["content"]["text"][20:]}}...</a>
  						{% else %}
  						<a style="color:gray">{{i["lastMessage"]["content"]["text"]}}</a>
  						{% endif %}
- 					</a>
- 					<a style="color:blue">{{ctime(i["lastMessage"]["content"]["createdAt"])}}</a>
+ 					</div>
+ 					<div style="color:blue">{{ctime(i["lastMessage"]["content"]["createdAt"])}}</div>
  				</div>
 
  			{% endfor %}

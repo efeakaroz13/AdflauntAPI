@@ -22,6 +22,11 @@ from cryptography.fernet import Fernet
 import datetime
 from kbook import Booker
 from datetime import date,timedelta
+import cv2
+
+
+
+
 
 r = redis.Redis()
 
@@ -1352,7 +1357,32 @@ class Admin:
 
         try:
             userdata = users.find({"_id":userID})[0]
-            return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray)
+            userInbox = userData["inbox"]
+            returnInbox = []
+            for u in userInbox:
+                try:
+                    inboxData = chats.find({"_id":u})[0]
+                except:
+                    continue
+                members_inbox = inboxData["members"]
+                opposite = ""
+                for m in members_inbox:
+
+                    if m != u:
+                        opposite = m
+
+                try:
+                    lastMessage = inboxData["messages"][-1]
+                except:
+                    lastMessage = None
+                oppositionData = users.find({"_id":opposite)[0]
+                idata = {
+                    "lastMessage":lastMessage,
+                    "oppositionData":oppositionData,
+                    "chatID":u 
+                }
+                returnInbox.append(idata)
+            return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray,inbox=returnInbox)
         except Exception as e:
 
             return render_template("user404.html",error=e)
@@ -1469,5 +1499,30 @@ class Booking():
 
         except:
             return {"SCC":False,"err":"That id was invalid."}
+class Scaling:
+    @app.route("/static/<filename>/s<scale>")
+    def staticScaler(filename,scale):
+        try:
+            scale = float(scale)
+            try:
+                img = cv2.imread('static/{}'.format(filename), cv2.IMREAD_UNCHANGED)
+            except:
+                return {"SCC":False,"err":"file not found or could not be opened by cv2"}
+
+            scale_percent = scale 
+
+            width = int(img.shape[1] * scale_percent / 100)
+            height = int(img.shape[0] * scale_percent / 100)
+            dim = (width, height)
+            resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+            retval, buffer = cv2.imencode('.png', resized)
+            response = make_response(buffer.tobytes())
+            response.headers['Content-Type'] = 'image/png'
+            return response
+
+        except:
+            return {"SCC":False,"err":"Scale should be a valid number like: s50 -> it means 50%"}
+
+
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

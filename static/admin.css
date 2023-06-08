@@ -31,3 +31,9 @@ path:hover {fill: gray;}
 #cc{
 	style:display:none;
 }
+.chat-line{
+	width:100%;
+	padding-left:20px;
+	display:grid;
+	grid-template-columns:10% 20% 50% 20%;
+}

@@ -24,9 +24,9 @@
  <br>
  {% for ul in userListings %}
  	<div class="card w70">
- 		 <img class="card-img-top" src="/static/{{ul["images"][0]}}" style="width:100%" alt="Card image cap">
+ 		 <img class="card-img-top" src="/static/{{ul["images"][0]}}/s50" style="width:100%" alt="Card image cap">
  		<div class="card-body">
- 			<h5 class="card-title">{{ul["title"]}} <span class="badge badge-success">{{ul["price"]}}$</span> <span class="badge badge-success">{{ul["typeOfAd"]}}$</span></h5>
+ 			<h5 class="card-title">{{ul["title"]}} <span class="badge alert-success">{{ul["price"]}}$</span> </h5>
  			<p class="card-text">
 
  				<strong>Description</strong>:<p>{{ul["description"]}}</p>
@@ -36,6 +36,21 @@
  		</div>
  	</div><br>
  {% endfor %}
+ <div class="card w70">
+ 	<div class="card-body">
+ 		<h5>User Inbox</h5>
+ 		<p class="card-text">
+
+ 			{% for i in inbox %}
+ 				<div class="chat-line">
+ 					{{i}}
+ 				</div>
+
+ 			{% endfor %}
+ 		</p>
+ 	</div>
+ </div>
+
 </center>
 
 {% endblock %}

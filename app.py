@@ -1355,37 +1355,37 @@ class Admin:
             return redirect("/admin/login")
 
 
-        try:
-            userdata = users.find({"_id":userID})[0]
-            userInbox = userdata["inbox"]
-            returnInbox = []
-            for u in userInbox:
-                try:
-                    inboxData = chats.find({"_id":u})[0]
-                except:
-                    continue
-                members_inbox = inboxData["members"]
-                opposite = ""
-                for m in members_inbox:
+        #try:
+        userdata = users.find({"_id":userID})[0]
+        userInbox = userdata["inbox"]
+        returnInbox = []
+        for u in userInbox:
+            try:
+                inboxData = chats.find({"_id":u})[0]
+            except:
+                continue
+            members_inbox = inboxData["members"]
+            opposite = ""
+            for m in members_inbox:
 
-                    if m != u:
-                        opposite = m
+                if m != u:
+                    opposite = m
 
-                try:
-                    lastMessage = inboxData["messages"][-1]
-                except:
-                    lastMessage = None
-                oppositionData = users.find({"_id":opposite})[0]
-                idata = {
-                    "lastMessage":lastMessage,
-                    "oppositionData":oppositionData,
-                    "chatID":u 
-                }
-                returnInbox.append(idata)
-            return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray,inbox=returnInbox)
-        except Exception as e:
+            try:
+                lastMessage = inboxData["messages"][-1]
+            except:
+                lastMessage = None
+            oppositionData = users.find({"_id":opposite})[0]
+            idata = {
+                "lastMessage":lastMessage,
+                "oppositionData":oppositionData,
+                "chatID":u 
+            }
+            returnInbox.append(idata)
+        return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray,inbox=returnInbox)
+        #except Exception as e:
 
-            return render_template("user404.html",error=e)
+            #return render_template("user404.html",error=e)
 
 
 class Booking():

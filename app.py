@@ -1375,7 +1375,7 @@ class Admin:
                     lastMessage = inboxData["messages"][-1]
                 except:
                     lastMessage = None
-                oppositionData = users.find({"_id":opposite)[0]
+                oppositionData = users.find({"_id":opposite})[0]
                 idata = {
                     "lastMessage":lastMessage,
                     "oppositionData":oppositionData,

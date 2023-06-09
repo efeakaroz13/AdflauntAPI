@@ -1808,7 +1808,8 @@ class Reviews:
             "review":review,
             "star":star,
             "host":listingData["user"],
-            "listing":listingID
+            "listing":listingID,
+            "revenue":current["price"]*(100-commisionRate/100),
         }
         try:
             hostProfile["reviews"]
@@ -1816,6 +1817,15 @@ class Reviews:
             hostProfile["reviews"] = []
         hostProfile["reviews"].append(reviewdata)
         users.update_one({"_id":listingData["user"]},{"$set":{"reviews":hostProfile["reviews"]}})
+        try:
+            balance = hostProfile["balance"]
+        except:
+            balance = 0
+        revenue = current["price"]*(100-commisionRate/100)
+        balance = balance+revenue
+        users.update_one({"_id":listingData["user"]},{"$set":{"balance":balance}})
+        
+
 
         try:
             listingData["reviews"]
@@ -1825,7 +1835,12 @@ class Reviews:
         listingData["reviews"].append(reviewdata)
         listings.update({"_id":listingID},{"$set":{"reviews":reviews}})
 
-        reviewdata["SCC"] = True 
+        reviewdata["SCC"] = True
+
+
+
+
+
         return reviewdata
 
 if __name__ == "__main__":

@@ -47,7 +47,7 @@ chats = db["Chats"]
 favorites = db["Favorites"]
 admin = db["Admin"]
 app = Flask(__name__)
-ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic"]
+ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic","zip","psd"]
 alphabet = ["a","b","c","d", "e", "f", "g", "h", "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
 app.config["SECRET"]="123"
 
@@ -57,6 +57,11 @@ sids = []
 
 
 maploader = open("loader.txt","r").read()
+
+
+def sendmail(email,title,content):
+    return True
+
 
 
 def calcPercentage(number,per):
@@ -1457,6 +1462,72 @@ class Admin:
             calcPercentage=calcPercentage
             )
 
+    @app.route("/admin/api/acceptBooking/<listingID>/<ListIndex>")
+    def AcceptBooking(listingID,ListIndex):
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username":username,"password":password})[0]
+        except Exception as e:
+
+
+            return {"SCC":False,"err":"Authentication Failed"}
+
+
+        bookings = db["Bookings"]
+
+        try:
+            bookingData = bookings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find listing"}
+        try:
+            currentData = bookingData["waitingForApproval"][int(ListIndex)]
+        except:
+            return {"SCC":False,"err":"Index value is not correct"}
+        bookingData["waitingForApproval"].pop(int(ListIndex))
+        bookingData["activeOrders"].append(currentData)
+        bookings.update_one({"_id":listingID},{"$set":{"waitingForApproval":bookingData["waitingForApproval"],"activeOrders":currentData["activeOrders"]}})
+
+        #sendMSG -> to host for informing that they have a new order
+        #sendMSG -> to user for informing their order is accepted by system admin
+
+
+
+        return {"SCC":True,"msg":"Updated"}
+
+    @app.route("/admin/api/denyBooking/<listingID>/<ListIndex>")
+    def AcceptBooking(listingID,ListIndex):
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username":username,"password":password})[0]
+        except Exception as e:
+
+
+            return {"SCC":False,"err":"Authentication Failed"}
+
+
+        bookings = db["Bookings"]
+
+        try:
+            bookingData = bookings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find listing"}
+        try:
+            currentData = bookingData["waitingForApproval"][int(ListIndex)]
+        except:
+            return {"SCC":False,"err":"Index value is not correct"}
+        bookingData["waitingForApproval"].pop(int(ListIndex))
+        #bookingData["activeOrders"].append(currentData)
+        bookings.update_one({"_id":listingID},{"$set":{"waitingForApproval":bookingData["waitingForApproval"]}})
+
+        #sendMSG -> DONT INFORM HOST.
+        #sendMSG -> Request denied
+
+
+
+        return {"SCC":True,"msg":"Denied successfully"}
+
 
 class Booking():
     @app.route("/api/book",methods=["POST"])
@@ -1519,13 +1590,14 @@ class Booking():
             daysWantToBook.append(day)
 
         price = pricePerDay*len(daysWantToBook)
-
+        printingFile = request.form.get("printingFile")
         orderData = {
             "title":title,
             "description":description,
             "daysWantToBook":daysWantToBook,
             "pricePerDay":pricePerDay,
             "price":price,
+            "printingFile":printingFile
 
 
         }

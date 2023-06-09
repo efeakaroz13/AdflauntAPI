@@ -54,3 +54,30 @@ function showHidePassword(){
 	}
 
 }
+
+async function acceptBooking(listingID,bookingIndex){
+	const response = await fetch('admin/api/acceptBooking/'+listingID+'/'+bookingIndex);
+	data = response.json();
+	if(data.SCC != true){
+		alert("An error occured while accepting order.")
+	}else{
+		alert("Order Successfully accepted.");
+		document.getElementById(listingID+bookingIndex).style.display="none";
+
+
+	}
+}
+
+
+async function denyBooking(listingID,bookingIndex){
+	const response = await fetch('admin/api/denyBooking/'+listingID+'/'+bookingIndex);
+	data = response.json();
+	if(data.SCC != true){
+		alert("An error occured while denying order.");
+	}else{
+		alert("Order Successfully Denied.");
+		document.getElementById(listingID+bookingIndex).style.display="none";
+		
+
+	}
+}

@@ -6,7 +6,7 @@
  <br>
  {% for a in approvalData %}
  	{% for b in approvalData[a] %}
-	 	<div class="card w70">
+	 	<div class="card w70" id="{{a}}{{approvalData[a].index(b)}}">
 	 		<div class="card-body">
 	 			<h5 class="card-title">Request for "{{listingData[a]["title"]}}"</h5>
 	 			<p class="card-text" style="text-align:left">
@@ -15,9 +15,13 @@
 	 				<strong>Total price cut(Adflaunt)</strong>:{{printFee+calcPercentage(b["price"],10)}}<br>
 	 				<strong>Offer title</strong>:{{b["title"]}}<br>
 	 				<strong>Offer Description</strong>:{{b["description"]}}<br>
-	 				<strong>Length(As days)</strong>:{{b["daysWantToBook"]|length}}<br>
-
-
+	 				<strong>Length(As days)</strong>:{{b["daysWantToBook"]|length}}<br><br>
+	 				<center>
+		 				<div class="grid2">
+		 					<button class="btn btn-success" onclick="acceptBooking('{{a}}','{{approvalData[a].index(b)}}')">Accept</button>
+		 					<button class="btn btn-danger" onclick="denyBooking('{{a}}','{{approvalData[a].index(b)}}')">Deny</button>
+		 				</div>
+	 				</center>
 	 			</p>
 
 	 		</div>

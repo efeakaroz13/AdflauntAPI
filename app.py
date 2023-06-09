@@ -1564,7 +1564,7 @@ class Booking():
                 for d in doneOrders:
                     datesList.append(d)
 
-            return {"SCC":True,"output":datesList,"printFee":printFee}
+            return {"SCC":True,"output":datesList,"printFee":int(printFee)}
 
 
         except:

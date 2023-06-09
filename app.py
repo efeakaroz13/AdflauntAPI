@@ -1635,7 +1635,7 @@ class Booking():
             user["orders"] = []
         user["orders"].append(orderData)
 
-        users.find({"_id":user['_id']},{"$set":{"orders":user["orders"]}})
+        users.update_one({"_id":user['_id']},{"$set":{"orders":user["orders"]}})
 
         return {"SCC":True,"orderData":orderData}
 

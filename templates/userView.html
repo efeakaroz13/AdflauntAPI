@@ -56,7 +56,12 @@
  						<a style="color:gray">{{i["lastMessage"]["content"]["text"]}}</a>
  						{% endif %}
  					</div>
+ 					{% if i["lastMessage"]["content"]["createdAt"] %}
+
  					<div style="color:blue">{{ctime(i["lastMessage"]["content"]["createdAt"])}}</div>
+ 					{% else %}
+ 						<div style="color:red">Time information not available</div>
+ 					{% endif %}
  				</div>
 
  			{% endfor %}

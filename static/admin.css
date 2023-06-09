@@ -40,6 +40,9 @@ path:hover {fill: gray;}
 
 .badge_kentel{
 	border-radius:10px;
+	padding:10px;
+	font-size:15px;
+	
 
 }
 .bg-black{

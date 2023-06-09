@@ -1355,37 +1355,88 @@ class Admin:
             return redirect("/admin/login")
 
 
-        #try:
-        userdata = users.find({"_id":userID})[0]
-        userInbox = userdata["inbox"]
-        returnInbox = []
-        for u in userInbox:
+        try:
+            userdata = users.find({"_id":userID})[0]
+            userInbox = userdata["inbox"]
+            returnInbox = []
+            for u in userInbox:
+                try:
+                    inboxData = chats.find({"_id":u})[0]
+                except:
+                    continue
+                members_inbox = inboxData["members"]
+                opposite = ""
+                for m in members_inbox:
+                    m = m["user"]
+                    if m != u:
+                        opposite = m
+
+                try:
+                    lastMessage = inboxData["messages"][-1]
+                except:
+                    lastMessage = None
+                oppositionData = users.find({"_id":opposite})[0]
+                idata = {
+                    "lastMessage":lastMessage,
+                    "oppositionData":oppositionData,
+                    "chatID":u 
+                }
+                returnInbox.append(idata)
+            return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray,inbox=returnInbox,ctime = time.ctime)
+        except Exception as e:
+
+            return render_template("user404.html",error=e)
+
+        
+    @app.route("/admin/map")
+    def adminMap():
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username":username,"password":password})[0]
+        except Exception as e:
+
+
+            return redirect("/admin/login")
+
+
+        countryDict = {}
+        for u in users.find({}):
             try:
-                inboxData = chats.find({"_id":u})[0]
+                IPDATA = u["IPDATA"]
             except:
                 continue
-            members_inbox = inboxData["members"]
-            opposite = ""
-            for m in members_inbox:
-                m = m["user"]
-                if m != u:
-                    opposite = m
 
+            countryCode = IPDATA["countryCode"]
             try:
-                lastMessage = inboxData["messages"][-1]
+                countryDict[countryCode]
             except:
-                lastMessage = None
-            oppositionData = users.find({"_id":opposite})[0]
-            idata = {
-                "lastMessage":lastMessage,
-                "oppositionData":oppositionData,
-                "chatID":u 
-            }
-            returnInbox.append(idata)
-        return render_template("userView.html",data=userdata,maploader=maploader,userListings=userListingsArray,inbox=returnInbox,ctime = time.ctime)
-        #except Exception as e:
+                countryDict[countryCode] = []
 
-            #return render_template("user404.html",error=e)
+
+            countryDict[countryCode].append(u["_id"])
+        return render_template("adminMap.html",countryDict=json.dumps(countryDict,indent=4),maploader=maploader)
+
+
+    @app.route("/admin/booking")
+    def adminBooking():
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username":username,"password":password})[0]
+        except Exception as e:
+
+
+            return redirect("/admin/login")
+
+        bookings = db["Bookings"]
+        allBookings = bookings.find({})
+        approvalData = {}
+        for b in allBookings:
+            if len(b["waitingForApproval"])>0:
+                approvalData[b["_id"]] = b["waitingForApproval"]
+
+        return render_template("orderApprovalAdmin.html",approvalData=approvalData)
 
 
 class Booking():

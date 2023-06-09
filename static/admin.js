@@ -14,6 +14,25 @@ if(currentURL.includes("admin/user/")){
 	document.getElementById("password").style.display="";
 
 }
+if(currentURL.includes("admin/map")){
+	data= JSON.parse(document.getElementById("data").innerHTML);
+	allKeys = Object.keys(data)
+	valueData = []
+	allKeys.forEach(function(key){
+		var value = data[key].length;
+		valueData.push(value);
+	})
+	console.log(valueData)
+	max = Math.max(valueData);
+	for (i=0;i<valueData.length;i++) {
+		var current = valueData[i];
+		red = (current/max)*255;
+		country = allKeys[i];
+		green = Math.round(red/2);
+		blue=green
+		document.getElementById(country).style.fill="rgb("+red+","+green+","+blue+")"
+	};
+}
 
 function showHidePassword(){
 	if(passwordState==0){

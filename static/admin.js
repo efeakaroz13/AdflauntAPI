@@ -72,7 +72,7 @@ async function acceptBooking(listingID,bookingIndex){
 
 async function denyBooking(listingID,bookingIndex){
 	const response = await fetch('api/denyBooking/'+listingID+'/'+bookingIndex);
-	data =  awaitresponse.json();
+	data =  await response.json();
 	if(data.SCC != true){
 		alert("An error occured while denying order.");
 	}else{

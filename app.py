@@ -1496,7 +1496,7 @@ class Admin:
         return {"SCC":True,"msg":"Updated"}
 
     @app.route("/admin/api/denyBooking/<listingID>/<ListIndex>")
-    def AcceptBooking(listingID,ListIndex):
+    def DenyBooking(listingID,ListIndex):
         try:
             username = decrypt(request.cookies.get("username"))
             password = decrypt(request.cookies.get("password"))

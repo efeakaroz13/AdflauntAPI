@@ -1597,7 +1597,10 @@ class Booking():
             "daysWantToBook":daysWantToBook,
             "pricePerDay":pricePerDay,
             "price":price,
-            "printingFile":printingFile
+            "printingFile":printingFile,
+            "bookingID":IDCREATOR_internal(30),
+            "customer":user,
+
 
 
         }
@@ -1609,7 +1612,7 @@ class Booking():
             return output
         except Exception as e:
             return {"SCC":False,"err":str(e)}
-        return {"SCC":True}
+        return {"SCC":True,"orderData":orderData}
 
     @app.route("/api/booking/calendar/<listingID>")
     def calendarAPI(listingID):
@@ -1742,6 +1745,88 @@ class Scaling:
         except:
             return {"SCC":False,"err":"Scale should be a valid number like: s50 -> it means 50%"}
 
+
+class Reviews:
+    @app.route("/api/reviews/add/<listingID>/<bookingID>",methods=["POST"])
+    def addReview(listingID,bookingID):
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+        if user == False:
+            return {"SCC":False,"err":"Could not login"}
+
+        try:
+            listingData = listings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find listing"}
+
+
+
+
+        review = request.form.get("review")
+        stars = request.form.et("stars")
+
+        if review == None:
+            return {"SCC":False,"err":"Review can't be none"}
+        try:
+            stars = float(stars)
+        except:
+            return {"SCC":False,"err":"stars invalid. Should be a float or int."}
+
+        bookings = db["Bookings"]
+        try:
+            bookingData = bookings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find booking data"}
+        activeOrders=bookingData["activeOrders"]
+        current = None
+        for a in activeOrders:
+            if bookingID == a["bookingID"]:
+                current = bookingID
+
+                break 
+        if current == None:
+            return {"SCC":False,"err":"Could not find requested booking"}
+
+        bookingData["doneOrders"].append(current)
+        cindex = bookingData["activeOrders"].index(current)
+        bookingData["activeOrders"].pop(cindex)
+
+
+        bookings.update_one({"_id":listingID},{"$set":{bookingData}})
+
+        try:
+            hostProfile = users.find({"_id":listingData["user"]})[0]
+        except:
+            return {"SCC":False,"err":"Could not find host's profile, instead made the booking DONE."}
+        del user["password"]
+
+        reviewdata={
+            "customer":user,
+            "at":time.time(),
+            "review":review,
+            "star":star,
+            "host":listingData["user"],
+            "listing":listingID
+        }
+        try:
+            hostProfile["reviews"]
+        except:
+            hostProfile["reviews"] = []
+        hostProfile["reviews"].append(reviewdata)
+        users.update_one({"_id":listingData["user"]},{"$set":{"reviews":hostProfile["reviews"]}})
+
+        try:
+            listingData["reviews"]
+        except:
+            listingData["reviews"] = []
+
+        listingData["reviews"].append(reviewdata)
+        listings.update({"_id":listingID},{"$set":{"reviews":reviews}})
+
+        reviewdata["SCC"] = True 
+        return reviewdata
 
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

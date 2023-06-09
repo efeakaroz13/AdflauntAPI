@@ -1490,7 +1490,15 @@ class Admin:
 
         #sendMSG -> to host for informing that they have a new order
         #sendMSG -> to user for informing their order is accepted by system admin
-
+        listingData = listings.find({"_id":listingID})[0]
+        host = listingData["user"]
+        hostData = users.find({"_id":host})[0]
+        try:
+            orders = hostData["orders"]
+        except:
+            orders = []
+        orders.append(currentData)
+        users.update_one({"_id":host},{"$set":{"orders":orders}})
 
 
         return {"SCC":True,"msg":"Updated"}
@@ -1523,7 +1531,15 @@ class Admin:
 
         #sendMSG -> DONT INFORM HOST.
         #sendMSG -> Request denied
-
+        customer = bookingData["customer"]["_id"]
+        customer = users.find({"_id":customer})[0]
+        orders = customer["orders"]
+        for o in orders:
+            bookingID = o["bookingID"]
+            if bookingID == bookingData["bookingID"]:
+                cindex = orders.index(o)
+        orders.pop(cindex)
+        users.update_one({"_id":bookingData["customer"]["_id"]},{"$set":{"orders":orders}})
 
 
         return {"SCC":True,"msg":"Denied successfully"}
@@ -1612,6 +1628,15 @@ class Booking():
             return output
         except Exception as e:
             return {"SCC":False,"err":str(e)}
+
+        try:
+            user["orders"]
+        except:
+            user["orders"] = []
+        user["orders"].append(orderData)
+
+        users.find({"_id":user['_id']},{"$set":{"orders":user["orders"]}})
+
         return {"SCC":True,"orderData":orderData}
 
     @app.route("/api/booking/calendar/<listingID>")
@@ -1824,7 +1849,7 @@ class Reviews:
         revenue = current["price"]*(100-commisionRate/100)
         balance = balance+revenue
         users.update_one({"_id":listingData["user"]},{"$set":{"balance":balance}})
-        
+
 
 
         try:
@@ -1842,6 +1867,7 @@ class Reviews:
 
 
         return reviewdata
+
 
 if __name__ == "__main__":
     app.run(debug=True,host="0.0.0.0")

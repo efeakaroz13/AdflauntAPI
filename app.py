@@ -1630,7 +1630,7 @@ class Booking():
         price = price+printFee
 
         data = {
-            "amount":str(price),
+            "amount":str(int(price)),
             "currency":"USD"
         }
         headers = {

@@ -1580,7 +1580,7 @@ class Booking():
         if user == False:
             return {"SCC":False,"err":"Authentication failed"},401
 
-        listingID = request.form.get("listingID")
+
         try:
             listingData = listings.find({"_id":listingID})[0]
         except:

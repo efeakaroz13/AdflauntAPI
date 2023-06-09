@@ -1622,13 +1622,6 @@ class Booking():
         }
         d1 = request.form.get("from")
         d2 = request.form.get("to")
-
-        try:
-            output = Booker.book(listingID,d1,d2,orderData)
-            return output
-        except Exception as e:
-            return {"SCC":False,"err":str(e)}
-
         try:
             user["orders"]
         except:
@@ -1637,6 +1630,13 @@ class Booking():
 
         users.update_one({"_id":user['_id']},{"$set":{"orders":user["orders"]}})
 
+        try:
+            output = Booker.book(listingID,d1,d2,orderData)
+            return output
+        except Exception as e:
+            return {"SCC":False,"err":str(e)}
+
+       
         return {"SCC":True,"orderData":orderData}
 
     @app.route("/api/booking/calendar/<listingID>")

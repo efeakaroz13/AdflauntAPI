@@ -63,6 +63,7 @@ async function acceptBooking(listingID,bookingIndex){
 	}else{
 		alert("Order Successfully accepted.");
 		document.getElementById(listingID+bookingIndex).style.display="none";
+		window.location.reload()
 
 
 	}
@@ -77,7 +78,7 @@ async function denyBooking(listingID,bookingIndex){
 	}else{
 		alert("Order Successfully Denied.");
 		document.getElementById(listingID+bookingIndex).style.display="none";
-		
+		window.location.reload()
 
 	}
 }

@@ -24,7 +24,9 @@ from kbook import Booker
 from datetime import date,timedelta
 import cv2
 
-
+commisionRates = open("commisionRate.txt","r").read()
+commisionRate = float(commisionRates.split(",")[0])
+printFee = float(commisionRates.split(",")[1])
 
 
 
@@ -54,6 +56,10 @@ sids = []
 
 
 maploader = open("loader.txt","r").read()
+
+
+def calcPercentage(number,per):
+    return number*(per/100)
 
 
 def login_internal(email,phoneNumber,password):
@@ -1436,7 +1442,19 @@ class Admin:
             if len(b["waitingForApproval"])>0:
                 approvalData[b["_id"]] = b["waitingForApproval"]
 
-        return render_template("orderApprovalAdmin.html",approvalData=approvalData)
+
+        listingData = {}
+        for ad in list(approvalData.keys()):
+            listingData[ad] = listings.find_one({"_id":ad})
+
+
+        return render_template("orderApprovalAdmin.html",
+            approvalData=approvalData,
+            listingData=listingData,
+            printFee=printFee,
+            commisionRate=commisionRate,
+            calcPercentage=calcPercentage
+            )
 
 
 class Booking():

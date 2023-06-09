@@ -1486,7 +1486,7 @@ class Admin:
             return {"SCC":False,"err":"Index value is not correct"}
         bookingData["waitingForApproval"].pop(int(ListIndex))
         bookingData["activeOrders"].append(currentData)
-        bookings.update_one({"_id":listingID},{"$set":{"waitingForApproval":bookingData["waitingForApproval"],"activeOrders":currentData["activeOrders"]}})
+        bookings.update_one({"_id":listingID},{"$set":{"waitingForApproval":bookingData["waitingForApproval"],"activeOrders":bookingData["activeOrders"]}})
 
         #sendMSG -> to host for informing that they have a new order
         #sendMSG -> to user for informing their order is accepted by system admin

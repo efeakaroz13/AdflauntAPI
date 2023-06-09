@@ -23,6 +23,7 @@ import datetime
 from kbook import Booker
 from datetime import date,timedelta
 import cv2
+from stripe_auth import stripeSecret
 
 commisionRates = open("commisionRate.txt","r").read()
 commisionRate = float(commisionRates.split(",")[0])
@@ -1563,11 +1564,88 @@ class Booking():
                 for d in doneOrders:
                     datesList.append(d)
 
-            return {"SCC":True,"output":datesList}
+            return {"SCC":True,"output":datesList,"printFee":printFee}
 
 
         except:
             return {"SCC":False,"err":"That id was invalid."}
+
+    @app.route("/api/stripe/createPayment/<listingID>")
+    def createPaymentStripe(listingID):
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+
+        if user == False:
+            return {"SCC":False,"err":"Authentication failed"},401
+
+        listingID = request.form.get("listingID")
+        try:
+            listingData = listings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find listing."}
+
+        pricePerDay = listingData["price"]
+
+
+
+        d1 = request.form.get("from")
+        d2 = request.form.get("to")
+        if d1 == None or d2 == None:
+            return {"SCC":False,"err":"'from' and 'to' are not definded, for booking you need to enter those correctly"}
+        d1 = d1.split("-")
+        d1y = int(d1[0])
+        try:
+            d1m = int(d1[1])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        
+        try:
+            d1d = int(d1[2])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        d1 = date(d1y,d1m,d1d)
+
+        d2 = d2.split("-")
+        d2y= int(d2[0])
+        try:
+            d2m = int(d2[1])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        try:
+            d2d=int(d2[2])
+        except:
+            return {"SCC":False ,"err": "Date format is invalid"}
+        d2 = date(d2y,d2m,d2d)
+        d = d2-d1
+        daysWantToBook = []
+        for i in range(d.days + 1):
+            day = d1 + timedelta(days=i)
+            #print(day)
+            day = day.strftime("%Y-%m-%d")
+            daysWantToBook.append(day)
+
+        price = pricePerDay*len(daysWantToBook)
+        price = price+printFee
+
+        data = {
+            "amount":str(price),
+            "currency":"USD"
+        }
+        headers = {
+            "Authorization":f"Bearer {stripeSecret}",
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        page =requests.post('https://api.stripe.com/v1/payment_intents',headers=headers,data=data)
+        page = json.loads(page.content) 
+        logger_payment = open("payments.log","a")
+        logger_payment.write(f"{time.time()} - {price} - USD\n")
+        logger_payment.close()
+        return page       
+
+
 class Scaling:
     @app.route("/static/<filename>/s<scale>")
     def staticScaler(filename,scale):

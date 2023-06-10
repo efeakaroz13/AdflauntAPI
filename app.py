@@ -1540,6 +1540,14 @@ class Admin:
                 cindex = orders.index(o)
         orders.pop(cindex)
         users.update_one({"_id":bookingData["customer"]},{"$set":{"orders":orders}})
+        listingData = listings.find({"_id":listingID})[0]
+        daysWantToBook = currentData["daysWantToBook"]
+        for d in daysWantToBook:
+            cindex = listingData["Bookings"].index(d)
+            listingData["Bookings"].pop(cindex)
+        listings.update_one({"_id":listingID},{"$set":{"Bookings":listingData["Bookings"]}})
+
+
 
 
         return {"SCC":True,"msg":"Denied successfully"}

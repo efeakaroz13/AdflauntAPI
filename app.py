@@ -1607,10 +1607,7 @@ class Booking():
 
         price = pricePerDay*len(daysWantToBook)
         printingFile = request.form.get("printingFile")
-        userMan = user 
-        del userMan["password"]
-        del userMan["IPDATA"]
-        del userMan["orders"]
+        
         orderData = {
             "title":title,
             "description":description,
@@ -1619,12 +1616,12 @@ class Booking():
             "price":price,
             "printingFile":printingFile,
             "bookingID":IDCREATOR_internal(30),
-            "customer":userMan,
+            "customer":user["_id"],
 
 
 
         }
-        print(json.dumps(userMan,indent=4),flush=True)
+
         print(json.dumps(orderData,indent=4),flush=True)
         d1 = request.form.get("from")
         d2 = request.form.get("to")

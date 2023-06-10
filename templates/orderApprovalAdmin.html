@@ -16,10 +16,11 @@
 	 				<strong>Offer title</strong>:{{b["title"]}}<br>
 	 				<strong>Offer Description</strong>:{{b["description"]}}<br>
 	 				<strong>Length(As days)</strong>:{{b["daysWantToBook"]|length}}<br><br>
+	 				<a href="/static/{{b['printingFile']}}" target="_blank">Download Attachement</a>
 	 				<center>
 		 				<div class="grid2">
-		 					<button class="btn btn-success" onclick="acceptBooking('{{a}}','{{approvalData[a].index(b)}}')">Accept</button>
-		 					<button class="btn btn-danger" onclick="denyBooking('{{a}}','{{approvalData[a].index(b)}}')">Deny</button>
+		 					<button class="btn btn-success w70" onclick="acceptBooking('{{a}}','{{approvalData[a].index(b)}}')">Accept</button>
+		 					<button class="btn btn-danger w70" onclick="denyBooking('{{a}}','{{approvalData[a].index(b)}}')">Deny</button>
 		 				</div>
 	 				</center>
 	 			</p>

@@ -1552,7 +1552,7 @@ class Booking():
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
         user = login_internal(email,phoneNumber,password)
-
+        UID = user["_id"]
         if user == False:
             return {"SCC":False,"err":"Authentication failed"},401
 
@@ -1607,6 +1607,9 @@ class Booking():
 
         price = pricePerDay*len(daysWantToBook)
         printingFile = request.form.get("printingFile")
+        userMan = user 
+        del userMan["password"]
+        del userMan["IPDATA"]
         orderData = {
             "title":title,
             "description":description,
@@ -1615,7 +1618,7 @@ class Booking():
             "price":price,
             "printingFile":printingFile,
             "bookingID":IDCREATOR_internal(30),
-            "customer":user,
+            "customer":userMan,
 
 
 
@@ -1628,7 +1631,7 @@ class Booking():
             orders = []
         orders.append(orderData)
 
-        users.update_one({"_id":user['_id']},{"$set":{"orders":orders}})
+        users.update_one({"_id":UID},{"$set":{"orders":orders}})
 
         try:
             output = Booker.book(listingID,d1,d2,orderData)

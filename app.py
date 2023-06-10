@@ -97,6 +97,26 @@ def getListingsOfUser(userID):
     for r in results:
         output.append(r)
     return output
+def getBookingData(bookingID):
+    bookings = db["Bookings"]
+    allBookings = bookings.find({})
+    for b in allBookings:
+        activeOrders = b["activeOrders"]
+        waitingForApproval = b["waitingForApproval"]
+        doneOrders= b["doneOrders"]
+        for a in activeOrders:
+            if a["bookingID"] == bookingID:
+                return {"status":"Active","data":a}
+        for w in waitingForApproval:
+            if w["bookingID"] == bookingID:
+                return {"status":"Waiting for Administrator Approval","data":w}
+        for d in doneOrders:
+            if d["bookingID"] == bookingID:
+                return {"status":"Completed","data":d}
+    return {"status":"Not found","data":{}}
+
+
+
 
 
 @socketio.on('join')
@@ -1144,6 +1164,16 @@ class Listings:
         except:
             return {"SCC": False, "err": "Could not find listing"}
 
+    @app.route("/api/get/listingsByCategory")
+    def getListingsByCategory():
+        category = request.args.get("category")
+        if category == None:
+            return {"SCC":False,"err":"Category is required for this endpoint"}
+        output = []
+        categoryData = db[category].find({})
+        for c in categoryData:
+            print()
+
 
 class Favorites:
     @app.route("/api/addto/favorites", methods=["POST", "DELETE"])
@@ -1894,10 +1924,13 @@ class OrdersAndSellerBalance:
             orders = user["orders"]
         except:
             orders = []
+
         for o in orders:
             if o["customer"] == user["_id"]:
+                o = getBookingData(o["bookingID"])
                 asCustomer.append(o)
             else:
+                o = getBookingData(o["bookingID"])
                 asHost.append(o)
         
         returnData = {

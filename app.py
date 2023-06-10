@@ -1769,14 +1769,26 @@ class Booking():
             customer=customerID,
             stripe_version='2022-11-15',
         )
-        paymentIntent = stripe.PaymentIntent.create(
-        amount= int(price*100),
-        currency='usd',
-        customer=customerID,
-        automatic_payment_methods={
-            'enabled': True,
-        },
-        )
+        payment_method = request.form.get("payment_method")
+        if payment_method != None:
+            paymentIntent = stripe.PaymentIntent.create(
+                amount= int(price*100),
+                currency='usd',
+                customer=customerID,
+                automatic_payment_methods={
+                    'enabled': True,
+                },
+                payment_method=payment_method
+            )
+        else:
+            paymentIntent = stripe.PaymentIntent.create(
+                amount= int(price*100),
+                currency='usd',
+                customer=customerID,
+                automatic_payment_methods={
+                    'enabled': True,
+                },
+            )
         logger_payment = open("payments.log", "a")
         logger_payment.write(f"{time.time()} - {price} - USD\n")
         logger_payment.close()
@@ -1857,9 +1869,10 @@ class Booking():
         except:
             return {"SCC":False,"err":"Customer not found"}
         output = stripe.PaymentMethod.list(
-        customer=customerID,
-        type="card",
+            customer=customerID,
+            type="card",
         )
+
         return output
     @app.route("/api/booking/addProof/<listingID>/<bookingID>", methods=["POST"])
     def addProof(listingID, bookingID):

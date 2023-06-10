@@ -1625,6 +1625,7 @@ class Booking():
 
         }
         print(json.dumps(userMan,indent=4),flush=True)
+        print(json.dumps(user,indent=4),flush=True)
         d1 = request.form.get("from")
         d2 = request.form.get("to")
         

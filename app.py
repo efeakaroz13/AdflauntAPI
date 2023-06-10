@@ -1241,11 +1241,17 @@ class Listings:
                 category= "Listings"
             priceStart = request.args.get("priceStart")
             priceEnd = request.args.get("priceEnd")
+
             if priceStart == None:
                 priceStart = 0 
             if priceEnd == None:
                 priceEnd = 1000000
-            
+            try:
+                priceStart = float(priceStart)
+                priceEnd = float(priceEnd)
+            except:
+                priceStart = 0
+                priceEnd=1000000            
             from_date = request.args.get("from")
             to_date = request.args.get("to")
             type_of_listing = request.args.get("type")

@@ -1273,6 +1273,11 @@ class Listings:
             long_ = request.args.get("long")
             distanced = False
             for c in categoryData:
+                try:
+                    c = listings.find({"_id":c["_id"]})[0]
+                except:
+                    continue
+                
                 lat_listing = c["lat"]
                 long_listing = c["long"]
 

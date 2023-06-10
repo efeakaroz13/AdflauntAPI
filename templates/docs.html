@@ -212,6 +212,52 @@
         And you are good to go.<br>
 
 
+    </code><br>
+    <br>
+    <h1>Reviews,proofs,orders and balances</h1>
+     <p>In this API the order system has 3 phases:</p>
+     <ul>
+        <li>waitingForApproval</li>
+        <li>activeOrders</li>
+        <li>doneOrders</li>
+     </ul>
+     <p>Once you order something(you will get the money from customer with additional printing fee) with this API, it first checks availability for booking  and if so, it adds it to bookings-> listing-> waitingForApproval. After that, user will wait for admin to approve their order and print. After that the order will be active on profile. User will be able to see the data when they want and it's status. But host will not receive anything until admin approves it. For completing the orders these are the steps that both user and host will follow:</p>
+     <ul>
+        <li>After receiving the package of ad which is printed by Adflaunt, host will send the user a proof with list of images or just one, demonstrating that the host is displaying your ad in correct position. </li>
+        <li>When hosts sends the proof, user will have the option to accept it or not. If not, they will contact customer support and adflaunt will handle the banning and user reporting</li>
+        <li>If user accepts it, payment will go to host's profile(not directly to their bank)</li>
+        <li>If host wants to hold all their money in our sytem it will be ok for them, once they want to withdraw money from their account using the API down below.</li>
+        <a href="https://stripe.com/docs/connect/collect-then-transfer-guide">Stripe pay out system</a>
+        <img src="https://b.stripecdn.com/docs-statics-srv/assets/application_fee_amount.837aa2339469b3c1a4319672971c1367.svg" loading="lazy" alt="">
+    </ul>
+    <code>
+        /api/book * POST <br>
+        Send the security credentials as always.<br>
+        required fields:title,description,from,to,printingFile  | <strong>from,to format:YYYY-MM-DD</strong><br>
+        will return bookingID.<br>
+        <br>
+        
+        /api/booking/addProof/listingID/bookingID * POST <br>
+        Security Credentials, images(custom array with '|-|' between all filenames).<br>
+        <br>
+        <h3>Fetching orders</h3>
+        /api/getorders/listingID * GET<br>
+        No authentication required. Give the listing ID.<br><br>
+        /api/orders * POST <br>
+        Just security credentials, it will return all the data for the current user <br>
+        <br>
+        /api/order/bookingID * GET 
+        Get booking data with booking ID, any extra field is not required 
+        <br><br>
+        /api/reviews/add/listingID/bookingID * POST <br>
+        security credentials are required<br>
+        review: string<br>
+        stars:int or float<br>
+        <br>
+        /api/getBalance * POST<br>
+        just security credentials, will give you the current user balance
+
+
     </code>
 </body>
 </html>

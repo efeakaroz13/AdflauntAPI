@@ -1842,6 +1842,25 @@ class Booking():
             return {"SCC":False,"err":"paymentMethod is not valid"}
         return {"SCC":True}
 
+
+    @app.route("/api/stripe/list_methods",methods=["POST"])
+    def list_methods_stripe():
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,password,phoneNumber)
+        if user == False:
+            return {"SCC":False,"err":"Authentication Failed"}
+        
+        try:
+            customerID = user["stripeCustomerID"]
+        except:
+            return {"SCC":False,"err":"Customer not found"}
+        output = stripe.PaymentMethod.list(
+        customer="cus_9s6XGDTHzA66Po",
+        type="card",
+        )
+        return output
     @app.route("/api/booking/addProof/<listingID>/<bookingID>", methods=["POST"])
     def addProof(listingID, bookingID):
         email = request.form.get("email")

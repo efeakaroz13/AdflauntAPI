@@ -1853,6 +1853,21 @@ class Booking():
         except:
             return {"SCC":False,"err":"paymentMethod is not valid"}
         return {"SCC":True}
+    @app.route("/api/stripe/detach")
+    def stripeDetach():
+        email = request.form.get("email")
+        phoneNumber = request.form.get("phoneNumber")
+        password = request.form.get("password")
+        user = login_internal(email,phoneNumber,password)
+
+        if user == False:
+            return {"SCC":False,"err":"Authentication failed"}
+        paymentMethod= request.form.get("paymentMethod")
+        if paymentMethod == None:
+            return {"SCC":False,"err":"paymentMethod is not defined"}
+        stripe.PaymentMethod.detach(paymentMethod)
+        
+        return {"SCC":True }
 
 
     @app.route("/api/stripe/list_methods",methods=["POST"])

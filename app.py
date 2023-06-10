@@ -1323,10 +1323,14 @@ class Listings:
                 ctype = c["type"]
                 print(daysWantToBook,flush=True)
                 print(cbook,flush=True)
+                gonnacontinue = False
                 for d in daysWantToBook:
-                    for cb in cbook:
-                        if d==cb:
-                            continue 
+                    if d in cbook:
+                        gonnacontinue = True 
+                        break 
+                if gonnacontinue:
+                    continue
+                        
                 
                 price = c["price"]
                 if distanced:

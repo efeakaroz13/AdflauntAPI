@@ -1582,7 +1582,7 @@ class Booking():
 
 
         except:
-            return {"SCC": False, "err": "That id was invalid."}
+            return {"SCC": True,"output":[]}
 
     @app.route("/api/stripe/createPayment/<listingID>", methods=["POST"])
     def createPaymentStripe(listingID):

@@ -1882,7 +1882,7 @@ class OrdersAndSellerBalance:
         if user == False:
             return {"SCC":False,"err":"Authentication failed"}
         userListings = getListingsOfUser(user["_id"])
-        if userListings>0:
+        if len(userListings)>0:
             type_user = "seller"
         else:
             type_user = "buyer"

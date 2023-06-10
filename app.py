@@ -1848,7 +1848,7 @@ class Booking():
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
-        user = login_internal(email,password,phoneNumber)
+        user = login_internal(email,phoneNumber,password)
         if user == False:
             return {"SCC":False,"err":"Authentication Failed"}
         

@@ -24,7 +24,9 @@ from kbook import Booker
 from datetime import date, timedelta
 import cv2
 from stripe_auth import stripeSecret
-import stripe 
+import stripe
+import geopy.distance
+
 
 stripe.api_key = "sk_test_51LkdT2BwxpdnO2PUh2too5t3AfGBGZqkDltuL0GuHIAClpHTVa9IiYN8bKdW7P3eSrKZbWjor9xtp2InwnuZgr8X00sXVNT3ql"
 
@@ -1061,10 +1063,10 @@ class Listings:
                 for l in listings.find({}):
                     lat_listing = l["lat"]
                     long_listing = l["long"]
-                    listingLocation = [lat_listing, long_listing]
-                    originalLocation = [lat, long]
+                    listingLocation = (lat_listing, long_listing)
+                    originalLocation = (lat, long)
 
-                    distance = math.dist(originalLocation, listingLocation) * 111
+                    distance =geopy.distance.geodesic(listingLocation, originalLocation).km
                     l["distance"] = distance
                     if distance < distanceAsKm:
                         output.append(l)
@@ -1273,7 +1275,7 @@ class Listings:
                 lat_listing = c["lat"]
                 long_listing = c["long"]
 
-                listingLocation = [lat_listing, long_listing]
+                listingLocation = (lat_listing, long_listing)
                 originalLocation = [lat, long_]
 
                 if lat != None and long_!=None:
@@ -1282,8 +1284,8 @@ class Listings:
                         long_ = float(long_ )
                     except:
                         return {"SCC":False,"err":"Check lat and long values"}
-                    originalLocation = [lat, long_]
-                    distance = math.dist(originalLocation, listingLocation) * 111
+                    originalLocation = (lat, long_)
+                    distance = geopy.distance.geodesic(listingLocation,originalLocation).km
                     c["distance"] = distance
                     distanced = True
 

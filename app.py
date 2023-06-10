@@ -1632,7 +1632,9 @@ class Booking():
         except:
             user["orders"] = []
         user["orders"].append(orderData)
-        users.update_one({"_id":user["_id"]},{"$set":user})
+        print(user["orders"])
+        print(user["_id"])
+        users.update_one({"_id":user["_id"]},{"$set":{"orders":user["orders"]}})
 
         try:
             output = Booker.book(listingID,d1,d2,orderData)

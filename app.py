@@ -269,6 +269,7 @@ def index():
     return render_template("docs.html")
 
 
+
 class Messaging:
     @app.route("/api/create/chat", methods=["POST"])
     def createChat():
@@ -1576,7 +1577,7 @@ class Admin:
         return {"SCC": True, "msg": "Denied successfully"}
 
 
-class Booking():
+class Booking:
     @app.route("/api/book", methods=["POST"])
     def book_it():
         email = request.form.get("email")
@@ -1853,7 +1854,7 @@ class Booking():
         except:
             return {"SCC":False,"err":"paymentMethod is not valid"}
         return {"SCC":True}
-    @app.route("/api/stripe/detach")
+    @app.route("/api/stripe/detach",methods=["POST"])
     def stripeDetach():
         email = request.form.get("email")
         phoneNumber = request.form.get("phoneNumber")

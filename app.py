@@ -1734,17 +1734,51 @@ class Booking():
             customer=customerID,
             stripe_version='2022-11-15',
         )
-        paymentIntent = stripe.SetupIntent.create(customer=customerID,)
+        paymentIntent = stripe.PaymentIntent.create(
+        amount= int(price*100),
+        currency='usd',
+        customer=customerID,
+        automatic_payment_methods={
+            'enabled': True,
+        },
+        )
         logger_payment = open("payments.log", "a")
         logger_payment.write(f"{time.time()} - {price} - USD\n")
         logger_payment.close()
-
         return jsonify(paymentIntent=paymentIntent.client_secret,
                         ephemeralKey=ephemeralKey.secret,
                         customer=customerID,
                         publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
 
         
+    @app.route("/api/stripe/setupIntent",methods=["POST"])
+    def setupIntentStripe():
+        email = request.form.get("email")
+        phoneNumber = request.form.get("phoneNumber")
+        password = request.form.get("password")
+        user = login_internal(email,phoneNumber,password)
+
+        if user == False:
+            return {"SCC":False,"err":"Authentication failed"}
+        try:
+            customerID = user["stripeCustomerID"]
+        except:
+
+            customer = stripe.Customer.create()
+            users.update_one({"_id":user["_id"]},{"$set":{"stripeCustomerID":customer["id"]}})
+            customerID = customer["id"]
+        ephemeralKey = stripe.EphemeralKey.create(
+            customer=customerID,
+            stripe_version='2022-11-15',
+        )
+        paymentIntent = stripe.SetupIntent.create(
+        customer=customerID
+        )
+        return jsonify(paymentIntent=paymentIntent.client_secret,
+                        ephemeralKey=ephemeralKey.secret,
+                        customer=customerID,
+                        publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
+
         
 
     @app.route("/api/booking/addProof/<listingID>/<bookingID>", methods=["POST"])

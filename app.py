@@ -378,9 +378,13 @@ class Messaging:
                     if m["user"] != user["_id"]:
                         opposition = users.find({"_id": m["user"]})[0]
                         del opposition["password"]
+                try:
 
-                mdata = {"lastMessage": lastMessage, "them": opposition, "chatID": chatD["_id"],
+                    mdata = {"lastMessage": lastMessage, "them": opposition, "chatID": chatD["_id"],
                          "lastMessageTime": lastMessage['at']}
+                except:
+                    mdata = {"lastMessage": lastMessage, "them": opposition, "chatID": chatD["_id"],
+                         "lastMessageTime": 0}
                 output.append(mdata)
 
             users.update_one({"_id": user["_id"]}, {"$set": {"inbox": inbox}})

@@ -1735,7 +1735,7 @@ class Booking():
             stripe_version='2022-11-15',
         )
         paymentIntent = stripe.PaymentIntent.create(
-        amount=price*100,
+        amount=int(price*100),
         currency='usd',
         customer=customerID,
         automatic_payment_methods={
@@ -1745,7 +1745,7 @@ class Booking():
         logger_payment = open("payments.log", "a")
         logger_payment.write(f"{time.time()} - {price} - USD\n")
         logger_payment.close()
-        
+
         return jsonify(paymentIntent=paymentIntent.client_secret,
                         ephemeralKey=ephemeralKey.secret,
                         customer=customerID,

@@ -1734,13 +1734,13 @@ class Booking():
             customer=customerID,
             stripe_version='2022-11-15',
         )
-        paymentIntent = stripe.PaymentIntent.create(
+        paymentIntent = stripe.SetupIntent.create(
         amount=int(price*100),
-        currency='usd',
-        customer=customerID,
-        automatic_payment_methods={
-            'enabled': True,
-        },
+            currency='usd',
+            customer=customerID,
+            automatic_payment_methods={
+                'enabled': True,
+            },
         )
         logger_payment = open("payments.log", "a")
         logger_payment.write(f"{time.time()} - {price} - USD\n")

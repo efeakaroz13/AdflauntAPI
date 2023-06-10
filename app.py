@@ -1266,7 +1266,7 @@ class Listings:
                 type_of_listing = "1.5' X 2' Digital Signage"
 
             daysWantToBook = dates2Arr(from_date,to_date)
-            print(daysWantToBook,flush=True)
+            
             output = []
             categoryData = db[category].find({})
             lat = request.args.get("lat")
@@ -1317,6 +1317,8 @@ class Listings:
                 except:
                     cbook = []
                 ctype = c["type"]
+                print(daysWantToBook,flush=True)
+                print(cbook,flush=True)
                 for d in daysWantToBook:
                     for cb in cbook:
                         if d==cb:

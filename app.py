@@ -1531,7 +1531,7 @@ class Admin:
 
         #sendMSG -> DONT INFORM HOST.
         #sendMSG -> Request denied
-        customer = bookingData["customer"]
+        customer = currentData["customer"]
         customer = users.find({"_id":customer})[0]
         orders = customer["orders"]
         for o in orders:

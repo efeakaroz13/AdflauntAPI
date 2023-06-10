@@ -1539,7 +1539,7 @@ class Admin:
             if bookingID == bookingData["bookingID"]:
                 cindex = orders.index(o)
         orders.pop(cindex)
-        users.update_one({"_id":bookingData["customer"],{"$set":{"orders":orders}})
+        users.update_one({"_id":bookingData["customer"]},{"$set":{"orders":orders}})
 
 
         return {"SCC":True,"msg":"Denied successfully"}

@@ -1536,10 +1536,10 @@ class Admin:
         orders = customer["orders"]
         for o in orders:
             bookingID = o["bookingID"]
-            if bookingID == bookingData["bookingID"]:
+            if bookingID == currentData["bookingID"]:
                 cindex = orders.index(o)
         orders.pop(cindex)
-        users.update_one({"_id":bookingData["customer"]},{"$set":{"orders":orders}})
+        users.update_one({"_id":currentData["customer"]},{"$set":{"orders":orders}})
         listingData = listings.find({"_id":listingID})[0]
         daysWantToBook = currentData["daysWantToBook"]
         for d in daysWantToBook:

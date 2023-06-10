@@ -1531,7 +1531,7 @@ class Admin:
 
         #sendMSG -> DONT INFORM HOST.
         #sendMSG -> Request denied
-        customer = bookingData["customer"]["_id"]
+        customer = bookingData["customer"]
         customer = users.find({"_id":customer})[0]
         orders = customer["orders"]
         for o in orders:
@@ -1539,7 +1539,7 @@ class Admin:
             if bookingID == bookingData["bookingID"]:
                 cindex = orders.index(o)
         orders.pop(cindex)
-        users.update_one({"_id":bookingData["customer"]["_id"]},{"$set":{"orders":orders}})
+        users.update_one({"_id":bookingData["customer"],{"$set":{"orders":orders}})
 
 
         return {"SCC":True,"msg":"Denied successfully"}

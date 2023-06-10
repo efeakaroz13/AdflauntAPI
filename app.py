@@ -3,7 +3,7 @@ Author:Efe Akaröz
 1st of may, monday 2023
 """
 import json
-from flask import Flask, render_template, request, redirect, make_response, abort
+from flask import Flask, render_template, request, redirect, make_response, abort,jsonify
 import cv2
 import requests
 import time
@@ -24,6 +24,10 @@ from kbook import Booker
 from datetime import date, timedelta
 import cv2
 from stripe_auth import stripeSecret
+import stripe 
+
+stripe.api_key = "sk_test_51LkdT2BwxpdnO2PUh2too5t3AfGBGZqkDltuL0GuHIAClpHTVa9IiYN8bKdW7P3eSrKZbWjor9xtp2InwnuZgr8X00sXVNT3ql"
+
 
 commisionRates = open("commisionRate.txt", "r").read()
 commisionRate = float(commisionRates.split(",")[0])
@@ -115,6 +119,43 @@ def getBookingData(bookingID):
                 return {"status":"Completed","data":d}
     return {"status":"Not found","data":{}}
 
+def dates2Arr(d1,d2):
+    if d1 == None:
+        return []
+    if d2 == None:
+        return []
+    d1 = d1.split("-")
+    d1y = int(d1[0])
+    try:
+        d1m = int(d1[1])
+    except:
+        return []
+
+    try:
+        d1d = int(d1[2])
+    except:
+        return []
+    d1 = date(d1y, d1m, d1d)
+
+    d2 = d2.split("-")
+    d2y = int(d2[0])
+    try:
+        d2m = int(d2[1])
+    except:
+        return []
+    try:
+        d2d = int(d2[2])
+    except:
+        return []
+    d2 = date(d2y, d2m, d2d)
+    d = d2 - d1
+    daysWantToBook = []
+    for i in range(d.days + 1):
+        day = d1 + timedelta(days=i)
+        # print(day)
+        day = day.strftime("%Y-%m-%d")
+        daysWantToBook.append(day)
+    return daysWantToBook
 
 
 
@@ -1164,11 +1205,22 @@ class Listings:
         except:
             return {"SCC": False, "err": "Could not find listing"}
 
-    @app.route("/api/get/listingsByCategory")
+    @app.route("/api/get/listingsFilterer")
     def getListingsByCategory():
         category = request.args.get("category")
         if category == None:
-            return {"SCC":False,"err":"Category is required for this endpoint"}
+            category= "Listings"
+        priceStart = request.args.get("priceStart")
+        priceEnd = request.args.get("priceEnd")
+        if priceStart == None:
+            priceStart = 0 
+        if priceEnd == None:
+            priceEnd = 1000000
+        
+        from_date = request.args.get("from")
+        to_date = request.args.get("to")
+
+        
         output = []
         categoryData = db[category].find({})
         for c in categoryData:
@@ -1671,21 +1723,36 @@ class Booking():
         price = pricePerDay * len(daysWantToBook)
         price = price + printFee
 
-        data = {
-            "amount": str(int(price) * 100),
-            "currency": "USD"
-        }
-        headers = {
-            "Authorization": f"Bearer {stripeSecret}",
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        try:
+            customerID = user["stripeCustomerID"]
+        except:
 
-        page = requests.post('https://api.stripe.com/v1/payment_intents', headers=headers, data=data)
-        page = json.loads(page.content)
+            customer = stripe.Customer.create()
+            users.update_one({"_id":user["_id"]},{"$set":{"stripeCustomerID":customer["id"]}})
+            customerID = customer["id"]
+        ephemeralKey = stripe.EphemeralKey.create(
+            customer=customerID,
+            stripe_version='2022-11-15',
+        )
+        paymentIntent = stripe.PaymentIntent.create(
+        amount=price*100,
+        currency='usd',
+        customer=customerID,
+        automatic_payment_methods={
+            'enabled': True,
+        },
+        )
         logger_payment = open("payments.log", "a")
         logger_payment.write(f"{time.time()} - {price} - USD\n")
         logger_payment.close()
-        return page
+        
+        return jsonify(paymentIntent=paymentIntent.client_secret,
+                        ephemeralKey=ephemeralKey.secret,
+                        customer=customerID,
+                        publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
+
+        
+        
 
     @app.route("/api/booking/addProof/<listingID>/<bookingID>", methods=["POST"])
     def addProof(listingID, bookingID):

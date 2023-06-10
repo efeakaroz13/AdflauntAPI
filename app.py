@@ -1857,7 +1857,7 @@ class Booking():
         except:
             return {"SCC":False,"err":"Customer not found"}
         output = stripe.PaymentMethod.list(
-        customer="cus_9s6XGDTHzA66Po",
+        customer=customerID,
         type="card",
         )
         return output

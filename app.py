@@ -1101,8 +1101,26 @@ class Listings:
 
                         if s in city:
                             priority += 0.03
+                    
+
+                    try:
+                        reviews = l["reviews"]
+                    except:
+                        reviews = []
+                    reviewsTotal = 0 
+                    reviewsCount = len(reviews)
+                    for r in reviews:
+                        star = r["star"]
+                        reviewsTotal += star 
+                    try:
+                        average = reviewsTotal/reviewsCount 
+                    except:
+                        average = 0 
+                    priority += average/6
+                    
+
                     if priority > 0:
-                        l["priority"] = priority
+                        l["priority"] = -priority
 
                         output.append(l)
                 output = sorted(output, key=operator.itemgetter('priority'))
@@ -1208,58 +1226,103 @@ class Listings:
 
     @app.route("/api/get/listingsFilterer")
     def getListingsByCategory():
-        category = request.args.get("category")
-        if category == None:
-            category= "Listings"
-        priceStart = request.args.get("priceStart")
-        priceEnd = request.args.get("priceEnd")
-        if priceStart == None:
-            priceStart = 0 
-        if priceEnd == None:
-            priceEnd = 1000000
-        
-        from_date = request.args.get("from")
-        to_date = request.args.get("to")
-        type_of_listing = request.args.get("type")
-        if type_of_listing == None:
-            type_of_listing = ""
-        if type_of_listing == "1":
-            type_of_listing = "1.5' X 2' Yard Sign"
-
-        if type_of_listing == "2":
-            type_of_listing = "10' Banner"
-
-        if type_of_listing == "3":
-            type_of_listing = "2'x 3' Floor Sign"
-
-        if type_of_listing == "4":
-            type_of_listing = "2'x 3' Poster"
-
-        if type_of_listing == "5":
-            type_of_listing = "20'+ Bill Board"
-
-        if type_of_listing == "6":
-            type_of_listing = "1.5' X 2' Digital Signage"
-
-        daysWantToBook = dates2Arr(from_date,to_date)
-        
-        output = []
-        categoryData = db[category].find({})
-        for c in categoryData:
-            try:
-                cbook = c["Bookings"]
-            except:
-                cbook = []
-            ctype = c["type"]
-            for d in daysWantToBook:
-                if d in cbook:
-                    continue 
+        sessionName =request.args.get("session")
+        page= request.args.get("page")
+        if sessionName == None:
+            category = request.args.get("category")
+            if category == None:
+                category= "Listings"
+            priceStart = request.args.get("priceStart")
+            priceEnd = request.args.get("priceEnd")
+            if priceStart == None:
+                priceStart = 0 
+            if priceEnd == None:
+                priceEnd = 1000000
             
-            price = c["price"]
-            if price>priceStart and price<priceEnd and type_of_listing in ctype:
-                output.append(c)
-        
-        return {"SCC":True,"output":output}
+            from_date = request.args.get("from")
+            to_date = request.args.get("to")
+            type_of_listing = request.args.get("type")
+            if type_of_listing == None:
+                type_of_listing = ""
+            if type_of_listing == "1":
+                type_of_listing = "1.5' X 2' Yard Sign"
+
+            if type_of_listing == "2":
+                type_of_listing = "10' Banner"
+
+            if type_of_listing == "3":
+                type_of_listing = "2'x 3' Floor Sign"
+
+            if type_of_listing == "4":
+                type_of_listing = "2'x 3' Poster"
+
+            if type_of_listing == "5":
+                type_of_listing = "20'+ Bill Board"
+
+            if type_of_listing == "6":
+                type_of_listing = "1.5' X 2' Digital Signage"
+
+            daysWantToBook = dates2Arr(from_date,to_date)
+            
+            output = []
+            categoryData = db[category].find({})
+            lat = request.args.get("lat")
+            long_ = request.args.get("long")
+            distanced = False
+            for c in categoryData:
+                lat_listing = c["lat"]
+                long_listing = c["long"]
+
+                listingLocation = [lat_listing, long_listing]
+                originalLocation = [lat, long_]
+
+                if lat != None and long_!=None:
+                    distance = math.dist(originalLocation, listingLocation) * 111
+                    c["distance"] = distance
+                    distanced = True
+
+                try:
+                    allReviews = c["reviews"]
+                except:
+                    allReviews = []
+                totalPoints = 0
+                numberOfReviews= len(allReviews)
+
+                for a in allReviews:
+                    star = a["star"]
+                    totalPoints += star 
+                try:
+                    average = totalPoints/numberOfReviews
+                except:
+                    average = 0
+
+                c["averageRating"] = average
+
+                try:
+                    cbook = c["Bookings"]
+                except:
+                    cbook = []
+                ctype = c["type"]
+                for d in daysWantToBook:
+                    if d in cbook:
+                        continue 
+                
+                price = c["price"]
+                if price>priceStart and price<priceEnd and type_of_listing in ctype:
+                    output.append(c)
+                if distanced:
+                    try:
+                        searchPoint = c["distance"]/average 
+                    except:
+                        searchPoint = c["distance"]/1 
+                    c["searchPoint"] = searchPoint
+
+            if distanced:
+                output = sorted(output,key=operator.itemgetter('searchPoint'))
+            else:
+                output = sorted(output,key=operator.itemgetter('averageRating'))
+            
+            return {"SCC":True,"output":output}
             
             
 

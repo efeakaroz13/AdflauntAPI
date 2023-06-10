@@ -1610,6 +1610,7 @@ class Booking():
         userMan = user 
         del userMan["password"]
         del userMan["IPDATA"]
+        del userMan["orders"]
         orderData = {
             "title":title,
             "description":description,
@@ -1632,8 +1633,7 @@ class Booking():
         except:
             user["orders"] = []
         user["orders"].append(orderData)
-        print(user["orders"],flush=True)
-        print(user["_id"],flush=True)
+        
         users.update_one({"_id":user["_id"]},{"$set":{"orders":user["orders"]}})
 
         try:

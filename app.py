@@ -1625,7 +1625,7 @@ class Booking():
             "printingFile":printingFile,
             "bookingID":IDCREATOR_internal(30),
             "customer":user["_id"],
-
+            "timeStamp":time.time()
 
 
         }
@@ -1756,6 +1756,101 @@ class Booking():
         logger_payment.write(f"{time.time()} - {price} - USD\n")
         logger_payment.close()
         return page       
+
+    @app.route("/api/booking/addProof/<listingID>/<bookingID>",methods=["POST"])
+    def addProof(listingID,bookingID):
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+        images = request.form.get("images")
+        if images == None:
+            return {
+                "SCC":False,
+                "error":"images can't be undefined.",
+                "docs":"Send image filenames to 'images'. For multiple images, put |-| between all image names"
+            }
+
+        """
+        images: as list of names. |-| between all images
+        """
+        images = images.split("|-|")
+
+        if user == False:
+            return {
+                "SCC":False,
+                "err":"Authentication failed"
+            }
+        try:
+            listingData = listings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find listing"}
+
+        bookings = db["Bookings"]
+        try:
+            bookingData_all = bookings.find({"_id":listingID})[0]
+        except:
+            return {"SCC":False,"err":"Could not find booking data"}
+
+
+        activeOrders = bookingData_all["activeOrders"]
+
+        bookingData = None 
+        for a in activeOrders:
+            if bookingID == a["bookingID"]:
+                bookingData = a
+                break 
+        if bookingData == None:
+            return {"SCC":False,"err":"Could not want booking with the id you gave."}
+        bindex = activeOrders.index(bookingData)
+        try:
+            bookingData["proofs"]
+            return {"SCC":True,"err":"You already sent it"}
+        except:
+            bookingData["proofs"] = images 
+        activeOrders.pop(bindex)
+        activeOrders.append(bookingData)
+        bookings.update_one({"_id":listingID},{"$set":{"activeOrders":activeOrders}})
+
+
+        host = listingData["user"]
+        customer = bookingData["customer"]
+        hostData = users.find({"_id":host})
+        customerData= users.find({"_id":customer})
+        ordersHost = hostData["orders"]
+        ordersCustomer = customerData["orders"]
+
+
+        hostBookingData = None
+        for oh in ordersHost:
+            if bookingID == oh["bookingID"]:
+                hostBookingData = oh 
+                break
+        if hostBookingData == None:
+            return {"SCC":False,"err":"Could not find booking on host's profile. Data may be corrupted or order not accepted by site admin"}
+
+        customerBookingData = None
+        for oc in ordersCustomer:
+            if bookingID == oh["bookingID"]:
+                customerBookingData = oc 
+                break 
+
+        if customerBookingData == None:
+            return {"SCC":False,"err":"Could not find customer booking data. Data may be corrupted"}
+
+        customerBookingData["proofs"] = images 
+        hostBookingData["proofs"] = images 
+        hindex = ordersHost.index(hostBookingData)
+        cindex  = ordersCustomer.index(customerBookingData)
+        ordersHost.pop(hindex)
+        ordersCustomer.pop(cindex)
+        ordersHost.append(hostBookingData)
+        ordersCustomer.append(customerBookingData)
+        users.update_one({"_id":customer},{"orders":ordersCustomer})
+        users.update_one({"_id":host},{"orders":ordersHost})
+        return {"SCC":True,"bookingData":bookingData}
+
+
 
 
 class Scaling:

@@ -1027,6 +1027,7 @@ class Listings:
 
     @app.route("/api/get/listings", methods=["GET"])
     def get_listings():
+        r = redis.Redis()
         data = {}
         output = []
         lat = request.args.get("lat")

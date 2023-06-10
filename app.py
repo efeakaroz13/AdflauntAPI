@@ -1277,6 +1277,12 @@ class Listings:
                 originalLocation = [lat, long_]
 
                 if lat != None and long_!=None:
+                    try:
+                        lat = float(lat)
+                        long_ = float(long_ )
+                    except:
+                        return {"SCC":False,"err":"Check lat and long values"}
+                    originalLocation = [lat, long_]
                     distance = math.dist(originalLocation, listingLocation) * 111
                     c["distance"] = distance
                     distanced = True

@@ -1632,8 +1632,8 @@ class Booking():
         except:
             user["orders"] = []
         user["orders"].append(orderData)
-        print(user["orders"])
-        print(user["_id"])
+        print(user["orders"],flush=True)
+        print(user["_id"],flush=True)
         users.update_one({"_id":user["_id"]},{"$set":{"orders":user["orders"]}})
 
         try:

@@ -1625,13 +1625,14 @@ class Booking():
         }
         d1 = request.form.get("from")
         d2 = request.form.get("to")
-        try:
-            orders= user["orders"]
-        except:
-            orders = []
-        orders.append(orderData)
+        
 
-        users.update_one({"_id":UID},{"$set":{"orders":orders}})
+        try:
+            user["orders"]
+        except:
+            user["orders"] = []
+        user["orders"].append(orderData)
+        users.update_one({"_id":user["_id"]},{"$set":user})
 
         try:
             output = Booker.book(listingID,d1,d2,orderData)

@@ -1117,7 +1117,7 @@ class Listings:
                     except:
                         average = 0 
                     priority += average/6
-                    
+
 
                     if priority > 0:
                         l["priority"] = -priority
@@ -1308,14 +1308,16 @@ class Listings:
                         continue 
                 
                 price = c["price"]
-                if price>priceStart and price<priceEnd and type_of_listing in ctype:
-                    output.append(c)
                 if distanced:
                     try:
                         searchPoint = c["distance"]/average 
                     except:
                         searchPoint = c["distance"]/1 
                     c["searchPoint"] = searchPoint
+                
+                if price>priceStart and price<priceEnd and type_of_listing in ctype:
+                    output.append(c)
+                
 
             if distanced:
                 output = sorted(output,key=operator.itemgetter('searchPoint'))

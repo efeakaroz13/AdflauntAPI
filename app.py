@@ -1219,13 +1219,48 @@ class Listings:
         
         from_date = request.args.get("from")
         to_date = request.args.get("to")
+        type_of_listing = request.args.get("type")
+        if type_of_listing == None:
+            type_of_listing = ""
+        if type_of_listing == "1":
+            type_of_listing = "1.5' X 2' Yard Sign"
 
+        if type_of_listing == "2":
+            type_of_listing = "10' Banner"
+
+        if type_of_listing == "3":
+            type_of_listing = "2'x 3' Floor Sign"
+
+        if type_of_listing == "4":
+            type_of_listing = "2'x 3' Poster"
+
+        if type_of_listing == "5":
+            type_of_listing = "20'+ Bill Board"
+
+        if type_of_listing == "6":
+            type_of_listing = "1.5' X 2' Digital Signage"
+
+        daysWantToBook = dates2Arr(from_date,to_date)
         
         output = []
         categoryData = db[category].find({})
         for c in categoryData:
-            print()
-
+            try:
+                cbook = c["Bookings"]
+            except:
+                cbook = []
+            ctype = c["type"]
+            for d in daysWantToBook:
+                if d in cbook:
+                    continue 
+            
+            price = c["price"]
+            if price>priceStart and price<priceEnd and type_of_listing in ctype:
+                output.append(c)
+        
+        return {"SCC":True,"output":output}
+            
+            
 
 class Favorites:
     @app.route("/api/addto/favorites", methods=["POST", "DELETE"])
@@ -1779,7 +1814,33 @@ class Booking():
                         customer=customerID,
                         publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
 
-        
+    @app.route("/api/stripe/attach", methods=["POST"])
+    def attachStripe():
+        email = request.form.get("email")
+        phoneNumber = request.form.get("phoneNumber")
+        password = request.form.get("password")
+        user = login_internal(email,phoneNumber,password)
+
+        if user == False:
+            return {"SCC":False,"err":"Authentication failed"}
+        try:
+            customerID = user["stripeCustomerID"]
+        except:
+
+            customer = stripe.Customer.create()
+            users.update_one({"_id":user["_id"]},{"$set":{"stripeCustomerID":customer["id"]}})
+            customerID = customer["id"]
+        paymentMethod = request.form.get("paymentMethod")
+        if paymentMethod == None:
+            return {"SCC":False,"err":"paymentMethod is not defined"}
+        try:
+            stripe.PaymentMethod.attach(
+            paymentMethod,
+            customer=customerID
+            )
+        except:
+            return {"SCC":False,"err":"paymentMethod is not valid"}
+        return {"SCC":True}
 
     @app.route("/api/booking/addProof/<listingID>/<bookingID>", methods=["POST"])
     def addProof(listingID, bookingID):

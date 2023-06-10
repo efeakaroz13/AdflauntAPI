@@ -1625,18 +1625,17 @@ class Booking():
 
         }
         print(json.dumps(userMan,indent=4),flush=True)
-        print(json.dumps(user,indent=4),flush=True)
+        print(json.dumps(orderData,indent=4),flush=True)
         d1 = request.form.get("from")
         d2 = request.form.get("to")
         
 
         try:
-            user["orders"]
+            orders = user["orders"]
         except:
-            user["orders"] = []
-        user["orders"].append(orderData)
-        print(json.dumps(user,indent=4),flush=True)
-        users.update_one({"_id":user["_id"]},{"$set":{"orders":user["orders"]}})
+            orders = []
+        orders.append(orderData)
+        users.update_one({"_id":user["_id"]},{"$set":{"orders":orderData}})
 
         try:
             output = Booker.book(listingID,d1,d2,orderData)

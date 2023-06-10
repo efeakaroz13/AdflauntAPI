@@ -1277,7 +1277,7 @@ class Listings:
                     c = listings.find({"_id":c["_id"]})[0]
                 except:
                     continue
-                
+
                 lat_listing = c["lat"]
                 long_listing = c["long"]
 
@@ -1318,8 +1318,9 @@ class Listings:
                     cbook = []
                 ctype = c["type"]
                 for d in daysWantToBook:
-                    if d in cbook:
-                        continue 
+                    for cb in cbook:
+                        if d==cb:
+                            continue 
                 
                 price = c["price"]
                 if distanced:

@@ -107,18 +107,19 @@ def getBookingData(bookingID):
     bookings = db["Bookings"]
     allBookings = bookings.find({})
     for b in allBookings:
+        listingData = listings.find({"_id":b["_id"]})[0]
         activeOrders = b["activeOrders"]
         waitingForApproval = b["waitingForApproval"]
         doneOrders= b["doneOrders"]
         for a in activeOrders:
             if a["bookingID"] == bookingID:
-                return {"status":"Active","data":a}
+                return {"status":"Active","data":a,"listingData":listingData}
         for w in waitingForApproval:
             if w["bookingID"] == bookingID:
-                return {"status":"Waiting for Administrator Approval","data":w}
+                return {"status":"Waiting for Administrator Approval","data":w,"listingData":listingData}
         for d in doneOrders:
             if d["bookingID"] == bookingID:
-                return {"status":"Completed","data":d}
+                return {"status":"Completed","data":d,"listingData":listingData}
     return {"status":"Not found","data":{}}
 
 def dates2Arr(d1,d2):

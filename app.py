@@ -1022,7 +1022,9 @@ class Listings:
         }
         db["Listings"].insert_one(data)
         for t in tags:
-            db[t].insert_one(data)
+            t = t.strip()
+            if t!= "":
+                db[t].insert_one(data)
         db[typeOfAd].insert_one(data)
 
         data["SCC"] = True

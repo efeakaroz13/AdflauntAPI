@@ -103,6 +103,9 @@ def getListingsOfUser(userID):
     for r in results:
         output.append(r)
     return output
+
+
+
 def getBookingData(bookingID):
     bookings = db["Bookings"]
     allBookings = bookings.find({})
@@ -1360,7 +1363,16 @@ class Listings:
             
             return {"SCC":True,"output":output}
             
-            
+    @app.route("/api/get/ListingsOfUser",methods=["POST"])
+    def APIGETLISTINGSOFUSER ():
+        email = request.form.get("email")
+        password = request.form.get("password")
+        phoneNumber = request.form.get("phoneNumber")
+        user = login_internal(email,phoneNumber,password)
+        if user == False:
+            return {"SCC":False,"err":"Auth false"}
+        output =  getListingsOfUser(user["_id"])  
+        return {"SCC":True,"output":output}   
 
 class Favorites:
     @app.route("/api/addto/favorites", methods=["POST", "DELETE"])

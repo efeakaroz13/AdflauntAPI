@@ -1047,7 +1047,7 @@ class Listings:
             storeData= data 
             del data["_id"]
             oldTags = oldListingData["tags"]
-            oldTypeOfAd = oldListingData["typeOfAd"]
+            oldTypeOfAd = oldListingData["typeOfAdd"]
 
             db["Listings"].update_one({"_id":listingID},{"$set":data})
             for t in oldTags:
@@ -1059,7 +1059,7 @@ class Listings:
                     db[t].insert_one(storeData)
                 else:
                     db[t].update_one({"_id":listingID},data)
-                    
+
 
             if typeOfAd != oldTypeOfAd:
                 db[oldTypeOfAd].delete_one({"_id":listingID})

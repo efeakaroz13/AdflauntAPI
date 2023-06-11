@@ -1045,9 +1045,10 @@ class Listings:
             return data
         if request.method == "PUT":
             storeData= data 
-            del data["_id"]
+            
             oldTags = oldListingData["tags"]
             oldTypeOfAd = oldListingData["typeOfAdd"]
+            del data["_id"]
 
             db["Listings"].update_one({"_id":listingID},{"$set":data})
             for t in oldTags:
@@ -1056,13 +1057,16 @@ class Listings:
                     db[t].delete_one({"_id":listingID})
             for t in tags:
                 if t not in oldTags:
-                    db[t].insert_one(storeData)
+                    data["_id"] = listingID
+                    db[t].insert_one(data )
+                    del data["_id"]
                 else:
-                    db[t].update_one({"_id":listingID},data)
+                    db[t].update_one({"_id":listingID},{"$set":data})
 
 
             if typeOfAd != oldTypeOfAd:
                 db[oldTypeOfAd].delete_one({"_id":listingID})
+                data["_id"] = listingID
                 db[typeOfAd].insert_one(storeData)
             else:
                 db[typeOfAd].update_one({"_id":listingID},{"$set":data})
@@ -1071,7 +1075,7 @@ class Listings:
 
             data["SCC"] = True 
 
-            return storeData
+            return data
         
 
 

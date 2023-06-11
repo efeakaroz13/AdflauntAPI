@@ -514,7 +514,7 @@ class Auth:
             output = a
             users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time()}})
 
-        output["SCC"] = True
+            output["SCC"] = True
 
         return output
 

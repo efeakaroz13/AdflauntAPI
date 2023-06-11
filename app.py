@@ -1044,6 +1044,7 @@ class Listings:
 
             return data
         if request.method == "PUT":
+            del data["_id"]
             oldTags = oldListingData["tags"]
             db["Listings"].update_one({"_id":listingID},{"$set":data})
             for t in oldTags:

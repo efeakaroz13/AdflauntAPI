@@ -1071,7 +1071,7 @@ class Listings:
 
             data["SCC"] = True 
 
-            return data
+            return storeData
         
 
 

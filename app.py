@@ -843,7 +843,7 @@ class IDVerification:
 
 
 class Listings:
-    @app.route("/api/create/listing", methods=["POST"])
+    @app.route("/api/create/listing", methods=["POST","PUT"])
     def createlisting():
         email = request.form.get("email")
         password = request.form.get("password")
@@ -864,6 +864,14 @@ class Listings:
             return {"SCC": False, "err": "Could not authenticate"}
         if user['idVerified'] == False:
             return {"SCC": False, "err": "ID NOT VERIFIED."}
+        if request.method == "PUT":
+            listingID = request.form.get("listingID")
+            if listingID == None:
+                return {"SCC":False,"err":"listingID is required for editing"}
+            try:
+                oldListingData= listings.find({"_id":listingID})[0]
+            except:
+                return {"SCC":False,"err":"Listing does not exist"}
 
         typeOfAd = request.form.get("typeOfAd")  # Number 0-1-2
         """
@@ -1024,16 +1032,29 @@ class Listings:
             "state": state,
             "country": country
         }
-        db["Listings"].insert_one(data)
-        for t in tags:
-            t = t.strip()
-            if t!= "":
-                db[t].insert_one(data)
-        db[typeOfAd].insert_one(data)
+        if request.method == "POST":
+            db["Listings"].insert_one(data)
+            for t in tags:
+                t = t.strip()
+                if t!= "":
+                    db[t].insert_one(data)
+            db[typeOfAd].insert_one(data)
 
-        data["SCC"] = True
+            data["SCC"] = True
 
-        return data
+            return data
+        if request.method == "PUT":
+            oldTags = oldListingData["tags"]
+            db["Listings"].update_one({"_id":listingID},{"$set":data})
+            for t in oldTags:
+                if t in tags:
+                    db[t].update_one({"_id":listingID},{"$set":data})
+                else:
+                    db[t].delete_one({"_id":listingID})
+            data["SCC"] = True 
+            return data
+        
+
 
     @app.route("/api/get/listings", methods=["GET"])
     def get_listings():

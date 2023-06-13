@@ -77,7 +77,9 @@ class Mail:
     def send(emails, subject, content):
         
         headers = {
-            "api-key":"",
+
+            "api-key":brevoSecret,
+
             "accept":"application/json",
             "content-type":"application/json"
         }

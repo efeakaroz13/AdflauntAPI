@@ -26,6 +26,11 @@ import cv2
 from stripe_auth import stripeSecret
 import stripe
 import geopy.distance
+#import sib_api_v3_sdk
+#from sib_api_v3_sdk.rest import ApiException
+import smtplib
+
+
 
 
 stripe.api_key = "sk_test_51LkdT2BwxpdnO2PUh2too5t3AfGBGZqkDltuL0GuHIAClpHTVa9IiYN8bKdW7P3eSrKZbWjor9xtp2InwnuZgr8X00sXVNT3ql"
@@ -61,8 +66,36 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
 sids = []
 
 maploader = open("loader.txt", "r").read()
+class Mail:
 
+    def __init__(self):
+        self.port = 587
+        self.smtp_server_domain_name = "smtp-relay.sendinblue.com"
+        self.sender_mail = "Flauntad@gmail.com"
+        self.password = "fEMV21a9yP3n7vZN"
 
+    def send(emails, subject, content):
+        
+        headers = {
+            "api-key":"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",
+            "accept":"application/json",
+            "content-type":"application/json"
+        }
+        data={
+           "sender":{
+              "name":"Adflaunt",
+              "email":"Flauntad@gmail.com"
+           },
+           "to":[],
+           "subject":f"{subject}",
+           "htmlContent":content
+        }
+        for e in emails:
+            data["to"].append({"email":e,"name":"Kentel Technologies"})
+        page = requests.post("https://api.brevo.com/v3/smtp/email",json=data,headers=headers)
+
+        output = json.loads(page.content)
+        return output
 def sendmail(email, title, content):
     return True
 
@@ -515,11 +548,20 @@ class Auth:
             "SCC": False,
             "err": "Credentials are not correct."
         }
+        notificationID = request.form.get("notificationID")
+
         for a in allResults:
             output = a
-            users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time()}})
+            if notificationID == None:
+                users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time()}}) 
+            else:
+                users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time(),"notificationID":notificationID}})
+            
 
             output["SCC"] = True
+
+
+
 
         return output
 
@@ -558,7 +600,7 @@ class Auth:
             return a
         return {"SCC": False, "err": "User not found"}, 404
 
-
+    
 class Upload:
     @app.route("/api/upload", methods=["POST"])
     def uploadIt():
@@ -724,6 +766,25 @@ class Verification:
             print(e)
             return {"SCC": False, "err": str(e)}
         return {"SCC": True, "m.body": message.body}
+
+    @app.route("/api/verify/email")
+    def email_verification():
+        email = request.args.get("email")
+        if email == None:
+            return {"SCC":False,"err":"email is required to use this endpoint"}
+        try:
+            email.split("@")[1]
+        except:
+            return {"SCC":False,"err":"Email malformatted"}
+        emails = [email]
+        verificationCode = random.randint(10000,100000)
+        Mail.send(emails,"Verify Your Email - Adflaunt",f"""Your verification code is:{verificationCode}""")
+        return {"SCC":True,"verificationCode":verificationCode}
+
+
+
+
+
 
 
 class ReportingSystem:

@@ -22,8 +22,8 @@ if(currentURL.includes("admin/map")){
 		var value = data[key].length;
 		valueData.push(value);
 	})
-	console.log(valueData)
-	max = Math.max(valueData);
+
+	max = Math.max.apply(Math, valueData);;
 	for (i=0;i<valueData.length;i++) {
 		var current = valueData[i];
 		red = (current/max)*255;

@@ -50,6 +50,17 @@
 
 
     </code>
+    <h2>Email And SMS verification</h2>
+    <code>
+
+        /api/verify/email?email=user_email *GET <br>
+        This endpoint is currently working with an email limit, don't send too much requests.<br>
+        /api/verify/sms?phoneNumber=phone_number_user <br>
+        NOTE: This Endpoint is currently broken.
+
+
+    </code>
+    <br><br>
     <h1>Profile and Credential Updating</h1>
     <h2>Profile update(you can't update phonenumber email or password)</h2>
     <p>In this section '/api/updateprofile' you will send POST requests to this endpoint. You are able to use the same things in register, it will automatically understand the data you sent. IPDATA is not required but you are still able to send.</p>

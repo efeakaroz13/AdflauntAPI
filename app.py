@@ -23,7 +23,7 @@ import datetime
 from kbook import Booker
 from datetime import date, timedelta
 import cv2
-from stripe_auth import stripeSecret
+from stripe_auth import stripeSecret,brevoSecret
 import stripe
 import geopy.distance
 #import sib_api_v3_sdk
@@ -77,7 +77,7 @@ class Mail:
     def send(emails, subject, content):
         
         headers = {
-            "api-key":"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",
+            "api-key":brevoSecret,
             "accept":"application/json",
             "content-type":"application/json"
         }

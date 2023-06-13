@@ -393,6 +393,7 @@ class Messaging:
 
             users.update_one({"_id": user["_id"]}, {"$set": {"inbox": inbox}})
             output = sorted(output, key=operator.itemgetter('lastMessageTime'))
+            output.reverse()
             return {"SCC": True, "output": output}
         except Exception as e:
             return {"SCC": True, "output": [], "reason": "no chat.", "e": str(e)}

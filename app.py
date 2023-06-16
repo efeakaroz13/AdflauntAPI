@@ -2277,7 +2277,7 @@ class Booking:
         
         bookingData["page"] = "bookingPage"
 
-        send_notification(user["_id"],bookingData,f"user['fullName']} accepted your order","Click for more details")
+        send_notification(user["_id"],bookingData,f"{user['fullName']} accepted your order","Click for more details")
         del bookingData["page"]
         return {"SCC":True,"bookingData":bookingData}
 

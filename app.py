@@ -2253,7 +2253,7 @@ class Booking:
         if bookingData["status"] == "Not found":
             return {"SCC":False,"err":"Could not find booking"},404
         if bookingData["status"] != "waitingForApproval":
-            return {"SCC":False,"err":"This listing is not waiting for approval"},401
+            return {"SCC":False,"err":"This listing is not waiting for approval","data":bookingData},401
 
         listingData = bookingData["listingData"]
         if user["_id"] != listingData["user"]:

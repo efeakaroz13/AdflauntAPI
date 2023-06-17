@@ -2267,6 +2267,7 @@ class Booking:
         allActive = allBookingData["activeOrders"]
         waindex = False
         for w in allWaitingForApproval:
+            print(w,flush=True)
             if w["bookingID"] == bookingID:
                 waindex = allWaitingForApproval.index(w)
                 bookingData = w

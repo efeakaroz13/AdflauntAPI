@@ -2452,7 +2452,7 @@ class OrdersAndSellerBalance:
         bookings = db["Bookings"]
         for l in usersListings:
             try:
-                bookingData = bookings.find({"_id":l})[0]
+                bookingData = bookings.find({"_id":l["_id"]})[0]
             except:
                 continue 
             activeOrders = bookingData["activeOrders"]
@@ -2463,7 +2463,7 @@ class OrdersAndSellerBalance:
             for w in waitingForApproval:
                 w["status"] = "waitingForApproval"
                 asHost.append(w)
-            
+
 
         
         returnData = {

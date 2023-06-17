@@ -1472,8 +1472,7 @@ class Listings:
                 except:
                     cbook = []
                 ctype = c["type"]
-                print(daysWantToBook,flush=True)
-                print(cbook,flush=True)
+                
                 gonnacontinue = False
                 for d in daysWantToBook:
                     if d in cbook:
@@ -2266,12 +2265,14 @@ class Booking:
         allWaitingForApproval = allBookingData["waitingForApproval"]
         allActive = allBookingData["activeOrders"]
         waindex = False
+        counter = 0
         for w in allWaitingForApproval:
             print(w,flush=True)
             if w["bookingID"] == bookingID:
-                waindex = allWaitingForApproval.index(w)
+                waindex = counter
                 bookingData = w
                 break
+            counter += 1
         if waindex == False:
             return {"SCC":False,"err":"There is an error with our side"},500
         allWaitingForApproval.pop(waindex)

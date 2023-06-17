@@ -2267,8 +2267,8 @@ class Booking:
         waindex = False
         counter = 0
         for w in allWaitingForApproval:
-            print(w,flush=True)
-            if w["bookingID"] == bookingID:
+            print(w["bookingID"],bookingData["data"]["bookingID"],flush=True)
+            if w["bookingID"] == bookingData["data"]["bookingID"]:
                 waindex = counter
                 bookingData = w
                 break

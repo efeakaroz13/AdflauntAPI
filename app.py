@@ -169,13 +169,13 @@ def getBookingData(bookingID):
         doneOrders= b["doneOrders"]
         for a in activeOrders:
             if a["bookingID"] == bookingID:
-                return {"status":"Active","data":a,"listingData":listingData}
+                return {"status":"active","data":a,"listingData":listingData}
         for w in waitingForApproval:
             if w["bookingID"] == bookingID:
-                return {"status":"Waiting for Administrator Approval","data":w,"listingData":listingData}
+                return {"status":"waitingForApproval","data":w,"listingData":listingData}
         for d in doneOrders:
             if d["bookingID"] == bookingID:
-                return {"status":"Completed","data":d,"listingData":listingData}
+                return {"status":"completed","data":d,"listingData":listingData}
     return {"status":"Not found","data":{}}
 
 def dates2Arr(d1,d2):

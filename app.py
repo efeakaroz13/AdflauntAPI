@@ -2438,19 +2438,33 @@ class OrdersAndSellerBalance:
 
         asHost = []
         asCustomer = []
-
         try:
-            orders = user["orders"]
-        except:
-            orders = []
+            profileOrders = user["orders"]
+            for p in profileOrders:
+                if p["customer"] == user["_id"]:
+                    p = getBookingData(p["bookingID"])
+                    asCustomer.append(p)
 
-        for o in orders:
-            if o["customer"] == user["_id"]:
-                o = getBookingData(o["bookingID"])
-                asCustomer.append(o)
-            else:
-                o = getBookingData(o["bookingID"])
-                asHost.append(o)
+
+        except:
+            pass
+        usersListings = getListingsOfUser(user["_id"])
+        bookings = db["Bookings"]
+        for l in usersListings:
+            try:
+                bookingData = bookings.find({"_id":l})[0]
+            except:
+                continue 
+            activeOrders = bookingData["activeOrders"]
+            waitingForApproval = bookingData["waitingForApproval"]
+            for a in activeOrders:
+                a["status"] = "active"
+                asHost.append(a)
+            for w in waitingForApproval:
+                w["status"] = "waitingForApproval"
+                asHost.append(w)
+            
+
         
         returnData = {
             "userData":user,

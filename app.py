@@ -579,10 +579,15 @@ class Auth:
             
 
             output["SCC"] = True
-
-        del output["orders"]
-        del output["inbox"]
-
+        try:
+            del output["orders"]
+        except:
+            pass
+        try:
+            del output["inbox"]
+        except:
+            pass
+            
 
 
         return output

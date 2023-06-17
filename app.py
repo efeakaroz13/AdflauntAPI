@@ -2264,7 +2264,7 @@ class Booking:
             return {"SCC":False,"err":"database corrupted"},500
         allWaitingForApproval = allBookingData["waitingForApproval"]
         allActive = allBookingData["activeOrders"]
-        waindex = False
+        waindex = -1
         counter = 0
         for w in allWaitingForApproval:
             
@@ -2274,7 +2274,7 @@ class Booking:
                 bookingData = w
                 break
             counter += 1
-        if waindex == False:
+        if waindex == -1:
             return {"SCC":False,"err":"There is an error with our side"},500
         allWaitingForApproval.pop(waindex)
         allActive.append(bookingData)

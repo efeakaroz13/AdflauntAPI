@@ -583,11 +583,13 @@ class Auth:
             del output["orders"]
         except:
             pass
+
+
         try:
             del output["inbox"]
         except:
             pass
-            
+
 
 
         return output
@@ -2282,8 +2284,15 @@ class Booking:
         
         bookingData["page"] = "bookingPage"
 
-        send_notification(user["_id"],bookingData,f"{user['fullName']} accepted your order","Click for more details")
+        send_notification(bookingData["customer"],bookingData,f"{user['fullName']} accepted your order","Click for more details")
+
         del bookingData["page"]
+        try:
+            hostOrders = user["orders"]
+        except:
+            hostOrders = []
+        hostOrders.append(bookingData)
+        users.update_one({"_id":user["_id"]},{"$set":{"orders":hostOrders}})
         return {"SCC":True,"bookingData":bookingData}
 
 

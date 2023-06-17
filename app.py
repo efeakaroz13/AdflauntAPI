@@ -2269,7 +2269,7 @@ class Booking:
         for w in allWaitingForApproval:
             
             if w["bookingID"] == bookingData["data"]["bookingID"]:
-                print(counter)
+                print(counter,flush=True)
                 waindex = counter
                 bookingData = w
                 break

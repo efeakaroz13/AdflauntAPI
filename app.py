@@ -1856,12 +1856,16 @@ class Booking:
         UID = user["_id"]
         if user == False:
             return {"SCC": False, "err": "Authentication failed"}, 401
+        paymentID = request.form.get("paymentID")
+        if paymentID == None:
+            return {"SCC":False,"err":"payment id is required"},401
+        
 
         listingID = request.form.get("listingID")
         try:
             listingData = listings.find({"_id": listingID})[0]
         except:
-            return {"SCC": False, "err": "Could not find listing."}
+            return {"SCC": False, "err": "Could not find listing."},404
 
         pricePerDay = listingData["price"]
 
@@ -1872,18 +1876,18 @@ class Booking:
         d2 = request.form.get("to")
         if d1 == None or d2 == None:
             return {"SCC": False,
-                    "err": "'from' and 'to' are not definded, for booking you need to enter those correctly"}
+                    "err": "'from' and 'to' are not definded, for booking you need to enter those correctly"},401
         d1 = d1.split("-")
         d1y = int(d1[0])
         try:
             d1m = int(d1[1])
         except:
-            return {"SCC": False, "err": "Date format is invalid"}
+            return {"SCC": False, "err": "Date format is invalid"},401
 
         try:
             d1d = int(d1[2])
         except:
-            return {"SCC": False, "err": "Date format is invalid"}
+            return {"SCC": False, "err": "Date format is invalid"},401
         d1 = date(d1y, d1m, d1d)
 
         d2 = d2.split("-")
@@ -1891,11 +1895,11 @@ class Booking:
         try:
             d2m = int(d2[1])
         except:
-            return {"SCC": False, "err": "Date format is invalid"}
+            return {"SCC": False, "err": "Date format is invalid"},401
         try:
             d2d = int(d2[2])
         except:
-            return {"SCC": False, "err": "Date format is invalid"}
+            return {"SCC": False, "err": "Date format is invalid"},401
         d2 = date(d2y, d2m, d2d)
         d = d2 - d1
         daysWantToBook = []
@@ -2059,12 +2063,16 @@ class Booking:
                     'enabled': True,
                 },
             )
+
         logger_payment = open("payments.log", "a")
         logger_payment.write(f"{time.time()} - {price} - USD\n")
         logger_payment.close()
+        paymentID = paymentIntent["id"]
+
         return jsonify(paymentIntent=paymentIntent.client_secret,
                         ephemeralKey=ephemeralKey.secret,
                         customer=customerID,
+                        paymentID=paymentID
                         publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
 
         

@@ -2389,6 +2389,14 @@ class Booking:
 
         users.update_one({"_id":customer},{"$set":{"orders":ordersCustomer}})
 
+        BookingPaymentID = bookingData["paymentID"]
+        bookingPrice = bookingData["price"]
+        refundData = stripe.Refund.create(
+          payment_intent=BookingPaymentID,
+        )
+
+
+
         customerEmail = users.find({"_id":bookingData["customer"]})[0]["email"]
         msgTitle = "Your booking request is declined by the host"
         msgBody = f"{user['fullName']} declined your booking request for {listingData['title']}. You can try talk with them on chat."

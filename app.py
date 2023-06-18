@@ -1731,11 +1731,11 @@ class Admin:
         approvalData = {}
         listingData = {}
 
-        for a in allBookins:
+        for a in allBookings:
             clisting = listings.find({"_id":a["_id"]})
             for c in clisting:
                 listingData[c["_id"]] = c
-            
+
 
             activeOrders = a["activeOrders"]
             try:

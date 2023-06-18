@@ -1859,7 +1859,7 @@ class Booking:
         paymentID = request.form.get("paymentID")
         if paymentID == None:
             return {"SCC":False,"err":"payment id is required"},401
-        
+
 
         listingID = request.form.get("listingID")
         try:
@@ -1921,7 +1921,8 @@ class Booking:
             "printingFile": printingFile,
             "bookingID": IDCREATOR_internal(30),
             "customer": user["_id"],
-            "timeStamp": time.time()
+            "timeStamp": time.time(),
+            "paymentID":paymentID
 
         }
 

@@ -1729,13 +1729,30 @@ class Admin:
         bookings = db["Bookings"]
         allBookings = bookings.find({})
         approvalData = {}
-        for b in allBookings:
-            if len(b["waitingForApproval"]) > 0:
-                approvalData[b["_id"]] = b["waitingForApproval"]
-
         listingData = {}
-        for ad in list(approvalData.keys()):
-            listingData[ad] = listings.find_one({"_id": ad})
+
+        for a in allBookins:
+            clisting = listings.find({"_id":a["_id"]})
+            for c in clisting:
+                listingData[c["_id"]] = c
+            
+
+            activeOrders = a["activeOrders"]
+            try:
+                approvalData[a["_id"]]
+            except:
+                approvalData[a["_id"]] = []
+            for ao in activeOrders:
+                ao["status"] = "active"
+                approvalData[a["_id"]].append(ao)
+
+            waitingForApproval = a["waitingForApproval"]
+            
+            for wa in waitingForApproval:
+                wa["status"] = "waitingForApproval"
+                approvalData[a["_id"]].append(wa)
+
+
 
         return render_template("orderApprovalAdmin.html",
                                approvalData=approvalData,

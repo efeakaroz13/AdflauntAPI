@@ -2073,7 +2073,7 @@ class Booking:
         return jsonify(paymentIntent=paymentIntent.client_secret,
                         ephemeralKey=ephemeralKey.secret,
                         customer=customerID,
-                        paymentID=paymentID
+                        paymentID=paymentID,
                         publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
 
         

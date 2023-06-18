@@ -10,6 +10,12 @@
 	 		<div class="card-body">
 	 			<h5 class="card-title">Request for "{{listingData[a]["title"]}}"</h5>
 	 			<p class="card-text" style="text-align:left">
+	 				{% if b["status"] == "active"%}
+	 				<strong>Status</strong>:<p style="color:green">Active</p>
+	 				{% endif %}
+	 				{% if b["status"] == "waitingForApproval"%}
+	 				<strong>Status</strong>:<p style="color:gray">Waiting for approval</p>
+	 				{% endif %}
 	 				<strong>Price(per day)</strong>:{{b["pricePerDay"]}}<br>
 	 				<strong>Price(total)</strong>:{{b["price"]}}<br>
 	 				<strong>Total price cut(Adflaunt)</strong>:{{printFee+calcPercentage(b["price"],10)}}<br>

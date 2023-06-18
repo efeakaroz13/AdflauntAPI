@@ -1858,7 +1858,7 @@ class Booking:
             return {"SCC": False, "err": "Authentication failed"}, 401
         paymentID = request.form.get("paymentID")
         if paymentID == None:
-            return {"SCC":False,"err":"payment id is required"},401
+            return {"SCC":False,"err":"paymentID is required"},401
 
 
         listingID = request.form.get("listingID")

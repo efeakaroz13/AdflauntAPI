@@ -249,8 +249,22 @@ def joinChat(data):
         chat["messages"] = chat["messages"][:30]
 
     sid = IDCREATOR_internal(20)
+    chatMembers = chat["members"]
+    opposition = ""
+    for c in chatMembers:
+        if c["user"] != user["_id"]:
+            opposition = c["user"]
+            break 
+    if opposition == "":
+        oppositionData = {}
+    else:
+        try:
+            oppositionData = users.find({"_id":opposition})[0]
+        except:
+            oppositionData = {}
 
-    sessionData = {"SCC": True, "SID": sid, "chat": chat, "chatID": chatID, "user": user}
+
+    sessionData = {"SCC": True, "SID": sid, "chat": chat, "chatID": chatID, "user": user,"opposition":oppositionData}
     sids.append(sessionData)
 
     return sessionData

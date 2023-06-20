@@ -216,6 +216,16 @@ def dates2Arr(d1,d2):
         daysWantToBook.append(day)
     return daysWantToBook
 
+def returnWidthLength(data):
+    try:
+        width  = data["width"]
+    except:
+        width = 0
+    try:
+        height = data["length"]
+    except:
+        height = 0
+    return {"width":width,"height":height}
 
 
 
@@ -1569,6 +1579,9 @@ class Listings:
         output =  getListingsOfUser(user["_id"])  
         return {"SCC":True,"output":output}   
 
+    @app.route("/api/listings/<userID>")
+    def getListingsOfUserApp(userID):
+        return {"SCC":True,"output":getListingsOfUser(userID)}
 class Favorites:
     @app.route("/api/addto/favorites", methods=["POST", "DELETE"])
     def addFavorites():
@@ -1816,7 +1829,8 @@ class Admin:
                                listingData=listingData,
                                printFee=printFee,
                                commisionRate=commisionRate,
-                               calcPercentage=calcPercentage
+                               calcPercentage=calcPercentage,
+                               returnWidthLength=returnWidthLength
                                )
 
     @app.route("/admin/api/acceptBooking/<listingID>/<ListIndex>")

@@ -1414,6 +1414,9 @@ class Listings:
     def getListingsByCategory():
         sessionName =request.args.get("session")
         page= request.args.get("page")
+        query = request.args.get("q")
+        if query == None:
+            query = ""
         if sessionName == None:
             category = request.args.get("category")
             if category == None:
@@ -1437,22 +1440,22 @@ class Listings:
             if type_of_listing == None:
                 type_of_listing = ""
             if type_of_listing == "1":
-                type_of_listing = "1.5' X 2' Yard Sign"
+                type_of_listing = "Yard Sign"
 
             if type_of_listing == "2":
-                type_of_listing = "10' Banner"
+                type_of_listing = "Banner"
 
             if type_of_listing == "3":
-                type_of_listing = "2'x 3' Floor Sign"
+                type_of_listing = "Floor Sign"
 
             if type_of_listing == "4":
-                type_of_listing = "2'x 3' Poster"
+                type_of_listing = "Poster"
 
             if type_of_listing == "5":
-                type_of_listing = "20'+ Bill Board"
+                type_of_listing = "Bill Board"
 
             if type_of_listing == "6":
-                type_of_listing = "1.5' X 2' Digital Signage"
+                type_of_listing = "Digital Signage"
 
             daysWantToBook = dates2Arr(from_date,to_date)
             
@@ -1523,17 +1526,37 @@ class Listings:
                     except:
                         searchPoint = c["distance"]/1 
                     c["searchPoint"] = searchPoint
-                
-                if price>priceStart and price<priceEnd and type_of_listing in ctype:
-                    output.append(c)
-                
+                tags = c["tags"]
+                tagsString = ""
+                for t in tags:
+                    tagsString += " "+t
+
+                titleString = c["title"]
+                descriptionString = c["description"]
+                if query in titleString or query in tagsString or query in description:
+
+                    if price>priceStart and price<priceEnd and type_of_listing in ctype:
+                        output.append(c)
+                else:
+                    pass
 
             if distanced:
                 output = sorted(output,key=operator.itemgetter('searchPoint'))
             else:
                 output = sorted(output,key=operator.itemgetter('averageRating'))
-            
-            return {"SCC":True,"output":output}
+            sid = IDCREATOR_internal(20)
+            r.mset({sid:json.dumps(output)})
+            return {"SCC":True,"output":output[:10],"sid":sid}
+        else:
+            if page == None:
+                page = 1
+            try:
+                output = json.loads(r.get(sessionName))
+            except:
+                return {"SCC":False,"err":"Check session you entered"}
+            output = output[:page*10][10*(page-1):]
+            return {"SCC":True,"output":output,"sid":sessionName}
+
             
     @app.route("/api/get/ListingsOfUser",methods=["POST"])
     def APIGETLISTINGSOFUSER ():

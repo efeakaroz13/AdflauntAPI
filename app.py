@@ -996,9 +996,10 @@ class Listings:
         price = request.form.get("price")  # number integer
         location = request.form.get("location")
         revision_limit = request.form.get("revision_limit")  # number integer
-        digital = request.form.get("digital")  # Boolean - 1 for true, 0 for false
-        sqfeet = request.form.get("sqfeet")  # number integer
-        square_footage = request.form.get("square_footage")  # number,int
+
+        width = request.form.get("width")#Float number
+        length = request.form.get("length")# float number
+
         type_of_listing = request.form.get("type")  # number - between 1-6
         check_in = request.form.get("check_in")  # Date
         check_out = request.form.get("check_out")  # Date
@@ -1026,7 +1027,7 @@ class Listings:
         country = request.form.get("country")
         state = request.form.get("state")
 
-        if typeOfAd == None or images == None or lat == None or long == None or title == None or price == None or revision_limit == None or digital == None or sqfeet == None or location == None or square_footage == None or type_of_listing == None or check_in == None or check_out == None or population == None or discountAvailable == None or description == None or extras == None or requirements == None:
+        if typeOfAd == None or width==None or length==None or images == None or lat == None or long == None or title == None or price == None or revision_limit == None or location == None or type_of_listing == None or check_in == None or check_out == None or population == None or discountAvailable == None or description == None or extras == None or requirements == None:
             return {"SCC": False, "err": "some parameters are required"}
 
         lat = float(lat)
@@ -1073,22 +1074,22 @@ class Listings:
             digital = True
 
         if type_of_listing == "1":
-            type_of_listing = "1.5' X 2' Yard Sign"
+            type_of_listing = "Yard Sign"
 
         if type_of_listing == "2":
-            type_of_listing = "10' Banner"
+            type_of_listing = "Banner"
 
         if type_of_listing == "3":
-            type_of_listing = "2'x 3' Floor Sign"
+            type_of_listing = "Floor Sign"
 
         if type_of_listing == "4":
-            type_of_listing = "2'x 3' Poster"
+            type_of_listing = "Poster"
 
         if type_of_listing == "5":
-            type_of_listing = "20'+ Bill Board"
+            type_of_listing = "Bill Board"
 
         if type_of_listing == "6":
-            type_of_listing = "1.5' X 2' Digital Signage"
+            type_of_listing = "Digital Signage"
 
         if discountAvailable == "1":
             discountAvailable = "Yes"
@@ -1110,6 +1111,22 @@ class Listings:
         else:
             return {"SCC": False, "err": "typeOfAd Should be one of those: 0,1,2"}
 
+
+        try:
+            width = float(width)
+
+        except:
+            return {"SCC":False,"err":"width should be a float"}
+        try:
+            height = float(height)
+
+        except:
+            return {"SCC":False,"err":"height should be a float"}
+
+        inchFootage = width*height 
+        sqfeet = inchFootage*0.006944444
+
+
         data = {
             "title": title,
             "price": price,
@@ -1119,8 +1136,6 @@ class Listings:
             "location": location,
             "revision_limit": revision_limit,
             "digital": digital,
-            "sqfeet": sqfeet,
-            "square_footage": square_footage,
             "type": type_of_listing,
             "check_in": check_in,
             "check_out": check_out,
@@ -1139,7 +1154,12 @@ class Listings:
             "typeOfAdd": typeOfAd,
             "city": city,
             "state": state,
-            "country": country
+            "country": country,
+            "width":width,
+            "height":height,
+            "sqfeet":sqfeet,
+            "sqfootage":sqfeet,
+            "inchFootage":inchFootage
         }
         if request.method == "POST":
             db["Listings"].insert_one(data)

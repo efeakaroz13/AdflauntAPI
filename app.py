@@ -593,13 +593,28 @@ class Auth:
             "err": "Credentials are not correct."
         }
         notificationID = request.form.get("notificationID")
+        latOfUser = request.form.get("lat")
+        longOfUser = request.form.get("long")
+        
+        if latOfUser != None:
+            latOfUser = float(latOfUser)
+        if longOfUser != None:
+            longOfUser = float(longOfUser)
+
 
         for a in allResults:
             output = a
             if notificationID == None:
-                users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time()}}) 
+                if latOfUser != None and longOfUser != None:
+                    users.update_one({'_id': output["_id"]}, {"$set": {"lat": latOfUser,"long":longOfUser,"lastTimeLoggedIn": time.time()}})
+                else:
+                    users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time()}}) 
             else:
-                users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time(),"notificationID":notificationID}})
+                if latOfUser != None and longOfUser != None:
+
+                    users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time(),"notificationID":notificationID,"lat": latOfUser,"long":longOfUser}})
+                else:
+                    users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time(),"notificationID":notificationID}})
             
 
             output["SCC"] = True
@@ -613,6 +628,7 @@ class Auth:
             del output["inbox"]
         except:
             pass
+
 
 
 

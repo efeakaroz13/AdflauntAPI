@@ -35,6 +35,10 @@ if(currentURL.includes("admin/map")){
 		})
 	})
 }
+if (currentURL.includes("admin/listings")) {
+	data= JSON.parse(document.getElementById("data").innerHTML);
+	console.log(data)
+};
 
 function showHidePassword(){
 	if(passwordState==0){

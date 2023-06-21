@@ -1849,6 +1849,23 @@ class Admin:
                                returnWidthLength=returnWidthLength
                                )
 
+    @app.route("/admin/listings")
+    def adminListings():
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username": username, "password": password})[0]
+        except Exception as e:
+
+            return redirect("/admin/login")
+
+        output = []
+        allListings = listings.find({})
+        for a in allListings:
+            output.append(a)
+
+        return render_template("listingsAdmin.html",listings=output)
+
     @app.route("/admin/api/acceptBooking/<listingID>/<ListIndex>")
     def AcceptBooking(listingID, ListIndex):
         try:

@@ -49,7 +49,7 @@ def doit():
                         if bookingID == a["bookingID"]:
                             current = bookingID
                             cindex=counter
-                            
+
                             break
                         counter += 1
                     if current == None:
@@ -60,7 +60,7 @@ def doit():
                     
                     bookingData["activeOrders"].pop(cindex)
 
-                    bookings.update_one({"_id": listingID}, {"$set": {bookingData}})
+                    bookings.update_one({"_id": listingID}, {"$set": bookingData})
 
                     try:
                         hostProfile = users.find({"_id": listingData["user"]})[0]

@@ -44,17 +44,20 @@ def doit():
                         continue
                     activeOrders = bookingData["activeOrders"]
                     current = None
+                    counter = 0
                     for a in activeOrders:
                         if bookingID == a["bookingID"]:
                             current = bookingID
-
+                            cindex=counter
+                            
                             break
+                        counter += 1
                     if current == None:
                         print({"SCC": False, "err": "Could not find requested booking"})
                         continue
 
                     bookingData["doneOrders"].append(current)
-                    cindex = bookingData["activeOrders"].index(current)
+                    
                     bookingData["activeOrders"].pop(cindex)
 
                     bookings.update_one({"_id": listingID}, {"$set": {bookingData}})

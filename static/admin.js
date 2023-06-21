@@ -57,7 +57,7 @@ if (currentURL.includes("admin/listings")) {
 		document.getElementById("results").innerHTML = ""
 		for (var i = renderData.length - 1; i >= 0; i--) {
 			current= renderData[i];
-			document.getElementById("results").innerHTML=  document.getElementById("results").innerHTML +"<div class='card' >"+"<img class='card-img-top' src='/static/"+current.images[0]+"/s10' >"+"<div class='card-body'>"+"<h5 class='card-title'>"+current.title+"</h5><p class='card-text'>"+"<strong>Location:</strong>"+current.city+","+current.state+" - "+current.country+"<br>"+"<strong>Price:</strong>"+current.price+"<br>"+"<strong>Surface area:</strong>"+current.sqfeet+"<br>"+"</p>"+"</div>"+"</div><br><br>"
+			document.getElementById("results").innerHTML=  document.getElementById("results").innerHTML +"<div class='card' style='width:500px'>"+"<img class='card-img-top' src='/static/"+current.images[0]+"/s10' >"+"<div class='card-body'>"+"<h5 class='card-title'>"+current.title+"</h5><p class='card-text'>"+"<strong>Location:</strong>"+current.city+","+current.state+" - "+current.country+"<br>"+"<strong>Price:</strong>"+current.price+"<br>"+"<strong>Surface area:</strong>"+current.sqfeet+"<br>"+"</p>"+"</div>"+"</div><br><br>"
 
 		};
 

@@ -98,7 +98,7 @@ def doit():
                         listingData["reviews"] = []
 
                     listingData["reviews"].append(reviewdata)
-                    listings.update({"_id": listingID}, {"$set": {"reviews": listingData["reviews"]}})
+                    listings.update_one({"_id": listingID}, {"$set": {"reviews": listingData["reviews"]}})
 
                     reviewdata["SCC"] = True
                     print(json.dumps(reviewdata,indent=4))

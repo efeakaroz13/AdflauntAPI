@@ -3,11 +3,13 @@
 {% block title2 %}Server Load Manager{% endblock %}
 {% block body %}
 <p id="data" style="display:none">{{load}}</p>
-<p>CPU</p>
+<div style="margin-left:10px;width:90%">
+<h2>CPU</h2>
 <canvas id="CPU"></canvas><br>
-<p>RAM</p>
+<h2>RAM</h2>
 <canvas id="RAM"></canvas><br>
-<p>DISK</p>
+<h2>DISK</h2>
 <canvas id="DISK"></canvas><br>
+</div>
 
 {% endblock %}

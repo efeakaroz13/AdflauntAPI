@@ -138,7 +138,7 @@ if (currentURL.includes("admin/serverLoad")) {
 	  type: 'line',
 	  data: dataDISK,
 	};
-	new Chart(RAMcanvas,configDISK);
+	new Chart(DISKcanvas,configDISK);
 };
 
 

@@ -1729,7 +1729,7 @@ class Admin:
             query = request.form.get("q")
             for o in output:
                 userString = o["fullName"] + " "+o["email"]
-                if q.lower() in userString.lower():
+                if query.lower() in userString.lower():
                     results.append(o)
             return render_template("adminUser.html", users=results, adminData=adminData)
 

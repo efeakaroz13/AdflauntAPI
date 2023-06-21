@@ -50,7 +50,12 @@ if (currentURL.includes("admin/listings")) {
 		document.getElementById("pages").innerHTML = document.getElementById("pages").innerHTML+'<a id="page'+i+'" onclick="loadpage(this)">'+i+'</a>';
 		
 	};
+	function loadpage(element){
+		pageNumber = element.innerHTML;
+		console.log(pageNumber)
 
+	}
+	loadpage(document.getElementById("page1"))
 	
 };
 

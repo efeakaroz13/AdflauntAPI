@@ -86,6 +86,9 @@ if (currentURL.includes("admin/serverLoad")) {
 
 
 	};
+	CPUload =CPUload.reverse(); 
+	RAMload =RAMload.reverse(); 
+	DISKload =DISKload.reverse(); 
 	const dataCPU = {
 	  labels: timeStamps,
 	  datasets: [{
@@ -101,7 +104,25 @@ if (currentURL.includes("admin/serverLoad")) {
 	  data: dataCPU,
 	};
 	new Chart(CPUcanvas,configCPU);
+
+
+	const dataRAM = {
+	  labels: timeStamps,
+	  datasets: [{
+	    label: 'CPU Load',
+	    data: RAMload,
+	    fill: false,
+	    borderColor: 'rgb(75, 192, 192)',
+	    tension: 0.1
+	  }]
+	};
+	const configRAM= {
+	  type: 'line',
+	  data: dataRAM,
+	};
+	new Chart(RAMcanvas,configRAM);
 };
+
 
 
 

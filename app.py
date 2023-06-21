@@ -1155,7 +1155,6 @@ class Listings:
             "images": images,
             "location": location,
             "revision_limit": revision_limit,
-            "digital": digital,
             "type": type_of_listing,
             "check_in": check_in,
             "check_out": check_out,

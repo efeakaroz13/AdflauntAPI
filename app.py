@@ -1963,7 +1963,7 @@ class Admin:
 
         loadData = db["LoadData"]
         loadput = []
-        for l in loadData:
+        for l in loadData.find({}):
             loadput.append(l)
 
         return render_template("serverload.html",load=json.dumps(loadput))

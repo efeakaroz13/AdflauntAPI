@@ -71,9 +71,11 @@ if (currentURL.includes("admin/serverLoad")) {
 	CPUload = [];
 	RAMload = [];
 	DISKload = [];
+	ACTIVEload = []
 	const CPUcanvas = document.getElementById('CPU');
 	const RAMcanvas = document.getElementById('RAM');
 	const DISKcanvas = document.getElementById('DISK');
+	const ACTIVEcanvas = document.getElementById('ACTIVE');
 
 
 
@@ -84,12 +86,14 @@ if (currentURL.includes("admin/serverLoad")) {
 		CPUload.push(current["CPU"]);
 		RAMload.push(current["RAM"]);
 		DISKload.push(current["DISK"]);
+		ACTIVEload.push(current["ACTIVE"]);
 
 
 	};
 	CPUload =CPUload.reverse(); 
 	RAMload =RAMload.reverse(); 
-	DISKload =DISKload.reverse(); 
+	DISKload =DISKload.reverse();
+	ACTIVEload =ACTIVEload.reverse(); 
 	const dataCPU = {
 	  labels: timeStamps,
 	  datasets: [{
@@ -161,6 +165,30 @@ if (currentURL.includes("admin/serverLoad")) {
       }	
 	};
 	new Chart(DISKcanvas,configDISK);
+
+
+	const dataACTIVE = {
+	  labels: timeStamps,
+	  datasets: [{
+	    label: 'Active Users',
+	    data: ACTIVEload,
+	    fill: false,
+	    borderColor: 'rgb(41, 8, 255)',
+	    tension: 0.1
+	  }]
+	};
+	const configACTIVE = {
+	  type: 'line',
+	  data: dataACTIVE,
+	  options:{
+        scales:{
+            x: {
+                display: false
+            }
+        }
+    }
+	};
+	new Chart(ACTIVEcanvas,configACTIVE);
 };
 
 

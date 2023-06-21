@@ -2070,7 +2070,7 @@ class Booking:
             pricePerSqFeet = 0
 
         printCost = pricePerSqFeet*sqfeet
-        
+
         try:
             booking_data = bookings.find({"_id": listingID})[0]
             
@@ -2103,7 +2103,7 @@ class Booking:
             return {"SCC": True,"output":[],"printFee":printCost}
 
     @app.route("/api/booking/calendarProfiler/<listingID>")
-    def calendarProfiler():
+    def calendarProfiler(listingID):
         bookings = db["Bookings"]
         try:
             booking_data = bookings.find({"_id": listingID})[0]

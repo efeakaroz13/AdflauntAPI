@@ -2707,7 +2707,13 @@ class OrdersAndSellerBalance:
 class UserMapper:
     @app.route("/api/usermap")
     def usermap():
-        output={}
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username": username, "password": password})[0]
+        except Exception as e:
+            return {"SCC":False,"err":"Login error"}
+        output={"SCC":True}
         allUsers = users.find({})
         for a in allUsers:
             try:

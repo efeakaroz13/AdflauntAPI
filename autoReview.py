@@ -1,3 +1,9 @@
+"""
+Author:Efe Akaröz @ Kentel
+22june 2023
+"""
+
+
 import pymongo
 import random
 import json
@@ -19,7 +25,7 @@ def doit():
             for listingData in allUsersListings:
                 listingID = listingData["_id"]
                 allBookings = []
-                print(listingID)
+                
                 try:
                     for b in bookings.find({"_id":listingID})[0]["activeOrders"]:
                         lastDay = b["daysWantToBook"][-1]
@@ -80,7 +86,7 @@ def doit():
                         "star": stars,
                         "host": listingData["user"],
                         "listing": listingID,
-                        "revenue": current["price"] * (100 - commisionRate / 100),
+                        "revenue": current["price"] * ((100 - commisionRate) / 100),
                     }
                     try:
                         hostProfile["reviews"]
@@ -92,7 +98,7 @@ def doit():
                         balance = hostProfile["balance"]
                     except:
                         balance = 0
-                    revenue = current["price"] * (100 - commisionRate / 100)
+                    revenue = current["price"] * ((100 - commisionRate) / 100)
                     balance = balance + revenue
                     users.update_one({"_id": listingData["user"]}, {"$set": {"balance": balance}})
 

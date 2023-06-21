@@ -5,7 +5,7 @@ import time
 import datetime
 
 sampleReviews = ["Excellent service!","What a great service!","Good deal!","Fair Price!"]
-
+commisionRate = 30
 client = pymongo.MongoClient()
 db = client["Adflaunt"]
 users = db["Users"]
@@ -47,7 +47,7 @@ def doit():
                     counter = 0
                     for a in activeOrders:
                         if bookingID == a["bookingID"]:
-                            current = bookingID
+                            current = a
                             cindex=counter
 
                             break

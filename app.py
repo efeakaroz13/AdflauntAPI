@@ -2674,19 +2674,22 @@ class Reviews:
             return {"SCC": False, "err": "Could not find booking data"}
         activeOrders = bookingData["activeOrders"]
         current = None
+        counter = 0
         for a in activeOrders:
             if bookingID == a["bookingID"]:
-                current = bookingID
+                current = a
+                cindex= counter
 
                 break
+            counter += 1
         if current == None:
             return {"SCC": False, "err": "Could not find requested booking"}
 
         bookingData["doneOrders"].append(current)
-        cindex = bookingData["activeOrders"].index(current)
+
         bookingData["activeOrders"].pop(cindex)
 
-        bookings.update_one({"_id": listingID}, {"$set": {bookingData}})
+        bookings.update_one({"_id": listingID}, {"$set": bookingData})
 
         try:
             hostProfile = users.find({"_id": listingData["user"]})[0]
@@ -2701,7 +2704,7 @@ class Reviews:
             "star": stars,
             "host": listingData["user"],
             "listing": listingID,
-            "revenue": current["price"] * (100 - commisionRate / 100),
+            "revenue": current["price"] * ((100 - commisionRate) / 100),
         }
         try:
             hostProfile["reviews"]
@@ -2713,7 +2716,7 @@ class Reviews:
             balance = hostProfile["balance"]
         except:
             balance = 0
-        revenue = current["price"] * (100 - commisionRate / 100)
+        revenue = current["price"] * ((100 - commisionRate) / 100)
         balance = balance + revenue
         users.update_one({"_id": listingData["user"]}, {"$set": {"balance": balance}})
 
@@ -2723,7 +2726,7 @@ class Reviews:
             listingData["reviews"] = []
 
         listingData["reviews"].append(reviewdata)
-        listings.update({"_id": listingID}, {"$set": {"reviews": listingData["reviews"]}})
+        listings.update_one({"_id": listingID}, {"$set": {"reviews": listingData["reviews"]}})
 
         reviewdata["SCC"] = True
 

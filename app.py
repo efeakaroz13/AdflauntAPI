@@ -29,7 +29,7 @@ import geopy.distance
 #import sib_api_v3_sdk
 #from sib_api_v3_sdk.rest import ApiException
 import smtplib
-
+import psutil
 
 
 
@@ -1338,6 +1338,7 @@ class Listings:
 
             sdata = {"output": output, "q": q, "mode": mode}
             r.mset({f"{sessionName}": json.dumps(sdata)})
+            r.expire(sessionName,2500)
 
         else:
             if mode == "search":
@@ -1571,6 +1572,7 @@ class Listings:
                 output = sorted(output,key=operator.itemgetter('averageRating'))
             sid = IDCREATOR_internal(20)
             r.mset({sid:json.dumps(output)})
+            r.expire(sid,2500)
             return {"SCC":True,"output":output[:10],"sid":sid}
         else:
             if page == None:
@@ -1949,7 +1951,22 @@ class Admin:
 
         return {"SCC": True, "msg": "Denied successfully"}
 
+    @app.route("/admin/serverLoad")
+    def serverLoadManagerAdmin():
+        try:
+            username = decrypt(request.cookies.get("username"))
+            password = decrypt(request.cookies.get("password"))
+            adminData = admin.find({"username": username, "password": password})[0]
+        except Exception as e:
 
+            return redirect("/admin/login")
+
+        loadData = db["LoadData"]
+        loadput = []
+        for l in loadData:
+            loadput.append(l)
+
+        return render_template("serverload.html",load=json.dumps(loadput))
 class Booking:
     @app.route("/api/book", methods=["POST"])
     def book_it():

@@ -65,7 +65,43 @@ if (currentURL.includes("admin/listings")) {
 	loadpage(document.getElementById("page1"))
 	
 };
+if (currentURL.includes("admin/serverLoad")) {
+	data = JSON.parse(document.getElementById("data").innerHTML);
+	timeStamps = [];
+	CPUload = [];
+	RAMload = [];
+	DISKload = [];
+	const CPUcanvas = document.getElementById('CPU');
+	const RAMcanvas = document.getElementById('RAM');
+	const DISKcanvas = document.getElementById('DISK');
 
+
+
+	for (var i = data.length - 1; i >= 0; i--) {
+		var current = data[i];
+		timeStamps.push(current["time"]);
+		CPUload.push(current["CPU"]);
+		RAMload.push(current["RAM"]);
+		DISKload.push(current["DISK"]);
+
+
+	};
+	const dataCPU = {
+	  labels: timeStamps,
+	  datasets: [{
+	    label: 'CPU Load',
+	    data: CPUload,
+	    fill: false,
+	    borderColor: 'rgb(75, 192, 192)',
+	    tension: 0.1
+	  }]
+	};
+	const configCPU = {
+	  type: 'line',
+	  data: dataCPU,
+	};
+	new Chart(CPUcanvas,configCPU);
+};
 
 
 

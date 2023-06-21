@@ -2051,9 +2051,31 @@ class Booking:
 
     @app.route("/api/booking/calendar/<listingID>")
     def calendarAPI(listingID):
+
         bookings = db["Bookings"]
+        listingData = listings.find({"_id":listingID})[0]
+        listingType = listingData["type"]
+        sqfeet = int(listingData["sqfeet"])
+        if "Yard Sign" in listingType:
+            pricePerSqFeet = 4
+        if "Banner" in listingType:
+            pricePerSqFeet = 1.5
+        if "Floor Sign" in listingType:
+            pricePerSqFeet = 4
+        if "Poster" in listingType:
+            pricePerSqFeet = 1.5
+        if "Bill Board" in listingType:
+            pricePerSqFeet = 4
+        if "Digital" in listingType:
+            pricePerSqFeet = 0
+
+        printCost = pricePerSqFeet*sqfeet
+        
         try:
             booking_data = bookings.find({"_id": listingID})[0]
+            
+
+
             datesList = []
             activeOrders = booking_data["activeOrders"]
             waitingForApproval = booking_data["waitingForApproval"]
@@ -2074,11 +2096,52 @@ class Booking:
                 for d in doneOrders:
                     datesList.append(d)
 
-            return {"SCC": True, "output": datesList, "printFee": int(printFee)}
+            return {"SCC": True, "output": datesList, "printFee":printCost}
 
 
         except:
-            return {"SCC": True,"output":[],"printFee":int(printFee)}
+            return {"SCC": True,"output":[],"printFee":printCost}
+
+    @app.route("/api/booking/calendarProfiler/<listingID>")
+    def calendarProfiler():
+        bookings = db["Bookings"]
+        try:
+            booking_data = bookings.find({"_id": listingID})[0]
+            datesList = []
+            activeOrders = booking_data["activeOrders"]
+            waitingForApproval = booking_data["waitingForApproval"]
+            doneOrders = booking_data["doneOrders"]
+
+            for a in activeOrders:
+                daysWantToBook = a["daysWantToBook"]
+                status = "active"
+                customer = a["customer"]
+                profileImage = users.find({"_id":customer})[0]["profileImage"]
+                datesList.append({"daysWantToBook":daysWantToBook,"status":status,"customer":customer,"profileImage":profileImage})
+                """
+                for d in daysWantToBook:
+                    datesList.append(d)
+                """
+
+            for a in waitingForApproval:
+                daysWantToBook = a["daysWantToBook"]
+                status = "active"
+                customer = a["customer"]
+                profileImage = users.find({"_id":customer})[0]["profileImage"]
+                datesList.append({"daysWantToBook":daysWantToBook,"status":status,"customer":customer,"profileImage":profileImage})
+
+            for a in activeOrders:
+                daysWantToBook = a["daysWantToBook"]
+                status = "active"
+                customer = a["customer"]
+                profileImage = users.find({"_id":customer})[0]["profileImage"]
+                datesList.append({"daysWantToBook":daysWantToBook,"status":status,"customer":customer,"profileImage":profileImage})
+
+            return {"SCC": True, "output": datesList}
+
+
+        except:
+            return {"SCC": True,"output":[]}
 
     @app.route("/api/stripe/createPayment/<listingID>", methods=["POST"])
     def createPaymentStripe(listingID):

@@ -105,11 +105,11 @@ if (currentURL.includes("admin/serverLoad")) {
 	  data: dataCPU,
 	  options:{
         scales:{
-            xAxes: [{
-                display: false //this will remove all the x-axis grid lines
-            }]
+            x: {
+                display: false
+            }
         }
-      }	
+    }
 	};
 	new Chart(CPUcanvas,configCPU);
 
@@ -129,11 +129,11 @@ if (currentURL.includes("admin/serverLoad")) {
 	  data: dataRAM,
 	  options:{
         scales:{
-            xAxes: [{
-                display: false //this will remove all the x-axis grid lines
-            }]
+            x: {
+                display: false
+            }
         }
-      }	
+    }
 	};
 	new Chart(RAMcanvas,configRAM);
 
@@ -154,9 +154,9 @@ if (currentURL.includes("admin/serverLoad")) {
 	  data: dataDISK,
 	  options:{
         scales:{
-            xAxes: [{
-                display: false //this will remove all the x-axis grid lines
-            }]
+            x: {
+                display: false
+            }
         }
       }	
 	};

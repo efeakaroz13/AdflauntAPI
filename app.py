@@ -1850,7 +1850,7 @@ class Admin:
                                returnWidthLength=returnWidthLength
                                )
 
-    @app.route("/admin/listings")
+    @app.route("/admin/listings",methods=["POST","GET"])
     def adminListings():
         try:
             username = decrypt(request.cookies.get("username"))
@@ -1860,10 +1860,25 @@ class Admin:
 
             return redirect("/admin/login")
 
+
         output = []
         allListings = listings.find({})
         for a in allListings:
             output.append(a)
+
+        if request.method == "POST":
+            query = request.form.get("q")
+            searchResults = []
+            for o in output:
+                tagsString = ""
+                for t in o["tags"]:
+                    tagsString += t+" "
+
+                allString = o["title"]+" "+o["description"]+" "+tagsString
+                if query.lower() in allString.lower():
+                    searchResults.append(o)
+            return render_template("listingsAdmin.html",listings=json.dumps({"output":searchResults}))
+
 
 
         return render_template("listingsAdmin.html",listings=json.dumps({"output":output}))

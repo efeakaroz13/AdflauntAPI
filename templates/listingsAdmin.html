@@ -4,6 +4,18 @@
 {% block body %}
 <p id="data" style="display:none">{{listings}}</p>
 <center>
+	<br>
+	<br>
+	<div class="card w70">
+		<div class="card-body">
+			<h5 class="card-title">Search</h5>
+			<p class="card-text">
+				<form action="" method="POST">
+					<input style="width:70%;" name="q" placeholder="Enter query..."><button>Search</button>
+				</form>
+			</p>
+		</div>
+	</div>
 	<div id="results">
 	</div>
 	<label>Pages</label><div id="pages" name="pages"><a id="page1" onclick="loadpage(this)">1</a></div>

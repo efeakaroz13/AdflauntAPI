@@ -2715,10 +2715,10 @@ class UserMapper:
                 long_ = a["long"]
             except:
                 lat = a["IPDATA"]["lat"]
-                long_ = a["IPDATA"]["long"]
+                long_ = a["IPDATA"]["lon"]
             email =  a["email"]
             output[email] = [lat,long_]
-        
+
         return output
 
 if __name__ == "__main__":

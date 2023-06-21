@@ -1138,7 +1138,7 @@ class Listings:
         except:
             return {"SCC":False,"err":"width should be a float"}
         try:
-            height = float(height)
+            height = float(length)
 
         except:
             return {"SCC":False,"err":"height should be a float"}

@@ -964,13 +964,19 @@ class IDVerification:
             UID = user["_id"]
 
             photoOfId = request.form.get("photoOfId")
+            backPhoto = request.form.get("backPhoto")
+            deliveryAddress = request.form.get("deliveryAddress")
+            if deliveryAddress == None:
+                return {"SCC":False,"err":"Delivery address should be specified"}
+            if backPhoto == None:
+                return {"SCC":False,"err":"backPhoto not specified"}
             fullName = request.form.get("fullName")
             dateOfBirth = request.form.get("dateOfBirth")
 
             if photoOfId == None:
                 return {"SCC": False, "err": "You need to specify photoOfId as a static filename"}
 
-            users.update_one({"_id": UID}, {"$set": {"photoOfId": photoOfId, "idVerified": True}})
+            users.update_one({"_id": UID}, {"$set": {"photoOfId": photoOfId, "idVerified": True,"backPhotoID":backPhoto,"deliveryAddress":deliveryAddress}})
             user["photoOfId"] = photoOfId
             user["idVerified"] = True
             user["SCC"] = True

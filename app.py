@@ -2713,7 +2713,7 @@ class UserMapper:
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
             return {"SCC":False,"err":"Login error"}
-        output={"SCC":True}
+        output={}
         allUsers = users.find({})
         for a in allUsers:
             try:

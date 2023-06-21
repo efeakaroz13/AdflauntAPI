@@ -1093,12 +1093,6 @@ class Listings:
         except:
             tags = []
 
-        if digital == "0":
-            digital = False
-
-        if digital == "1":
-            digital = True
-
         if type_of_listing == "1":
             type_of_listing = "Yard Sign"
 
@@ -1864,7 +1858,8 @@ class Admin:
         for a in allListings:
             output.append(a)
 
-        return render_template("listingsAdmin.html",listings=output)
+
+        return render_template("listingsAdmin.html",listings={"output":output})
 
     @app.route("/admin/api/acceptBooking/<listingID>/<ListIndex>")
     def AcceptBooking(listingID, ListIndex):

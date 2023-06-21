@@ -2,5 +2,15 @@
 {% block title %} Listings on Adflaunt {% endblock %}
 {% block title2 %} Listings on Adflaunt {% endblock %}
 {% block body %}
-<p id="data">{{listings}}</p>
+<p id="data" style="display:none">{{listings}}</p>
+<center>
+	<div id="results">
+	</div>
+	<div id="pages"><a id="page1" onclick="loadpage(this)">1</a></div>
+	<style>
+		#pages a{
+			margin-right:5px;
+		} 
+	</style>
+</center>
 {% endblock %}

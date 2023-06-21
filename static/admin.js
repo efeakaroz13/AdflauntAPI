@@ -1,3 +1,10 @@
+/*
+Kentel Development 
+JUNE 2023
+All rights reserved
+Author:Efe Akaröz
+*/
+
 passwordState = 0;
 //state 0 is hidden
 password_save = ""
@@ -36,9 +43,21 @@ if(currentURL.includes("admin/map")){
 	})
 }
 if (currentURL.includes("admin/listings")) {
-	data= JSON.parse(document.getElementById("data").innerHTML);
-	console.log(data)
+	data= JSON.parse(document.getElementById("data").innerHTML)["output"];
+	pageNumberMax = Math.floor(data.lenght/20)+1
+	document.getElementById("pages").innerHTML = "";
+	for (var i = pageNumberMax - 1; i > 0; i--) {
+		document.getElementById("pages").innerHTML = document.getElementById("pages").innerHTML+'<a id="page'+i+'" onclick="loadpage(this)">'+i+'</a>';
+		
+	};
+
+	
 };
+
+
+
+
+
 
 function showHidePassword(){
 	if(passwordState==0){

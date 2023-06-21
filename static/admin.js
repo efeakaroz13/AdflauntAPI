@@ -46,8 +46,9 @@ if (currentURL.includes("admin/listings")) {
 	data= JSON.parse(document.getElementById("data").innerHTML)["output"];
 	pageNumberMax = Math.floor(data.length/20)+1
 	document.getElementById("pages").innerHTML = "";
-	for (var i = pageNumberMax - 1; i > 0; i--) {
-		document.getElementById("pages").innerHTML = document.getElementById("pages").innerHTML+'<a id="page'+i+'" onclick="loadpage(this)">'+i+'</a>';
+	for (var i=0; i<pageNumberMax;i++) {
+		ireal = i+1
+		document.getElementById("pages").innerHTML = document.getElementById("pages").innerHTML+'<a id="page'+ireal+'" onclick="loadpage(this)">'+ireal+'</a>';
 		
 	};
 	function loadpage(element){

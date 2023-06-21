@@ -1710,7 +1710,7 @@ class Admin:
 
             return response
 
-    @app.route("/admin/users")
+    @app.route("/admin/users",methods=["POST","GET"])
     def adminViewUsers():
         allUsers = users.find({})
         output = []
@@ -1724,6 +1724,15 @@ class Admin:
         except Exception as e:
 
             return redirect("/admin/login")
+        if request.method == "POST":
+            results = []
+            query = request.form.get("q")
+            for o in output:
+                userString = o["fullName"] + " "+o["email"]
+                if q.lower() in userString.lower():
+                    results.append(o)
+            return render_template("adminUser.html", users=results, adminData=adminData)
+
 
         return render_template("adminUser.html", users=output, adminData=adminData)
 

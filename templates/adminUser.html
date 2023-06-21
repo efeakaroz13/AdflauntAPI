@@ -4,7 +4,18 @@
 {% block body %}
 <center>
  <br><br>
+ <div class="card w70">
+		<div class="card-body">
+			<h5 class="card-title">Search</h5>
+			<p class="card-text">
+				<form action="" method="POST">
+					<input style="width:70%;" name="q" placeholder="Enter query..."><button>Search</button>
+				</form>
+			</p>
+		</div>
+</div><br>
  <ul class="list-group w70">
+
  	{% if users %}
  		{% for u in users %}
  			<li class="list-group-item"><a class="flag">{{u["IPDATA"]["countryCode"]}}</a> <img loading="lazy" style="border-radius:50%;object-fit: cover; width:40px;height:30px" src="/static/{{u['profileImage']}}" onerror="this.onerror=null;this.src='/static/user.png';"><a href="/admin/user/{{u["_id"]}}" style="text-decoration:none;color:gray;"> {{u["fullName"]}}</a> <a style="color:blue;" href="mailto: {{u["email"]}}">{{u["email"]}}</a> </li>

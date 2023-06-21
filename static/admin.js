@@ -15,11 +15,23 @@ if(currentURL.includes("admin/user/")){
 
 }
 if(currentURL.includes("admin/map")){
+	const map = L.map('map').setView([0, 0], 2);
+
+	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">Kentel Development</a>'
+	}).addTo(map);
+
 	$.getJSON("/api/usermap",function(data){
 		allKeys = Object.keys(data)
 		allKeys.forEach(function(key){
 			var value = data[key];
-			console.log(key+","+value)
+
+			var marker = L.marker(value);    // Creating a Marker
+         
+
+	        marker.bindPopup(key);
+	        marker.addTo(map); 
 		})
 	})
 }

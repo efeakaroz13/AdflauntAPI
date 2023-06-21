@@ -52,8 +52,14 @@ if (currentURL.includes("admin/listings")) {
 		
 	};
 	function loadpage(element){
-		pageNumber = element.innerHTML;
-		console.log(pageNumber)
+		pageNumber =parseInt( element.innerHTML);
+		renderData = data.slice(0,pageNumber*20).slice(-20);
+		document.getElementById("results").innerHTML = ""
+		for (var i = renderData.length - 1; i >= 0; i--) {
+			current= renderData[i];
+			document.getElementById("results").innerHTML=  document.getElementById("results").innerHTML +"<div class='card' style='width:70%;'>"+"<img class='card-img-top' src='/static/"+current.images[0]+"/s30' >"+"<div class='card-body'>"+"<h5 class='card-title'>"+current.title+"</h5><p class='card-text'>"+"<strong>Location:</strong>"+current.city+","+current.state+" - "+current.country+"<br>"+"<strong>Price:</strong>"+current.price+"<br>"+"<strong>Surface area:</strong>"+current.sqfeet+"<br>"+"</p>"+"</div>"+"</div>"
+
+		};
 
 	}
 	loadpage(document.getElementById("page1"))

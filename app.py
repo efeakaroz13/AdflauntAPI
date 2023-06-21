@@ -2704,6 +2704,22 @@ class OrdersAndSellerBalance:
             balance = 0 
         return {"SCC":True,"user":user,"balance":balance}
 
+class UserMapper:
+    @app.route("/api/usermap")
+    def usermap():
+        output={}
+        allUsers = users.find({})
+        for a in allUsers:
+            try:
+                lat = a["lat"]
+                long_ = a["long"]
+            except:
+                lat = a["IPDATA"]["lat"]
+                long_ = a["IPDATA"]["long"]
+            email =  a["email"]
+            output[email] = [lat,long_]
+        
+        return output
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")

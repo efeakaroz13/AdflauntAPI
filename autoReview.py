@@ -19,14 +19,18 @@ def doit():
             for listingData in allUsersListings:
                 listingID = listingData["_id"]
                 allBookings = []
-                for b in bookings.find({"_id":listingID})[0]["activeOrders"]:
-                    lastDay = b["daysWantToBook"][-1]
-                    year = int(lastDay.split("-")[0])
-                    month = int(lastDay.split("-")[1])
-                    day = int(lastDay.split("-")[2])
-                    lastTimestamp = datetime.datetime(year,month,day,0,0).timestamp()
-                    if lastTimestamp+259200<time.time():
-                        allBookings.append(b["bookingID"])
+                print(listingID)
+                try:
+                    for b in bookings.find({"_id":listingID})[0]["activeOrders"]:
+                        lastDay = b["daysWantToBook"][-1]
+                        year = int(lastDay.split("-")[0])
+                        month = int(lastDay.split("-")[1])
+                        day = int(lastDay.split("-")[2])
+                        lastTimestamp = datetime.datetime(year,month,day,0,0).timestamp()
+                        if lastTimestamp+259200<time.time():
+                            allBookings.append(b["bookingID"])
+                except:
+                    continue
                 for bookingID in allBookings:
 
 

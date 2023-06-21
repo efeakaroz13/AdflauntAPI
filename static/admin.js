@@ -103,6 +103,13 @@ if (currentURL.includes("admin/serverLoad")) {
 	const configCPU = {
 	  type: 'line',
 	  data: dataCPU,
+	  options:{
+        scales:{
+            xAxes: [{
+                display: false //this will remove all the x-axis grid lines
+            }]
+        }
+      }	
 	};
 	new Chart(CPUcanvas,configCPU);
 
@@ -120,6 +127,13 @@ if (currentURL.includes("admin/serverLoad")) {
 	const configRAM= {
 	  type: 'line',
 	  data: dataRAM,
+	  options:{
+        scales:{
+            xAxes: [{
+                display: false //this will remove all the x-axis grid lines
+            }]
+        }
+      }	
 	};
 	new Chart(RAMcanvas,configRAM);
 
@@ -132,11 +146,19 @@ if (currentURL.includes("admin/serverLoad")) {
 	    fill: false,
 	    borderColor: 'rgb(232, 96, 86)',
 	    tension: 0.1
-	  }]
+	  }],
+	  
 	};
 	const configDISK= {
 	  type: 'line',
 	  data: dataDISK,
+	  options:{
+        scales:{
+            xAxes: [{
+                display: false //this will remove all the x-axis grid lines
+            }]
+        }
+      }	
 	};
 	new Chart(DISKcanvas,configDISK);
 };

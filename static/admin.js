@@ -79,7 +79,8 @@ if (currentURL.includes("admin/serverLoad")) {
 
 	for (var i = data.length - 1; i >= 0; i--) {
 		var current = data[i];
-		timeStamps.push(current["time"]);
+		d = new Date(current["time"]*1000)
+		timeStamps.push(d.toLocaleString());
 		CPUload.push(current["CPU"]);
 		RAMload.push(current["RAM"]);
 		DISKload.push(current["DISK"]);
@@ -109,10 +110,10 @@ if (currentURL.includes("admin/serverLoad")) {
 	const dataRAM = {
 	  labels: timeStamps,
 	  datasets: [{
-	    label: 'CPU Load',
+	    label: 'RAM Load',
 	    data: RAMload,
 	    fill: false,
-	    borderColor: 'rgb(75, 192, 192)',
+	    borderColor: 'rgb(77, 235, 96)',
 	    tension: 0.1
 	  }]
 	};
@@ -121,6 +122,23 @@ if (currentURL.includes("admin/serverLoad")) {
 	  data: dataRAM,
 	};
 	new Chart(RAMcanvas,configRAM);
+
+
+	const dataDISK = {
+	  labels: timeStamps,
+	  datasets: [{
+	    label: 'DISK Load',
+	    data: DISKload,
+	    fill: false,
+	    borderColor: 'rgb(232, 96, 86)',
+	    tension: 0.1
+	  }]
+	};
+	const configDISK= {
+	  type: 'line',
+	  data: dataDISK,
+	};
+	new Chart(RAMcanvas,configDISK);
 };
 
 

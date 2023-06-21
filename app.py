@@ -1859,7 +1859,7 @@ class Admin:
             output.append(a)
 
 
-        return render_template("listingsAdmin.html",listings={"output":output})
+        return render_template("listingsAdmin.html",listings=json.dumps({"output":output}))
 
     @app.route("/admin/api/acceptBooking/<listingID>/<ListIndex>")
     def AcceptBooking(listingID, ListIndex):

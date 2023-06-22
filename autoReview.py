@@ -3,12 +3,13 @@ Author:Efe Akaröz @ Kentel
 22june 2023
 """
 
-
+ 
 import pymongo
 import random
 import json
 import time
 import datetime
+from app import Mail
 
 sampleReviews = ["Excellent service!","What a great service!","Good deal!","Fair Price!"]
 commisionRate = 30
@@ -52,6 +53,7 @@ def doit():
                     except:
                         print({"SCC": False, "err": "Could not find booking data"})
                         continue
+                    user = users.find({"_id":bookingData["customer"]})
                     activeOrders = bookingData["activeOrders"]
                     current = None
                     counter = 0
@@ -111,6 +113,11 @@ def doit():
                     listings.update_one({"_id": listingID}, {"$set": {"reviews": listingData["reviews"]}})
 
                     reviewdata["SCC"] = True
+                    html = Mail.generate(f"Your order from {user['fullName']} marked as complete",f"{user['fullName']} {stars}<br>'{review}'<br>For your listing {listingData['title']}<br>We automatically give this rating because of user's 3 days delay.")
+                    Mail.send([hostProfile["email"]],f"Your order from {user['fullName']} marked as complete",html)
+
+                    html = Mail.generate(f"Your order marked as complete because of 3 days of delay.",f"Your order for listing {listingData['title']} has marked as complete")
+                    Mail.send([user["email"]],f"Your order marked as complete because of 3 days of delay.",html)
                     print(json.dumps(reviewdata,indent=4))
 doit()
 

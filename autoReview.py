@@ -9,7 +9,7 @@ import random
 import json
 import time
 import datetime
-import smtp
+import smtplib
 from stripe_auth import stripeSecret,brevoSecret,firebaseKey
 
 class Mail:

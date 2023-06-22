@@ -1323,8 +1323,8 @@ class Listings:
                         reviews = []
                     reviewsTotal = 0 
                     reviewsCount = len(reviews)
-                    for r in reviews:
-                        star = r["star"]
+                    for rew in reviews:
+                        star = rew["star"]
                         reviewsTotal += star 
                     try:
                         average = reviewsTotal/reviewsCount 
@@ -1340,6 +1340,7 @@ class Listings:
                 output = sorted(output, key=operator.itemgetter('priority'))
 
             sdata = {"output": output, "q": q, "mode": mode}
+            r= redis.Redis()
             r.mset({f"{sessionName}": json.dumps(sdata)})
             r.expire(sessionName,2500)
 
@@ -1574,6 +1575,7 @@ class Listings:
             else:
                 output = sorted(output,key=operator.itemgetter('averageRating'))
             sid = IDCREATOR_internal(20)
+            r= redis.Redis()
             r.mset({sid:json.dumps(output)})
             r.expire(sid,2500)
             return {"SCC":True,"output":output[:10],"sid":sid}
@@ -2793,7 +2795,7 @@ class OrdersAndSellerBalance:
 
                 a= getBookingData(a["bookingID"])
                 asHost.append(a)
-                
+
             for w in waitingForApproval:
                 w= getBookingData(w["bookingID"])
                 asHost.append(w)

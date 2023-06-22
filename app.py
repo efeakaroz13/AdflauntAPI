@@ -1562,8 +1562,9 @@ class Listings:
                     tagsString += " "+t
 
                 titleString = c["title"]
+                description = c["description"]
                 descriptionString = c["description"]
-                if query in titleString or query in tagsString or query in description:
+                if query.lower() in titleString.lower() or query.lower() in tagsString.lower() or query.lower() in description.lower():
 
                     if price>priceStart and price<priceEnd and type_of_listing in ctype:
                         output.append(c)

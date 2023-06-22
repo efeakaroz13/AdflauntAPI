@@ -2790,10 +2790,12 @@ class OrdersAndSellerBalance:
             activeOrders = bookingData["activeOrders"]
             waitingForApproval = bookingData["waitingForApproval"]
             for a in activeOrders:
-                a["status"] = "active"
+
+                a= getBookingData(a["bookingID"])
                 asHost.append(a)
+                
             for w in waitingForApproval:
-                w["status"] = "waitingForApproval"
+                w= getBookingData(w["bookingID"])
                 asHost.append(w)
 
 

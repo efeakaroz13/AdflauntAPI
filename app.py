@@ -2569,9 +2569,9 @@ class Booking:
 
         bookings = db["Bookings"]
         try:
-            allBookingData = bookings.find_one({"_id":bookingData["listingData"]["_id"]})[0]
-        except:
-            return {"SCC":False,"err":"Corruption in database"},500
+            allBookingData = bookings.find_one({"_id":bookingData["data"]["_id"]})[0]
+        except Exception as e:
+            return {"SCC":False,"err":"Corruption in database","e":str(e),"data":bookingData},500
         allWaitingForApproval = allBookingData["waitingForApproval"]
         counter = 0
         waindex = -1

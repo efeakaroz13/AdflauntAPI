@@ -2555,8 +2555,8 @@ class Booking:
             return {"SCC":False,"err":"Authentication failed"},403
 
         bookingData = getBookingData(bookingID)
-
-
+        
+        listingData = bookingData["listingData"]
         if bookingData["status"] == "Not found":
             return {"SCC":False,"err":"Could not find listing"},404
 

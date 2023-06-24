@@ -533,7 +533,8 @@ class Auth:
 
             password = request.form.get("password")
             dateOfBirth = request.form.get("dateOfBirth")
-            IPDATA = json.loads(request.form.get("IPDATA"))
+            ipraw = request.header['X-Real-IP']
+            IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
             try:
                 ipraw = IPDATA["query"]
             except:
@@ -575,11 +576,8 @@ class Auth:
 
     @app.route("/api/login", methods=["POST"])
     def login():
-        try:
-            ip = request.environ['REMOTE_ADDR']
-
-        except:
-            ip = request.environ['HTTP_X_FORWARDED_FOR']
+        ipraw = request.header['X-Real-IP']
+        IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
 
         email = request.form.get("email")
         password = request.form.get("password")
@@ -675,40 +673,56 @@ class Auth:
         for a in allResults:
             return a
         return {"SCC": False, "err": "User not found"}, 404
-    @app.route("/api/google_auth",methods=["POST","GET"])
+    @app.route("/api/google_auth",methods=["POST"])
     def api_google_auth():
-        data = {"displayName": "Berke Enes Aktümen", "email": "berkenesaktumen@gmail.com", "id": "107576210077606880951", "photoUrl": "https://lh3.googleusercontent.com/a/AAcHTtecVtwF_WGc6hxsNhcTWALMG4AvoQyOBJBPomSy=s1337", "serverAuthCode": None}
+        #data = {"displayName": "Berke Enes Aktümen", "email": "berkenesaktumen@gmail.com", "id": "107576210077606880951", "photoUrl": "https://lh3.googleusercontent.com/a/AAcHTtecVtwF_WGc6hxsNhcTWALMG4AvoQyOBJBPomSy=s1337", "serverAuthCode": None}
         r = redis.Redis()
         id_ = request.form.get("id")
         email = request.form.get("email")
         photoUrl = request.form.get("photoUrl")
         displayName = request.form.get("displayName")
+        if id_ == None or email==None or photoUrl == None or displayName==None:
+            return {"SCC":False,"err":"Form missing"}
         try:
             users.find({"email":email})[0]
             try:
-                users.find({"email":email,"password":id_})[0]
-                return {"SCC":True,"msg":"You are logged in"}
+                data = users.find({"email":email,"password":id_})[0]
+                data["SCC"] = True
+                data["googleStatus"] = "login"
+                return data
             except:
                 return {"SCC":False,"err":"You are not registered with google!"}
 
         except:
             #REGISTER
             ipraw = request.header['X-Real-IP']
-            IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}"))
+            IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
+            profile_img_download = requests.get(photoUrl,stream=True)
+            with open(f"static/{IDCREATOR_internal(30)}.jpg","wb") as f:
+                f.write(profile_img_download.content)
+                profileImage = f.name.split("/")[-1]
+
             data = {
                 "_id": IDCREATOR_internal(24),
                 "email": email,
                 "password": id_,
                 "dateOfBirth": None,
                 "IPDATA": IPDATA,
-                "fullName": fullName,
+                "fullName": displayName,
                 "profileImage": profileImage,
-                "phoneNumber": phoneNumber,
+                "phoneNumber": None,
                 "lastTimeLoggedIn": 0,
                 "ipraw": ipraw,
                 "idVerified": False,
-                "thirdParty": thirdParty
+                "thirdParty": "google"
             }
+            users.insert_one(data)
+            data["SCC"]=True 
+            data["googleStatus"] = "register"
+            return data 
+
+
+
     @app.route("/ip-data")
     def Ipdatagetter():
         ipraw = request.headers['X-Real-IP']
@@ -721,11 +735,7 @@ class Upload:
     def uploadIt():
         logger = open("file.log", "a")
         if request.method == "POST":
-            try:
-                ip = request.environ['REMOTE_ADDR'].split(",")[0]
-                # ip=request.remote_addr
-            except:
-                ip = request.environ['HTTP_X_FORWARDED_FOR'].split(",")[0]
+            ip = request.headers['X-Real-IP']
             try:
                 file = request.files['file']
             except:
@@ -779,15 +789,8 @@ class Profile:
         email = request.form.get("email")
         password = request.form.get("password")
         dateOfBirth = request.form.get("dateOfBirth")
-        try:
-            IPDATA = json.loads(request.form.get("IPDATA"))
-            try:
-                ipraw = IPDATA["query"]
-            except:
-                ipraw = None
-        except:
-            IPDATA = None
-            ipraw = None
+        ipraw = request.header['X-Real-IP']
+        IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
         # IPDATA = request.form.get("IPDATA")
         fullName = request.form.get("fullName")
         profileImage = request.form.get("profileImage")

@@ -1626,6 +1626,8 @@ class Listings:
                     average = 0
 
                 c["averageRating"] = average
+                c["numberOfReviews"] = numberOfReviews
+                
 
                 try:
                     cbook = c["Bookings"]

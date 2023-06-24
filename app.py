@@ -689,6 +689,7 @@ class Auth:
                 data = users.find({"email":email,"password":id_})[0]
                 data["SCC"] = True
                 data["googleStatus"] = "login"
+                users.update_one({"_id":data["_id"]},{"$set":{"lastTimeLoggedIn":time.time()}})
                 return data
             except:
                 return {"SCC":False,"err":"You are not registered with google!"}
@@ -721,7 +722,52 @@ class Auth:
             data["googleStatus"] = "register"
             return data 
 
+    @app.route("/api/apple_auth",methods=["POST","GET"])
+    def apple_auth_api():
+        if request.method == "GET":
+            id_ = request.args.get("id")
+            if id_ == None:
+                return {"SCC":False,"err":"you need to enter 'id'"},400
+            try:
+                data = users.find({"password":id_})[0]
+                data["SCC"]= True
+                return data
+            except:
+                return {"SCC":False,"err":"Couldnt find user"},404
+        if request.method == "POST":
+            firstName = request.form.get("firstName")
+            lastName = request.form.get("lastName")
+            email = request.form.get("email")
+            id_ = request.form.get("id")
+            if firstName==None or lastName == None or email== None or id_ == None:
+                return {"SCC":False,"err":"Return all the information to the server"},401
+            try:
+                users.find({"email":email})[0]
+                return {"SCC":False,"err":"User already exists"},401
+            except:
+                pass
 
+            ipraw = request.header['X-Real-IP']
+            IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
+            fullName = firstName+" "+lastName
+            data = {
+                "_id": IDCREATOR_internal(24),
+                "email": email,
+                "password": id_,
+                "dateOfBirth": None,
+                "IPDATA": IPDATA,
+                "fullName": fullName,
+                "profileImage": None,
+                "phoneNumber": None,
+                "lastTimeLoggedIn": 0,
+                "ipraw": ipraw,
+                "idVerified": False,
+                "thirdParty": "apple"
+            }
+            users.insert_one(data)
+            data["SCC"] = True
+            return data
+            
 
     @app.route("/ip-data")
     def Ipdatagetter():
@@ -2140,6 +2186,14 @@ class Booking:
         except Exception as e:
             return {"SCC": False, "err": str(e)}
 
+        host_user = users.find({"_id":listingData["user"]})[0]
+
+        html = Mail.generate(f"New order",f"You recieved a new order from {user['fullName']} for {listingData['title']}. Check out the details on the app")
+        Mail.send([host_user["email"]],f"You have a new order",html)
+        orderData["page"] = "bookingPage"
+
+        send_notification(host_user["_id"],orderData,f"New order from {user['fullName']} for {listingData['title']}","Click for more details")
+        
         return {"SCC": True, "orderData": orderData}
 
     @app.route("/api/booking/calendar/<listingID>")
@@ -2522,7 +2576,9 @@ class Booking:
 
         html = Mail.generate(f"Proof picture added to order",f"Host added proof picture to your order for {listingData['title']}. Check it out on the app!")
         Mail.send([customerData["email"]],f"Proof picture added to order",html)
+        customerBookingData["page"] = "bookingPage"
 
+        send_notification(customerBookingData["customer"],customerBookingData,f"{host['fullName']} added proof image to your order","Click for more details")
         return {"SCC": True, "bookingData": bookingData}
     
 
@@ -2789,6 +2845,9 @@ class Reviews:
         html = Mail.generate(f"{user['fullName']} gave you a {stars} review",f"{user['fullName']} {stars}<br>'{review}'<br>For your listing {listingData['title']}")
         Mail.send([hostProfile["email"]],f"{user['fullName']} gave you a {stars} review",html)
 
+        customerBookingData["page"] = "bookingPage"
+        mbd = getBookingData(bookingID)
+        send_notification(hostProfile["_id"],mbd,f"{user['fullName']} gave you a {stars} review","View your review for {listingData['title']")
         return reviewdata
 
 class OrdersAndSellerBalance:

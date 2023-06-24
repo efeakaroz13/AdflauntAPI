@@ -712,7 +712,7 @@ class Auth:
     @app.route("/ip-data")
     def Ipdatagetter():
         ipraw = request.headers['X-Real-IP']
-        IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}"))   
+        IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)   
         return IPDATA   
 
     

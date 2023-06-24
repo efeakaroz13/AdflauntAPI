@@ -533,7 +533,7 @@ class Auth:
 
             password = request.form.get("password")
             dateOfBirth = request.form.get("dateOfBirth")
-            ipraw = request.header['X-Real-IP']
+            ipraw = request.headers['X-Real-IP']
             IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
             try:
                 ipraw = IPDATA["query"]
@@ -576,7 +576,7 @@ class Auth:
 
     @app.route("/api/login", methods=["POST"])
     def login():
-        ipraw = request.header['X-Real-IP']
+        ipraw = request.headers['X-Real-IP']
         IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
 
         email = request.form.get("email")
@@ -696,7 +696,7 @@ class Auth:
 
         except:
             #REGISTER
-            ipraw = request.header['X-Real-IP']
+            ipraw = request.headers['X-Real-IP']
             IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
             profile_img_download = requests.get(photoUrl,stream=True)
             with open(f"static/{IDCREATOR_internal(30)}.jpg","wb") as f:
@@ -747,7 +747,7 @@ class Auth:
             except:
                 pass
 
-            ipraw = request.header['X-Real-IP']
+            ipraw = request.headers['X-Real-IP']
             IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
             fullName = firstName+" "+lastName
             data = {
@@ -835,7 +835,7 @@ class Profile:
         email = request.form.get("email")
         password = request.form.get("password")
         dateOfBirth = request.form.get("dateOfBirth")
-        ipraw = request.header['X-Real-IP']
+        ipraw = request.headers['X-Real-IP']
         IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
         # IPDATA = request.form.get("IPDATA")
         fullName = request.form.get("fullName")

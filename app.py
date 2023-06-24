@@ -2579,7 +2579,7 @@ class Booking:
         Mail.send([customerData["email"]],f"Proof picture added to order",html)
         customerBookingData["page"] = "bookingPage"
 
-        send_notification(customerBookingData["customer"],customerBookingData,f"{host['fullName']} added proof image to your order","Click for more details")
+        send_notification(customerBookingData["customer"],customerBookingData,f"{hostData['fullName']} added proof image to your order","Click for more details")
         return {"SCC": True, "bookingData": bookingData}
     
 

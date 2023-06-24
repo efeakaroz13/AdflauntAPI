@@ -121,11 +121,11 @@ def send_notification(userID,data,title,message):
         'Authorization':f'key={firebaseKey}',
     }
     output = requests.post("https://fcm.googleapis.com/fcm/send",data=json.dumps(payload),headers=headers)
-    print(output.status_code,flush=True)
-    print(output.content,flush=True)
+
+
     return output
 
-send_notification("beogx8b5fozl9mnlbui0qn6m2xvqq",{"page":"hello","id":"1313"},"Server reload","Server reloaded")
+
 
 def calcPercentage(number, per):
     return number * (per / 100)

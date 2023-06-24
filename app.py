@@ -2846,8 +2846,9 @@ class Reviews:
         html = Mail.generate(f"{user['fullName']} gave you a {stars} review",f"{user['fullName']} {stars}<br>'{review}'<br>For your listing {listingData['title']}")
         Mail.send([hostProfile["email"]],f"{user['fullName']} gave you a {stars} review",html)
 
-        customerBookingData["page"] = "bookingPage"
+        
         mbd = getBookingData(bookingID)
+        mbd["page"] = "bookingPage"
         send_notification(hostProfile["_id"],mbd,f"{user['fullName']} gave you a {stars} review","View your review for {listingData['title']")
         return reviewdata
 

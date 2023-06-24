@@ -2541,7 +2541,7 @@ class Booking:
 
         host = listingData["user"]
         customer = bookingData["customer"]
-        hostData = users.find({"_id": host})
+        hostData = users.find({"_id": host})[0]
         customerData = users.find({"_id": customer})[0]
         ordersHost = hostData["orders"]
         ordersCustomer = customerData["orders"]

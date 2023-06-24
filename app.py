@@ -2572,8 +2572,8 @@ class Booking:
         ordersCustomer.pop(cindex)
         ordersHost.append(hostBookingData)
         ordersCustomer.append(customerBookingData)
-        users.update_one({"_id": customer}, {"orders": ordersCustomer})
-        users.update_one({"_id": host}, {"orders": ordersHost})
+        users.update_one({"_id": customer}, {"$set":{"orders": ordersCustomer}})
+        users.update_one({"_id": host}, {"$set":{"orders": ordersHost}})
 
         html = Mail.generate(f"Proof picture added to order",f"Host added proof picture to your order for {listingData['title']}. Check it out on the app!")
         Mail.send([customerData["email"]],f"Proof picture added to order",html)

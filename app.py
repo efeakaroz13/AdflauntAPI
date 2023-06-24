@@ -2772,7 +2772,7 @@ class Reviews:
             return {"SCC": False, "err": "Could not find listing"}
 
         review = request.form.get("review")
-        stars = request.form.et("stars")
+        stars = request.form.get("stars")
 
         if review == None:
             return {"SCC": False, "err": "Review can't be none"}

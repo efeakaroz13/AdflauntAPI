@@ -675,6 +675,45 @@ class Auth:
         for a in allResults:
             return a
         return {"SCC": False, "err": "User not found"}, 404
+    @app.route("/api/google_auth",methods=["POST","GET"])
+    def api_google_auth():
+        data = {"displayName": "Berke Enes Aktümen", "email": "berkenesaktumen@gmail.com", "id": "107576210077606880951", "photoUrl": "https://lh3.googleusercontent.com/a/AAcHTtecVtwF_WGc6hxsNhcTWALMG4AvoQyOBJBPomSy=s1337", "serverAuthCode": None}
+        r = redis.Redis()
+        id_ = request.form.get("id")
+        email = request.form.get("email")
+        photoUrl = request.form.get("photoUrl")
+        displayName = request.form.get("displayName")
+        try:
+            users.find({"email":email})[0]
+            try:
+                users.find({"email":email,"password":id_})[0]
+                return {"SCC":True,"msg":"You are logged in"}
+            except:
+                return {"SCC":False,"err":"You are not registered with google!"}
+
+        except:
+            #REGISTER
+            ipraw = request.header['X-Real-IP']
+            IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}"))
+            data = {
+                "_id": IDCREATOR_internal(24),
+                "email": email,
+                "password": id_,
+                "dateOfBirth": None,
+                "IPDATA": IPDATA,
+                "fullName": fullName,
+                "profileImage": profileImage,
+                "phoneNumber": phoneNumber,
+                "lastTimeLoggedIn": 0,
+                "ipraw": ipraw,
+                "idVerified": False,
+                "thirdParty": thirdParty
+            }
+    @app.route("/ip-data")
+    def Ipdatagetter():
+        ipraw = request.header['X-Real-IP']
+        IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}"))   
+        return IPDATA   
 
     
 class Upload:

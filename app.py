@@ -764,6 +764,7 @@ class Auth:
                 "idVerified": False,
                 "thirdParty": "apple"
             }
+
             users.insert_one(data)
             data["SCC"] = True
             return data
@@ -2541,7 +2542,7 @@ class Booking:
         host = listingData["user"]
         customer = bookingData["customer"]
         hostData = users.find({"_id": host})
-        customerData = users.find({"_id": customer})
+        customerData = users.find({"_id": customer})[0]
         ordersHost = hostData["orders"]
         ordersCustomer = customerData["orders"]
 

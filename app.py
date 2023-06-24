@@ -120,7 +120,7 @@ def send_notification(userID,data,title,message):
         'Content-Type': 'application/json',
         'Authorization':f'key={firebaseKey}',
     }
-    output = requests.post("https://fcm.googleapis.com/fcm/send",data=payload,headers=headers)
+    output = requests.post("https://fcm.googleapis.com/fcm/send",data=json.dumps(payload),headers=headers)
     print(output.status_code,flush=True)
     print(output.content,flush=True)
     return output

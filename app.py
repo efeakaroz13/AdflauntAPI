@@ -30,6 +30,7 @@ import geopy.distance
 #from sib_api_v3_sdk.rest import ApiException
 import smtplib
 import psutil
+import datetime
 
 
 
@@ -1535,6 +1536,7 @@ class Listings:
 
     @app.route("/api/get/listingsFilterer")
     def getListingsByCategory():
+        current_time = time.time()
         sessionName =request.args.get("session")
         page= request.args.get("page")
         query = request.args.get("q")
@@ -1592,7 +1594,8 @@ class Listings:
                     c = listings.find({"_id":c["_id"]})[0]
                 except:
                     continue
-
+                lastDay = c["check_out"]
+                
                 lat_listing = c["lat"]
                 long_listing = c["long"]
 
@@ -2243,7 +2246,7 @@ class Booking:
 
             for a in activeOrders:
                 daysWantToBook = a["daysWantToBook"]
-                for d in doneOrders:
+                for d in daysWantToBook:
                     datesList.append(d)
 
             return {"SCC": True, "output": datesList, "printFee":printCost}

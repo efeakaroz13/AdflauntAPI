@@ -933,9 +933,9 @@ class Verification:
             return {"SCC": False, "err": str(e)}
         return {"SCC": True, "m.body": message.body}
 
-    @app.route("/api/verify/email")
+    @app.route("/api/verify/email",methods=["POST"])
     def email_verification():
-        email = request.args.get("email")
+        email = request.form.get("email")
         if email == None:
             return {"SCC":False,"err":"email is required to use this endpoint"}
         try:

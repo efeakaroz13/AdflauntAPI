@@ -56,6 +56,8 @@ listings = db["Listings"]
 chats = db["Chats"]
 favorites = db["Favorites"]
 admin = db["Admin"]
+bookings = db["Bookings"]
+
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic", "zip", "psd"]
 alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
@@ -535,7 +537,9 @@ class Auth:
             password = request.form.get("password")
             dateOfBirth = request.form.get("dateOfBirth")
             ipraw = request.headers['X-Real-IP']
+
             IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
+
             try:
                 ipraw = IPDATA["query"]
             except:
@@ -1767,6 +1771,7 @@ class Favorites:
         user = login_internal(email, phoneNumber, password)
         if user == False:
             return {"SCC": False, "err": "Login Failed."}
+        UID = user["_id"]
         try:
 
             FAVDATA = favorites.find({"_id": user["_id"]})[0]
@@ -2244,7 +2249,7 @@ class Booking:
                 for d in daysWantToBook:
                     datesList.append(d)
 
-            for a in activeOrders:
+            for a in doneOrders:
                 daysWantToBook = a["daysWantToBook"]
                 for d in daysWantToBook:
                     datesList.append(d)

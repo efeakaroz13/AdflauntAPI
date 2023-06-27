@@ -85,7 +85,7 @@ class Booker:
             current_booking_db_data["waitingForApproval"].append(bookingData)
             bookings_db.insert_one(current_booking_db_data)
         current_booking_db_data["SCC"] = True
-        current_booking_db_data["message"] = "Placed the order waiting for approval by admin."
+        current_booking_db_data["message"] = "Placed the order waiting for approval by host."
         return current_booking_db_data
 
 

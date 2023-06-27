@@ -2191,12 +2191,6 @@ class Booking:
         orders.append(orderData)
         users.update_one({"_id": user["_id"]}, {"$set": {"orders": orders}})
 
-        try:
-            output = Booker.book(listingID, d1, d2, orderData)
-            return output
-        except Exception as e:
-            return {"SCC": False, "err": str(e)}
-
         host_user = users.find({"_id":listingData["user"]})[0]
 
         html = Mail.generate(f"New order",f"You recieved a new order from {user['fullName']} for {listingData['title']}. Check out the details on the app")
@@ -2204,6 +2198,13 @@ class Booking:
         orderData["page"] = "bookingPage"
 
         send_notification(host_user["_id"],orderData,f"New order from {user['fullName']} for {listingData['title']}","Click for more details")
+        
+        try:
+            output = Booker.book(listingID, d1, d2, orderData)
+            return output
+        except Exception as e:
+            return {"SCC": False, "err": str(e)}
+
         
         return {"SCC": True, "orderData": orderData}
 

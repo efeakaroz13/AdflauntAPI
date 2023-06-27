@@ -4,274 +4,296 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation and details of Private API</title>
+    <title>Adflaunt - Powered by Kentel</title>
+    <meta name="description" content="Adflaunt Advertisement. Powered by Kentel Development">
+    <meta name="keywords" content="adflaunt, ricky torres, kentel development,">
+    <meta name="author" content="Efe Akaröz">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Tech Stack</h1>
-    <p>We use mongo DB and python flask combined together on this API. You can find every detail about using this API on this page.</p>
-    <br>
-    <h1> Uploading to this server</h1>
-    <p>So in every endpoint with a file input statement, you need to upload the file to the /api/upload and put the given filename to the parameter.</p>
-    <br>
-    <code>
-        /api/upload - POST<br>
-        'file' - send file to this endpoint, no more documentation here. 
-    </code>
-    <br>
-    <br>
-    <h1>Authentication</h1>
-    <p>We don't have crazy shit here</p>
-    <code>
-        /api/register - POST <br>
-        "email" - E-Mail of the user<br>
-        "password" - Password of the user<br>
-        "dateOfBirth" -  Date of birth of the user In DD/MM/YYYY format<br>
-        "IPDATA" - Data returned from <a href="http://ip-api.com/json"> http://ip-api.com/json</a><br>
-        "fullName"- You know what a name is<br>
-        "profileImage" - As I mentioned before. Don't mention any folders but you can access it trough Static route.<br>
-        "phoneNumber" - Phone number, simple.<br>
-        "thirdParty" - For google and Apple sign up
+
+    <center>
+        <br><br><br>
+        <h1>API service worker</h1>
+        <p>This site is an API service worker, nothing to see here.</p>
+        <p>Powered by <a href="https://kentel.dev">Kentel</a></p>
+    </center>
+    <div style="display:none;">
+
+        <h1>Tech Stack</h1>
+        <p>We use mongo DB and python flask combined together on this API. You can find every detail about using this API on this page.</p>
         <br>
-
-    </code>
-    <br>
-    <code>
-        /api/login - POST <br>
-        "email" - E-Mail of the user<br>
-        "password" - Password of the user<br>
-        "phoneNumber" - Phone number, simple.<br>
-        "notificationID" - Firebase notification ID<br>
-        one of email and phone number should be mentioned while using the API, it can work with both.<br>
-    </code>
-    <br><br>
-    <code>
-        /api/getuser/byid GET <br>
-        'id' as URL argument <br>
-
-
-    </code>
-    <h2>Email And SMS verification</h2>
-    <code>
-
-        /api/verify/email?email=user_email *GET <br>
-        This endpoint is currently working with an email limit, don't send too much requests.<br>
-        /api/verify/sms?phoneNumber=phone_number_user <br>
-        NOTE: This Endpoint is currently broken.
-
-
-    </code>
-    <br><br>
-    <h1>Profile and Credential Updating</h1>
-    <h2>Profile update(you can't update phonenumber email or password)</h2>
-    <p>In this section '/api/updateprofile' you will send POST requests to this endpoint. You are able to use the same things in register, it will automatically understand the data you sent. IPDATA is not required but you are still able to send.</p>
-    <h2>Credential Updating</h2>
-    <code>
-        ENDPOINT: /api/update_login_credentials METHOD: POST <br>
-        # You are able to authenticate with just email or just phoneNumber or by using both <br>
-        # Required: email or phoneNumber,password <br>
-        # optional: <br>
-        #new_password, new_phoneNumber, new_email
-        # I'm not explain what they mean, they are very self explanatory.
-    </code>
-    <h2>Profile View</h2>
-    <code>
-        /api/getprofile/userID GET <br>
-        this endpoint will give the user data from the database <br>
-    </code>
-    <h1>User report system</h1>
-    <code>
-        /api/report/-userID of the suspect- POST <br>
-        required form parameters: <br>
-        email,password,phoneNumber(of current user) <br>
-        title,description(of report) <br>
-        
-
-    </code>
-    <h1>Bug reporting system</h1>
-    <p>This endpoint is for the shake function on mobile and with this endpoint user will be able to trace bugs and reports with screenshot attachment.</p>
-    <code>
-        /api/report/bugs - POST - GET[not finished yet, it will be a admin panel url] <br>
-        "email" - for verification <br>
-        "password" - for verification <br>
-        "title" <br>
-        "description" <br>
-        "bugImage":as a static image url <br>
-        "phoneNumber" - for verification <br>
-
-    </code>
-    <h1>Id verification</h1>
-    <p>So this is a long topic, I didn't do anything on serverside. You need to handle all data from app-side. From this endpoint you will be able to add ID verified state to the database and add the static image name.
-        Let me start by united states state identity cards: every state has their own card with different kind of layout and information. It is a little hard to get all the information turned into text. If you can crop the image of the person just directly from the ID card, it would be so cool.
-    </p>
-    <code>
+        <h1> Uploading to this server</h1>
+        <p>So in every endpoint with a file input statement, you need to upload the file to the /api/upload and put the given filename to the parameter.</p>
         <br>
-        /api/verify/ID - POST  <br>
-        email,password,phoneNumber(if you didn't pass email) <br>
-        photoOfId - You will need to just upload the photo to the upload url and give the returned name.
-    </code> <br>
-    <br>
-    <h1>Listings</h1>
-    <p><code>|-|</code> is the splitter text for images and tags. NOTE: EVERY TAG IS REGISTERED TO DATABASE AS TABLES, DON'T TYPE ANYTHING OTHER THAN LETTERS AND NUMBERS, FILTER.</p>
-    <code>
-        email,password and phoneNumber is the same as authentication
-        ("city")#string <br>
-        ("country")#string <br>
-        ("state")#string <br>
-        ("lat")#number, float <br>
-        ("long")#number, float <br>
-        ("images") <br>
-        ("title") <br>
-        ("price")#number integer <br>
-        ("typeOfAd")#Number 0-1-2 <br>
-        """<br>
-        0-outdoor <br>
-        1-indoor <br>
-        2-vehicle <br>
-        """ <br>
-        ("location") <br>
-        ("revision_limit")#number integer <br>
-        ("digital") #Boolean - 1 for true, 0 for false <br>
-
-        ("width")#Float number<br>
-        ("length")# float number<br>
-
-        ("type") # number - between 1-6 <br>
-        ("check_in")#Date <br>
-        ("check_out") #Date <br>
-        ("population") #number <br>
-        ("discountAvailable")# Number between 1-4 <br>
-        """  <br>
-        Discount available: <br>
-        yes <br>
-        no <br>
-        long-term <br>
-        partial <br>
-        """ <br>
-        ("tags") <br>
-        ("extras")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY <br>
-        ("requirements")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY <br>
-        ("description")#STR <br>
-        ("bookingNote")#STR OPT <br>
-        ("bookingOffset") #INT OPT <br>
-        "Set how many days are required prior to the booking date" <br>
-        ("bookingWindow") #INT OPT <br>
-        "Set how many days in advance a booking can be made." <br>
-        ("minimumBookingDuration") <br>
-        ("BookingImportURL") <br>
-
-    </code>
-
-
-
-    <h1>Search</h1>
-    <code>
-        /api/get/listings GET<br>
-        ("lat") #Latitude <br>
-        ("long") #Longtitude <br>
-        ("mode") #near, search <br>
-        ("km") #diameter of search <br>
-        ("q") #for mode search <br>
-        ("session") #It will return you a session after search for pagination <br>
-        ("page") #page <br>
-    </code>
-
-    <br><br>
-    <h1>Chatting</h1>
-    <code>
-        /api/create/chat POST <br>
-        email,password,phoneNumber, reciver<br>
-        <strong>/api/get/inbox - POST</strong>
+        <code>
+            /api/upload - POST<br>
+            'file' - send file to this endpoint, no more documentation here. 
+        </code>
         <br>
-        email,password,phoneNumber.<br>
+        <br>
+        <h1>Authentication</h1>
+        <p>We don't have crazy shit here</p>
+        <code>
+            /api/register - POST <br>
+            "email" - E-Mail of the user<br>
+            "password" - Password of the user<br>
+            "dateOfBirth" -  Date of birth of the user In DD/MM/YYYY format<br>
+            "IPDATA" - Data returned from <a href="http://ip-api.com/json"> http://ip-api.com/json</a><br>
+            "fullName"- You know what a name is<br>
+            "profileImage" - As I mentioned before. Don't mention any folders but you can access it trough Static route.<br>
+            "phoneNumber" - Phone number, simple.<br>
+            "thirdParty" - For google and Apple sign up
+            <br>
 
-    </code>
-    <h1> Socket connection for chatting</h1>
-    <code>
-        /tests/chat - For example(credentials not gonna work, change them) <br>
-        NOTE: YOU CAN'T CREATE CHATS WITH SOCKET CONNECTIONS.<br>
-        NOTE: DON'T FORGET TO FILTER TRAFFIC FOR RECIEVING DATA, ALL USERS ARE IN THE SAME POOL.<br><br>
-        Send json to <strong>'join'</strong> socket. It does not have any URL it works on /.<br>
-        "email" <br>
-        "password" <br>
-        "phoneNumber" <br>
-        "ChatID" <br>
-        As json.<br>
-        NOTE:It will return you a session ID after it, you can use that id for sending messages and leaving.<br>
+        </code>
         <br>
-        <strong>leave</strong> socket.<br>
-        Needed data: "SID" in json<br>
-        <br>
-        *****IMPORTANT******<br>
-        send_msg:<br>
-        SID,content,image<br>
-        it will be enough to send messages. It will be automatically saved into the mongo DB.<br>
+        <code>
+            /api/login - POST <br>
+            "email" - E-Mail of the user<br>
+            "password" - Password of the user<br>
+            "phoneNumber" - Phone number, simple.<br>
+            "notificationID" - Firebase notification ID<br>
+            one of email and phone number should be mentioned while using the API, it can work with both.<br>
+        </code>
         <br><br>
-        receive - Receiving the sent information above. NOTE: WORKS AS A POOL.<br>
+        <code>
+            /api/getuser/byid GET <br>
+            'id' as URL argument <br>
 
 
+        </code>
+        <h2>Email And SMS verification</h2>
+        <code>
+
+            /api/verify/email?email=user_email *GET <br>
+            This endpoint is currently working with an email limit, don't send too much requests.<br>
+            /api/verify/sms?phoneNumber=phone_number_user <br>
+            NOTE: This Endpoint is currently broken.
 
 
-
-
-    </code>
-
-    <h1>Favorites(wishlist)</h1>
-    <code>
-        /api/addto/favorites POST <br>
-        email,phoneNumber,password,listingID<br>
-        <br>
-        //And for getting the wishlist back:<br>
-        /api/get/favorites POST<br>
-        email,phoneNumber,password <br>
-        And you are good to go.<br>
-
-
-    </code><br>
-    <br>
-    <h1>Reviews,proofs,orders and balances</h1>
-     <p>In this API the order system has 3 phases:</p>
-     <ul>
-        <li>waitingForApproval</li>
-        <li>activeOrders</li>
-        <li>doneOrders</li>
-     </ul>
-     <p>Once you order something(you will get the money from customer with additional printing fee) with this API, it first checks availability for booking  and if so, it adds it to bookings-> listing-> waitingForApproval. After that, user will wait for admin to approve their order and print. After that the order will be active on profile. User will be able to see the data when they want and it's status. But host will not receive anything until admin approves it. For completing the orders these are the steps that both user and host will follow:</p>
-     <ul>
-        <li>After receiving the package of ad which is printed by Adflaunt, host will send the user a proof with list of images or just one, demonstrating that the host is displaying your ad in correct position. </li>
-        <li>When hosts sends the proof, user will have the option to accept it or not. If not, they will contact customer support and adflaunt will handle the banning and user reporting</li>
-        <li>If user accepts it, payment will go to host's profile(not directly to their bank)</li>
-        <li>If host wants to hold all their money in our sytem it will be ok for them, once they want to withdraw money from their account using the API down below.</li>
-        <a href="https://stripe.com/docs/connect/collect-then-transfer-guide">Stripe pay out system</a>
-        <img src="https://b.stripecdn.com/docs-statics-srv/assets/application_fee_amount.837aa2339469b3c1a4319672971c1367.svg" loading="lazy" alt="">
-    </ul>
-    <code>
-        /api/book * POST <br>
-        Send the security credentials as always.<br>
-        required fields:title,description,from,to,printingFile  | <strong>from,to format:YYYY-MM-DD</strong><br>
-        will return bookingID.<br>
-        <br>
-        
-        /api/booking/addProof/listingID/bookingID * POST <br>
-        Security Credentials, images(custom array with '|-|' between all filenames).<br>
-        <br>
-        <h3>Fetching orders</h3>
-        /api/getorders/listingID * GET<br>
-        No authentication required. Give the listing ID.<br><br>
-        /api/orders * POST <br>
-        Just security credentials, it will return all the data for the current user <br>
-        <br>
-        /api/order/bookingID * GET 
-        Get booking data with booking ID, any extra field is not required 
+        </code>
         <br><br>
-        /api/reviews/add/listingID/bookingID * POST <br>
-        security credentials are required<br>
-        review: string<br>
-        stars:int or float<br>
+        <h1>Profile and Credential Updating</h1>
+        <h2>Profile update(you can't update phonenumber email or password)</h2>
+        <p>In this section '/api/updateprofile' you will send POST requests to this endpoint. You are able to use the same things in register, it will automatically understand the data you sent. IPDATA is not required but you are still able to send.</p>
+        <h2>Credential Updating</h2>
+        <code>
+            ENDPOINT: /api/update_login_credentials METHOD: POST <br>
+            # You are able to authenticate with just email or just phoneNumber or by using both <br>
+            # Required: email or phoneNumber,password <br>
+            # optional: <br>
+            #new_password, new_phoneNumber, new_email
+            # I'm not explain what they mean, they are very self explanatory.
+        </code>
+        <h2>Profile View</h2>
+        <code>
+            /api/getprofile/userID GET <br>
+            this endpoint will give the user data from the database <br>
+        </code>
+        <h1>User report system</h1>
+        <code>
+            /api/report/-userID of the suspect- POST <br>
+            required form parameters: <br>
+            email,password,phoneNumber(of current user) <br>
+            title,description(of report) <br>
+            
+
+        </code>
+        <h1>Bug reporting system</h1>
+        <p>This endpoint is for the shake function on mobile and with this endpoint user will be able to trace bugs and reports with screenshot attachment.</p>
+        <code>
+            /api/report/bugs - POST - GET[not finished yet, it will be a admin panel url] <br>
+            "email" - for verification <br>
+            "password" - for verification <br>
+            "title" <br>
+            "description" <br>
+            "bugImage":as a static image url <br>
+            "phoneNumber" - for verification <br>
+
+        </code>
+        <h1>Id verification</h1>
+        <p>So this is a long topic, I didn't do anything on serverside. You need to handle all data from app-side. From this endpoint you will be able to add ID verified state to the database and add the static image name.
+            Let me start by united states state identity cards: every state has their own card with different kind of layout and information. It is a little hard to get all the information turned into text. If you can crop the image of the person just directly from the ID card, it would be so cool.
+        </p>
+        <code>
+            <br>
+            /api/verify/ID - POST  <br>
+            email,password,phoneNumber(if you didn't pass email) <br>
+            photoOfId - You will need to just upload the photo to the upload url and give the returned name.
+        </code> <br>
         <br>
-        /api/getBalance * POST<br>
-        just security credentials, will give you the current user balance
+        <h1>Listings</h1>
+        <p><code>|-|</code> is the splitter text for images and tags. NOTE: EVERY TAG IS REGISTERED TO DATABASE AS TABLES, DON'T TYPE ANYTHING OTHER THAN LETTERS AND NUMBERS, FILTER.</p>
+        <code>
+            email,password and phoneNumber is the same as authentication
+            ("city")#string <br>
+            ("country")#string <br>
+            ("state")#string <br>
+            ("lat")#number, float <br>
+            ("long")#number, float <br>
+            ("images") <br>
+            ("title") <br>
+            ("price")#number integer <br>
+            ("typeOfAd")#Number 0-1-2 <br>
+            """<br>
+            0-outdoor <br>
+            1-indoor <br>
+            2-vehicle <br>
+            """ <br>
+            ("location") <br>
+            ("revision_limit")#number integer <br>
+            ("digital") #Boolean - 1 for true, 0 for false <br>
+
+            ("width")#Float number<br>
+            ("length")# float number<br>
+
+            ("type") # number - between 1-6 <br>
+            ("check_in")#Date <br>
+            ("check_out") #Date <br>
+            ("population") #number <br>
+            ("discountAvailable")# Number between 1-4 <br>
+            """  <br>
+            Discount available: <br>
+            yes <br>
+            no <br>
+            long-term <br>
+            partial <br>
+            """ <br>
+            ("tags") <br>
+            ("extras")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY <br>
+            ("requirements")#fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY <br>
+            ("description")#STR <br>
+            ("bookingNote")#STR OPT <br>
+            ("bookingOffset") #INT OPT <br>
+            "Set how many days are required prior to the booking date" <br>
+            ("bookingWindow") #INT OPT <br>
+            "Set how many days in advance a booking can be made." <br>
+            ("minimumBookingDuration") <br>
+            ("BookingImportURL") <br>
+
+        </code>
 
 
-    </code>
+
+        <h1>Search</h1>
+        <code>
+            /api/get/listings GET<br>
+            ("lat") #Latitude <br>
+            ("long") #Longtitude <br>
+            ("mode") #near, search <br>
+            ("km") #diameter of search <br>
+            ("q") #for mode search <br>
+            ("session") #It will return you a session after search for pagination <br>
+            ("page") #page <br>
+        </code>
+
+        <br><br>
+        <h1>Chatting</h1>
+        <code>
+            /api/create/chat POST <br>
+            email,password,phoneNumber, reciver<br>
+            <strong>/api/get/inbox - POST</strong>
+            <br>
+            email,password,phoneNumber.<br>
+
+        </code>
+        <h1> Socket connection for chatting</h1>
+        <code>
+            /tests/chat - For example(credentials not gonna work, change them) <br>
+            NOTE: YOU CAN'T CREATE CHATS WITH SOCKET CONNECTIONS.<br>
+            NOTE: DON'T FORGET TO FILTER TRAFFIC FOR RECIEVING DATA, ALL USERS ARE IN THE SAME POOL.<br><br>
+            Send json to <strong>'join'</strong> socket. It does not have any URL it works on /.<br>
+            "email" <br>
+            "password" <br>
+            "phoneNumber" <br>
+            "ChatID" <br>
+            As json.<br>
+            NOTE:It will return you a session ID after it, you can use that id for sending messages and leaving.<br>
+            <br>
+            <strong>leave</strong> socket.<br>
+            Needed data: "SID" in json<br>
+            <br>
+            *****IMPORTANT******<br>
+            send_msg:<br>
+            SID,content,image<br>
+            it will be enough to send messages. It will be automatically saved into the mongo DB.<br>
+            <br><br>
+            receive - Receiving the sent information above. NOTE: WORKS AS A POOL.<br>
+
+
+
+
+
+
+        </code>
+
+        <h1>Favorites(wishlist)</h1>
+        <code>
+            /api/addto/favorites POST <br>
+            email,phoneNumber,password,listingID<br>
+            <br>
+            //And for getting the wishlist back:<br>
+            /api/get/favorites POST<br>
+            email,phoneNumber,password <br>
+            And you are good to go.<br>
+
+
+        </code><br>
+        <br>
+        <h1>Reviews,proofs,orders and balances</h1>
+         <p>In this API the order system has 3 phases:</p>
+         <ul>
+            <li>waitingForApproval</li>
+            <li>activeOrders</li>
+            <li>doneOrders</li>
+         </ul>
+         <p>Once you order something(you will get the money from customer with additional printing fee) with this API, it first checks availability for booking  and if so, it adds it to bookings-> listing-> waitingForApproval. After that, user will wait for admin to approve their order and print. After that the order will be active on profile. User will be able to see the data when they want and it's status. But host will not receive anything until admin approves it. For completing the orders these are the steps that both user and host will follow:</p>
+         <ul>
+            <li>After receiving the package of ad which is printed by Adflaunt, host will send the user a proof with list of images or just one, demonstrating that the host is displaying your ad in correct position. </li>
+            <li>When hosts sends the proof, user will have the option to accept it or not. If not, they will contact customer support and adflaunt will handle the banning and user reporting</li>
+            <li>If user accepts it, payment will go to host's profile(not directly to their bank)</li>
+            <li>If host wants to hold all their money in our sytem it will be ok for them, once they want to withdraw money from their account using the API down below.</li>
+            <a href="https://stripe.com/docs/connect/collect-then-transfer-guide">Stripe pay out system</a>
+            <img src="https://b.stripecdn.com/docs-statics-srv/assets/application_fee_amount.837aa2339469b3c1a4319672971c1367.svg" loading="lazy" alt="">
+        </ul>
+        <code>
+            /api/book * POST <br>
+            Send the security credentials as always.<br>
+            required fields:title,description,from,to,printingFile  | <strong>from,to format:YYYY-MM-DD</strong><br>
+            will return bookingID.<br>
+            <br>
+            
+            /api/booking/addProof/listingID/bookingID * POST <br>
+            Security Credentials, images(custom array with '|-|' between all filenames).<br>
+            <br>
+            <h3>Fetching orders</h3>
+            /api/getorders/listingID * GET<br>
+            No authentication required. Give the listing ID.<br><br>
+            /api/orders * POST <br>
+            Just security credentials, it will return all the data for the current user <br>
+            <br>
+            /api/order/bookingID * GET 
+            Get booking data with booking ID, any extra field is not required 
+            <br><br>
+            /api/reviews/add/listingID/bookingID * POST <br>
+            security credentials are required<br>
+            review: string<br>
+            stars:int or float<br>
+            <br>
+            /api/getBalance * POST<br>
+            just security credentials, will give you the current user balance
+
+
+        </code>
+    </div>
+    <style>
+        body{
+            font-family: 'DM Sans', sans-serif;
+        }
+    </style>
 </body>
 </html>

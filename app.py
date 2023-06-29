@@ -2921,7 +2921,7 @@ class OrdersAndSellerBalance:
 
 
             for d in doneOrders:
-                d = getBookingData(w["bookingID"])
+                d = getBookingData(d["bookingID"])
                 asHost.append(d)
 
 

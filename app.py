@@ -3,7 +3,15 @@ Author:Efe Akaröz
 1st of may, monday 2023
 """
 import json
-from flask import Flask, render_template, request, redirect, make_response, abort,jsonify
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    make_response,
+    abort,
+    jsonify,
+)
 import cv2
 import requests
 import time
@@ -23,15 +31,15 @@ import datetime
 from kbook import Booker
 from datetime import date, timedelta
 import cv2
-from stripe_auth import stripeSecret,brevoSecret,firebaseKey
+from stripe_auth import stripeSecret, brevoSecret, firebaseKey
 import stripe
 import geopy.distance
-#import sib_api_v3_sdk
-#from sib_api_v3_sdk.rest import ApiException
+
+# import sib_api_v3_sdk
+# from sib_api_v3_sdk.rest import ApiException
 import smtplib
 import psutil
 import datetime
-
 
 
 stripe.api_key = "sk_test_51LkdT2BwxpdnO2PUh2too5t3AfGBGZqkDltuL0GuHIAClpHTVa9IiYN8bKdW7P3eSrKZbWjor9xtp2InwnuZgr8X00sXVNT3ql"
@@ -44,12 +52,12 @@ printFee = float(commisionRates.split(",")[1])
 r = redis.Redis()
 
 twcl = Client(SID, authToken)
-key = b'wlKSloOfyKju_DMzYvCygRI6X9KR5w9Ugp4BZ5wa7Dw='
+key = b"wlKSloOfyKju_DMzYvCygRI6X9KR5w9Ugp4BZ5wa7Dw="
 fernet = Fernet(key)
 
 client = pymongo.MongoClient()
-db = client['Adflaunt']
-users = db['Users']
+db = client["Adflaunt"]
+users = db["Users"]
 reports = db["Reports"]
 bugs = db["Bugs"]
 listings = db["Listings"]
@@ -60,17 +68,44 @@ bookings = db["Bookings"]
 
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "heic", "zip", "psd"]
-alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
-            "v", "w", "x", "y", "z"]
+alphabet = [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
+    "z",
+]
 app.config["SECRET"] = "123"
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 sids = []
 
 maploader = open("loader.txt", "r").read()
-class Mail:
 
+
+class Mail:
     def __init__(self):
         self.port = 587
         self.smtp_server_domain_name = "smtp-relay.sendinblue.com"
@@ -78,56 +113,60 @@ class Mail:
         self.password = "fEMV21a9yP3n7vZN"
 
     def send(emails, subject, content):
-        
         headers = {
-
-            "api-key":brevoSecret,
-
-            "accept":"application/json",
-            "content-type":"application/json"
+            "api-key": brevoSecret,
+            "accept": "application/json",
+            "content-type": "application/json",
         }
-        data={
-           "sender":{
-              "name":"Adflaunt",
-              "email":"Flauntad@gmail.com"
-           },
-           "to":[],
-           "subject":f"{subject}",
-           "htmlContent":content
+        data = {
+            "sender": {"name": "Adflaunt", "email": "Flauntad@gmail.com"},
+            "to": [],
+            "subject": f"{subject}",
+            "htmlContent": content,
         }
         for e in emails:
-            data["to"].append({"email":e,"name":"Kentel Technologies"})
-        page = requests.post("https://api.brevo.com/v3/smtp/email",json=data,headers=headers)
+            data["to"].append({"email": e, "name": "Kentel Technologies"})
+        page = requests.post(
+            "https://api.brevo.com/v3/smtp/email", json=data, headers=headers
+        )
 
         output = json.loads(page.content)
         output["statusCode"] = page.status_code
-        
+
         return output
-    def generate(msgTitle,msgBody):
-        return '<!DOCTYPE html><html><head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>'+msgTitle+'</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 400; src: local(\'Source Sans Pro Regular\'), local(\'SourceSansPro-Regular\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format(\'woff\'); } @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 700; src: local(\'Source Sans Pro Bold\'), local(\'SourceSansPro-Bold\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format(\'woff\'); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style></head><body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Make fast, cheap, easy advertisements with Adflaunt! </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">'+msgTitle+'</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">'+msgBody+'</p> </td> </tr> <!-- start button --> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px">Kentel <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --></body></html>'
+
+    def generate(msgTitle, msgBody):
+        return (
+            '<!DOCTYPE html><html><head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>'
+            + msgTitle
+            + '</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 400; src: local(\'Source Sans Pro Regular\'), local(\'SourceSansPro-Regular\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format(\'woff\'); } @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 700; src: local(\'Source Sans Pro Bold\'), local(\'SourceSansPro-Bold\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format(\'woff\'); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style></head><body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Make fast, cheap, easy advertisements with Adflaunt! </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">'
+            + msgTitle
+            + '</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">'
+            + msgBody
+            + '</p> </td> </tr> <!-- start button --> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px">Kentel <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --></body></html>'
+        )
+
 
 def sendmail(email, title, content):
     return True
 
 
-
-
-def send_notification(userID,data,title,message):
+def send_notification(userID, data, title, message):
     data["click_action"] = "FLUTTER_NOTIFICATION_CLICK"
     payload = {
         "to": f"/topics/{userID}",
         "notification": {"title": title, "body": message},
-        "data": data
+        "data": data,
     }
     headers = {
-        'Content-Type': 'application/json',
-        'Authorization':f'key={firebaseKey}',
+        "Content-Type": "application/json",
+        "Authorization": f"key={firebaseKey}",
     }
-    output = requests.post("https://fcm.googleapis.com/fcm/send",data=json.dumps(payload),headers=headers)
-
+    output = requests.post(
+        "https://fcm.googleapis.com/fcm/send", data=json.dumps(payload), headers=headers
+    )
 
     return output
-
 
 
 def calcPercentage(number, per):
@@ -159,36 +198,39 @@ def decrypt(text):
     return fernet.decrypt(text.encode()).decode()
 
 
-
 def getListingsOfUser(userID):
-    results =  listings.find({"user":userID})
+    results = listings.find({"user": userID})
     output = []
     for r in results:
         output.append(r)
     return output
 
 
-
 def getBookingData(bookingID):
     bookings = db["Bookings"]
     allBookings = bookings.find({})
     for b in allBookings:
-        listingData = listings.find({"_id":b["_id"]})[0]
+        listingData = listings.find({"_id": b["_id"]})[0]
         activeOrders = b["activeOrders"]
         waitingForApproval = b["waitingForApproval"]
-        doneOrders= b["doneOrders"]
+        doneOrders = b["doneOrders"]
         for a in activeOrders:
             if a["bookingID"] == bookingID:
-                return {"status":"active","data":a,"listingData":listingData}
+                return {"status": "active", "data": a, "listingData": listingData}
         for w in waitingForApproval:
             if w["bookingID"] == bookingID:
-                return {"status":"waitingForApproval","data":w,"listingData":listingData}
+                return {
+                    "status": "waitingForApproval",
+                    "data": w,
+                    "listingData": listingData,
+                }
         for d in doneOrders:
             if d["bookingID"] == bookingID:
-                return {"status":"completed","data":d,"listingData":listingData}
-    return {"status":"Not found","data":{}}
+                return {"status": "completed", "data": d, "listingData": listingData}
+    return {"status": "Not found", "data": {}}
 
-def dates2Arr(d1,d2):
+
+def dates2Arr(d1, d2):
     if d1 == None:
         return []
     if d2 == None:
@@ -226,20 +268,20 @@ def dates2Arr(d1,d2):
         daysWantToBook.append(day)
     return daysWantToBook
 
+
 def returnWidthLength(data):
     try:
-        width  = data["width"]
+        width = data["width"]
     except:
         width = 0
     try:
         height = data["length"]
     except:
         height = 0
-    return {"width":width,"height":height}
+    return {"width": width, "height": height}
 
 
-
-@socketio.on('join')
+@socketio.on("join")
 def joinChat(data):
     email = data["email"]
     password = data["password"]
@@ -274,26 +316,29 @@ def joinChat(data):
     for c in chatMembers:
         if c["user"] != user["_id"]:
             opposition = c["user"]
-            break 
+            break
     if opposition == "":
         oppositionData = {}
     else:
         try:
-            oppositionData = users.find({"_id":opposition})[0]
+            oppositionData = users.find({"_id": opposition})[0]
         except:
             oppositionData = {}
 
-
-    sessionData = {"SCC": True, "SID": sid, "chat": chat, "chatID": chatID, "user": user,"opposition":oppositionData}
+    sessionData = {
+        "SCC": True,
+        "SID": sid,
+        "chat": chat,
+        "chatID": chatID,
+        "user": user,
+        "opposition": oppositionData,
+    }
     sids.append(sessionData)
 
     return sessionData
 
 
-
-
-
-@socketio.on('leave')
+@socketio.on("leave")
 def leaveRoom(data):
     sid = data["SID"]
     for s in sids:
@@ -303,7 +348,7 @@ def leaveRoom(data):
             return {"SCC": True, "msg": "Disconnected"}
 
 
-@socketio.on('send_msg')
+@socketio.on("send_msg")
 def socketiosendmsg(data):
     sid = data["SID"]
     content = data["content"]
@@ -311,9 +356,9 @@ def socketiosendmsg(data):
 
     for s in sids:
         if s["SID"] == sid:
-            sender = s['user']['_id']
+            sender = s["user"]["_id"]
 
-            chatData = chats.find({'_id': s["chatID"]})[0]
+            chatData = chats.find({"_id": s["chatID"]})[0]
             members = chatData["members"]
             receiver = ""
             for m in members:
@@ -325,11 +370,13 @@ def socketiosendmsg(data):
                 "sender": sender,
                 "receiver": receiver,
                 "at": time.time(),
-                "_id": IDCREATOR_internal(25)
+                "_id": IDCREATOR_internal(25),
             }
             chatData["messages"].append(msgData)
 
-            chats.update_one({"_id": s["chatID"]}, {"$set": {"messages": chatData["messages"]}})
+            chats.update_one(
+                {"_id": s["chatID"]}, {"$set": {"messages": chatData["messages"]}}
+            )
             msgData["chatID"] = chatData["_id"]
 
             socketio.emit("receive", msgData)
@@ -360,7 +407,6 @@ def allowed_file(filename):
 @app.route("/")
 def index():
     return render_template("docs.html")
-
 
 
 class Messaging:
@@ -401,7 +447,6 @@ class Messaging:
             recieverHere = False
             senderHere = False
             for m in members:
-
                 if m["user"] == recieverUser["_id"]:
                     recieverHere = True
                 if m["user"] == user["_id"]:
@@ -413,11 +458,16 @@ class Messaging:
 
         chatID = IDCREATOR_internal(30)
         chatData = {
-            "members": [{"user": user["_id"], "profilePicture": user["profileImage"]},
-                        {"user": recieverUser["_id"], "profilePicture": recieverUser["profileImage"]}],
+            "members": [
+                {"user": user["_id"], "profilePicture": user["profileImage"]},
+                {
+                    "user": recieverUser["_id"],
+                    "profilePicture": recieverUser["profileImage"],
+                },
+            ],
             "createdAt": time.time(),
             "messages": [],
-            "_id": chatID
+            "_id": chatID,
         }
         chats.insert_one(chatData)
         chatData["SCC"] = True
@@ -465,21 +515,27 @@ class Messaging:
                 members = chatD["members"]
                 opposition = {}
                 for m in members:
-
                     if m["user"] != user["_id"]:
                         opposition = users.find({"_id": m["user"]})[0]
                         del opposition["password"]
                 try:
-
-                    mdata = {"lastMessage": lastMessage, "them": opposition, "chatID": chatD["_id"],
-                         "lastMessageTime": lastMessage['at']}
+                    mdata = {
+                        "lastMessage": lastMessage,
+                        "them": opposition,
+                        "chatID": chatD["_id"],
+                        "lastMessageTime": lastMessage["at"],
+                    }
                 except:
-                    mdata = {"lastMessage": lastMessage, "them": opposition, "chatID": chatD["_id"],
-                         "lastMessageTime": 0}
+                    mdata = {
+                        "lastMessage": lastMessage,
+                        "them": opposition,
+                        "chatID": chatD["_id"],
+                        "lastMessageTime": 0,
+                    }
                 output.append(mdata)
 
             users.update_one({"_id": user["_id"]}, {"$set": {"inbox": inbox}})
-            output = sorted(output, key=operator.itemgetter('lastMessageTime'))
+            output = sorted(output, key=operator.itemgetter("lastMessageTime"))
             output.reverse()
             return {"SCC": True, "output": output}
         except Exception as e:
@@ -504,12 +560,18 @@ class Messaging:
         try:
             page = int(page)
         except:
-            return {"SCC": False, "err": "Can't resolve page as an integer. Please enter a valid number"}
+            return {
+                "SCC": False,
+                "err": "Can't resolve page as an integer. Please enter a valid number",
+            }
 
         try:
             chatData = chats.find({"_id": chatID})[0]
         except:
-            return {"SCC": False, "err": "Could not find chat in the database. This error can be on our hand."}
+            return {
+                "SCC": False,
+                "err": "Could not find chat in the database. This error can be on our hand.",
+            }
         messages = chatData["messages"]
         messages.reverse()
         startFrom = data2page * page
@@ -524,7 +586,7 @@ class Messaging:
 
 
 class Auth:
-    @app.route('/api/register', methods=["POST"])
+    @app.route("/api/register", methods=["POST"])
     def register():
         if request.method == "POST":
             email = request.form.get("email")
@@ -536,7 +598,7 @@ class Auth:
 
             password = request.form.get("password")
             dateOfBirth = request.form.get("dateOfBirth")
-            ipraw = request.headers['X-Real-IP']
+            ipraw = request.headers["X-Real-IP"]
 
             IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
 
@@ -551,7 +613,12 @@ class Auth:
             thirdParty = request.form.get("thirdParty")
 
             if phoneNumber != None:
-                phoneNumber = phoneNumber.replace("+", "").replace("(", "").replace(")", "").replace(" ", "")
+                phoneNumber = (
+                    phoneNumber.replace("+", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                    .replace(" ", "")
+                )
 
             if phoneNumber != None and phoneNumber != "":
                 allResults = users.find({"phoneNumber": phoneNumber})
@@ -571,7 +638,7 @@ class Auth:
                 "lastTimeLoggedIn": 0,
                 "ipraw": ipraw,
                 "idVerified": False,
-                "thirdParty": thirdParty
+                "thirdParty": thirdParty,
             }
 
             result = users.insert_one(data)
@@ -581,14 +648,17 @@ class Auth:
 
     @app.route("/api/login", methods=["POST"])
     def login():
-        ipraw = request.headers['X-Real-IP']
+        ipraw = request.headers["X-Real-IP"]
         IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
 
         email = request.form.get("email")
         password = request.form.get("password")
         phonenumber = request.form.get("phonenumber")
         if email == None and phonenumber == None:
-            return {"SCC": False, "err": "You need to specify at least a phone number or a email"}
+            return {
+                "SCC": False,
+                "err": "You need to specify at least a phone number or a email",
+            }
         if password == None:
             return {"SCC": False, "err": "you need to  specify a password to login"}
 
@@ -598,34 +668,58 @@ class Auth:
         if phonenumber != None:
             allResults = users.find({"phoneNumber": phonenumber, "password": password})
 
-        output = {
-            "SCC": False,
-            "err": "Credentials are not correct."
-        }
+        output = {"SCC": False, "err": "Credentials are not correct."}
         notificationID = request.form.get("notificationID")
         latOfUser = request.form.get("lat")
         longOfUser = request.form.get("long")
-        
+
         if latOfUser != None:
             latOfUser = float(latOfUser)
         if longOfUser != None:
             longOfUser = float(longOfUser)
 
-
         for a in allResults:
             output = a
             if notificationID == None:
                 if latOfUser != None and longOfUser != None:
-                    users.update_one({'_id': output["_id"]}, {"$set": {"lat": latOfUser,"long":longOfUser,"lastTimeLoggedIn": time.time()}})
+                    users.update_one(
+                        {"_id": output["_id"]},
+                        {
+                            "$set": {
+                                "lat": latOfUser,
+                                "long": longOfUser,
+                                "lastTimeLoggedIn": time.time(),
+                            }
+                        },
+                    )
                 else:
-                    users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time()}}) 
+                    users.update_one(
+                        {"_id": output["_id"]},
+                        {"$set": {"lastTimeLoggedIn": time.time()}},
+                    )
             else:
                 if latOfUser != None and longOfUser != None:
-
-                    users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time(),"notificationID":notificationID,"lat": latOfUser,"long":longOfUser}})
+                    users.update_one(
+                        {"_id": output["_id"]},
+                        {
+                            "$set": {
+                                "lastTimeLoggedIn": time.time(),
+                                "notificationID": notificationID,
+                                "lat": latOfUser,
+                                "long": longOfUser,
+                            }
+                        },
+                    )
                 else:
-                    users.update_one({'_id': output["_id"]}, {"$set": {"lastTimeLoggedIn": time.time(),"notificationID":notificationID}})
-            
+                    users.update_one(
+                        {"_id": output["_id"]},
+                        {
+                            "$set": {
+                                "lastTimeLoggedIn": time.time(),
+                                "notificationID": notificationID,
+                            }
+                        },
+                    )
 
             output["SCC"] = True
         try:
@@ -633,14 +727,10 @@ class Auth:
         except:
             pass
 
-
         try:
             del output["inbox"]
         except:
             pass
-
-
-
 
         return output
 
@@ -653,7 +743,12 @@ class Auth:
         if email == None and phoneNumber == None:
             return {"SCC": False, "err": "You need to specify email or phoneNumber"}
         if phoneNumber != None:
-            phoneNumber = phoneNumber.replace("+", "").replace("(", "").replace(")", "").replace(" ", "")
+            phoneNumber = (
+                phoneNumber.replace("+", "")
+                .replace("(", "")
+                .replace(")", "")
+                .replace(" ", "")
+            )
             allResults = users.find({"phoneNumber": phoneNumber})
             for a in allResults:
                 output["phoneNumberExists"] = True
@@ -678,33 +773,36 @@ class Auth:
         for a in allResults:
             return a
         return {"SCC": False, "err": "User not found"}, 404
-    @app.route("/api/google_auth",methods=["POST"])
+
+    @app.route("/api/google_auth", methods=["POST"])
     def api_google_auth():
-        #data = {"displayName": "Berke Enes Aktümen", "email": "berkenesaktumen@gmail.com", "id": "107576210077606880951", "photoUrl": "https://lh3.googleusercontent.com/a/AAcHTtecVtwF_WGc6hxsNhcTWALMG4AvoQyOBJBPomSy=s1337", "serverAuthCode": None}
+        # data = {"displayName": "Berke Enes Aktümen", "email": "berkenesaktumen@gmail.com", "id": "107576210077606880951", "photoUrl": "https://lh3.googleusercontent.com/a/AAcHTtecVtwF_WGc6hxsNhcTWALMG4AvoQyOBJBPomSy=s1337", "serverAuthCode": None}
         r = redis.Redis()
         id_ = request.form.get("id")
         email = request.form.get("email")
         photoUrl = request.form.get("photoUrl")
         displayName = request.form.get("displayName")
-        if id_ == None or email==None or photoUrl == None or displayName==None:
-            return {"SCC":False,"err":"Form missing"}
+        if id_ == None or email == None or photoUrl == None or displayName == None:
+            return {"SCC": False, "err": "Form missing"}
         try:
-            users.find({"email":email})[0]
+            users.find({"email": email})[0]
             try:
-                data = users.find({"email":email,"password":id_})[0]
+                data = users.find({"email": email, "password": id_})[0]
                 data["SCC"] = True
                 data["googleStatus"] = "login"
-                users.update_one({"_id":data["_id"]},{"$set":{"lastTimeLoggedIn":time.time()}})
+                users.update_one(
+                    {"_id": data["_id"]}, {"$set": {"lastTimeLoggedIn": time.time()}}
+                )
                 return data
             except:
-                return {"SCC":False,"err":"You are not registered with google!"}
+                return {"SCC": False, "err": "You are not registered with google!"}
 
         except:
-            #REGISTER
-            ipraw = request.headers['X-Real-IP']
+            # REGISTER
+            ipraw = request.headers["X-Real-IP"]
             IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
-            profile_img_download = requests.get(photoUrl,stream=True)
-            with open(f"static/{IDCREATOR_internal(30)}.jpg","wb") as f:
+            profile_img_download = requests.get(photoUrl, stream=True)
+            with open(f"static/{IDCREATOR_internal(30)}.jpg", "wb") as f:
                 f.write(profile_img_download.content)
                 profileImage = f.name.split("/")[-1]
 
@@ -720,41 +818,44 @@ class Auth:
                 "lastTimeLoggedIn": 0,
                 "ipraw": ipraw,
                 "idVerified": False,
-                "thirdParty": "google"
+                "thirdParty": "google",
             }
             users.insert_one(data)
-            data["SCC"]=True 
+            data["SCC"] = True
             data["googleStatus"] = "register"
-            return data 
+            return data
 
-    @app.route("/api/apple_auth",methods=["POST","GET"])
+    @app.route("/api/apple_auth", methods=["POST", "GET"])
     def apple_auth_api():
         if request.method == "GET":
             id_ = request.args.get("id")
             if id_ == None:
-                return {"SCC":False,"err":"you need to enter 'id'"},400
+                return {"SCC": False, "err": "you need to enter 'id'"}, 400
             try:
-                data = users.find({"password":id_})[0]
-                data["SCC"]= True
+                data = users.find({"password": id_})[0]
+                data["SCC"] = True
                 return data
             except:
-                return {"SCC":False,"err":"Couldnt find user"},404
+                return {"SCC": False, "err": "Couldnt find user"}, 404
         if request.method == "POST":
             firstName = request.form.get("firstName")
             lastName = request.form.get("lastName")
             email = request.form.get("email")
             id_ = request.form.get("id")
-            if firstName==None or lastName == None or email== None or id_ == None:
-                return {"SCC":False,"err":"Return all the information to the server"},401
+            if firstName == None or lastName == None or email == None or id_ == None:
+                return {
+                    "SCC": False,
+                    "err": "Return all the information to the server",
+                }, 401
             try:
-                users.find({"email":email})[0]
-                return {"SCC":False,"err":"User already exists"},401
+                users.find({"email": email})[0]
+                return {"SCC": False, "err": "User already exists"}, 401
             except:
                 pass
 
-            ipraw = request.headers['X-Real-IP']
+            ipraw = request.headers["X-Real-IP"]
             IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
-            fullName = firstName+" "+lastName
+            fullName = firstName + " " + lastName
             data = {
                 "_id": IDCREATOR_internal(24),
                 "email": email,
@@ -767,29 +868,28 @@ class Auth:
                 "lastTimeLoggedIn": 0,
                 "ipraw": ipraw,
                 "idVerified": False,
-                "thirdParty": "apple"
+                "thirdParty": "apple",
             }
 
             users.insert_one(data)
             data["SCC"] = True
             return data
-            
 
     @app.route("/ip-data")
     def Ipdatagetter():
-        ipraw = request.headers['X-Real-IP']
-        IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)   
-        return IPDATA   
+        ipraw = request.headers["X-Real-IP"]
+        IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
+        return IPDATA
 
-    
+
 class Upload:
     @app.route("/api/upload", methods=["POST"])
     def uploadIt():
         logger = open("file.log", "a")
         if request.method == "POST":
-            ip = request.headers['X-Real-IP']
+            ip = request.headers["X-Real-IP"]
             try:
-                file = request.files['file']
+                file = request.files["file"]
             except:
                 return {"err": "Please specify 'file'."}
             if file and allowed_file(file.filename):
@@ -807,15 +907,31 @@ class Upload:
 
                 try:
                     file.save("static/" + filename + "." + ext)
-                    logger.write(f"UPLOAD {ip} | " + originalFile + " @" +
-                                 str(time.time()) + " as " + filename + "." + ext + "\n")
-                    return {"file": filename + "." + ext, "time": time.time(), "ctime": time.ctime(time.time())}
+                    logger.write(
+                        f"UPLOAD {ip} | "
+                        + originalFile
+                        + " @"
+                        + str(time.time())
+                        + " as "
+                        + filename
+                        + "."
+                        + ext
+                        + "\n"
+                    )
+                    return {
+                        "file": filename + "." + ext,
+                        "time": time.time(),
+                        "ctime": time.ctime(time.time()),
+                    }
 
                 except Exception as e:
                     return {"err": str(e)}
             else:
-                return {"err": "File type is not allowed in this server", "allowedFileTypes": ALLOWED_EXTENSIONS,
-                        "maxSize": "10MB"}
+                return {
+                    "err": "File type is not allowed in this server",
+                    "allowedFileTypes": ALLOWED_EXTENSIONS,
+                    "maxSize": "10MB",
+                }
         logger.close()
 
 
@@ -834,23 +950,29 @@ class Profile:
 
     @app.route("/api/updateprofile", methods=["POST"])
     def updateProfile():
-
         # Notes:
         # Email password and phone number is required for this field
         # Updating the login credentials is in the other part
         email = request.form.get("email")
         password = request.form.get("password")
         dateOfBirth = request.form.get("dateOfBirth")
-        ipraw = request.headers['X-Real-IP']
+        ipraw = request.headers["X-Real-IP"]
         IPDATA = json.loads(requests.get(f"http://ip-api.com/json/{ipraw}").content)
         # IPDATA = request.form.get("IPDATA")
         fullName = request.form.get("fullName")
         profileImage = request.form.get("profileImage")
         phoneNumber = request.form.get("phoneNumber")
         if phoneNumber != None:
-            phoneNumber = phoneNumber.replace("+", "").replace("(", "").replace(")", "").replace(" ", "")
+            phoneNumber = (
+                phoneNumber.replace("+", "")
+                .replace("(", "")
+                .replace(")", "")
+                .replace(" ", "")
+            )
         # Login phase
-        allResults = users.find({"email": email, "password": password, "phoneNumber": phoneNumber})
+        allResults = users.find(
+            {"email": email, "password": password, "phoneNumber": phoneNumber}
+        )
         try:
             r = allResults[0]
         except:
@@ -874,8 +996,10 @@ class Profile:
         if IPDATA != None and IPDATA != r["IPDATA"]:
             updateData["IPDATA"] = IPDATA
 
-        users.update_one({'_id': rid}, {"$set": updateData})
-        outputdata = allResults = users.find({"email": email, "password": password, "phoneNumber": phoneNumber})[0]
+        users.update_one({"_id": rid}, {"$set": updateData})
+        outputdata = allResults = users.find(
+            {"email": email, "password": password, "phoneNumber": phoneNumber}
+        )[0]
         outputdata["SCC"] = True
 
         return outputdata
@@ -883,8 +1007,8 @@ class Profile:
     @app.route("/api/update_login_credentials", methods=["POST"])
     def update_login_credentials():
         # How it works?
-        # So you send whatevery you want to update and also authenticate, 
-        # we are checking if the information matches with the old ones and 
+        # So you send whatevery you want to update and also authenticate,
+        # we are checking if the information matches with the old ones and
         # replace them with the new ones
         email = request.form.get("email")
         password = request.form.get("password")
@@ -930,35 +1054,34 @@ class Verification:
             message = twcl.messages.create(
                 body=f"Adflaunt Verification Code:{code_verify}",
                 from_=phoneNumber_tw,
-                to=phoneNumber
+                to=phoneNumber,
             )
         except Exception as e:
             print(e)
             return {"SCC": False, "err": str(e)}
         return {"SCC": True, "m.body": message.body}
 
-    @app.route("/api/verify/email",methods=["POST"])
+    @app.route("/api/verify/email", methods=["POST"])
     def email_verification():
         email = request.form.get("email")
         if email == None:
-            return {"SCC":False,"err":"email is required to use this endpoint"}
+            return {"SCC": False, "err": "email is required to use this endpoint"}
         try:
             email.split("@")[1]
         except:
-            return {"SCC":False,"err":"Email malformatted"}
+            return {"SCC": False, "err": "Email malformatted"}
         emails = [email]
-        verificationCode = random.randint(10000,100000)
+        verificationCode = random.randint(10000, 100000)
         verificationCode = str(verificationCode)
-        html_ = """
-        <!DOCTYPE html> <html> <head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>Confirm your email - Adflaunt</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: "Source Sans Pro"; font-style: normal; font-weight: 400; src: local("Source Sans Pro Regular"), local("SourceSansPro-Regular"), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format("woff"); } @font-face { font-family: "Source Sans Pro"; font-style: normal; font-weight: 700; src: local("Source Sans Pro Bold"), local("SourceSansPro-Bold"), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format("woff"); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style> </head> <body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Verify your email - powered by kentel.dev </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">Confirm Your Email Address</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">Tap the button below to confirm your email address. If you didn't create an account on <a href="">Adflaunt</a>, you can safely delete this email.</p> </td> </tr> <!-- end copy --> <!-- start button --> <tr> <td align="left" bgcolor="#ffffff"> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <tr> <td align="center" bgcolor="#ffffff" style="padding: 12px;"> <table border="0" cellpadding="0" cellspacing="0"> <tr> <td align="center" style="border-radius: 6px;"> <a style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 26px; color: #000000; text-decoration: none; border-radius: 6px;letter-spacing:20px">"""+verificationCode+"""</a> </td> </tr> </table> </td> </tr> </table> </td> </tr> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px"> <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --> </body> </html>""" 
-        out = Mail.send(emails,"Verify Your Email - Adflaunt",html_)
+        html_ = (
+            """
+        <!DOCTYPE html> <html> <head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>Confirm your email - Adflaunt</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: "Source Sans Pro"; font-style: normal; font-weight: 400; src: local("Source Sans Pro Regular"), local("SourceSansPro-Regular"), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format("woff"); } @font-face { font-family: "Source Sans Pro"; font-style: normal; font-weight: 700; src: local("Source Sans Pro Bold"), local("SourceSansPro-Bold"), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format("woff"); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style> </head> <body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Verify your email - powered by kentel.dev </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">Confirm Your Email Address</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">Tap the button below to confirm your email address. If you didn't create an account on <a href="">Adflaunt</a>, you can safely delete this email.</p> </td> </tr> <!-- end copy --> <!-- start button --> <tr> <td align="left" bgcolor="#ffffff"> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <tr> <td align="center" bgcolor="#ffffff" style="padding: 12px;"> <table border="0" cellpadding="0" cellspacing="0"> <tr> <td align="center" style="border-radius: 6px;"> <a style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 26px; color: #000000; text-decoration: none; border-radius: 6px;letter-spacing:20px">"""
+            + verificationCode
+            + """</a> </td> </tr> </table> </td> </tr> </table> </td> </tr> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px"> <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --> </body> </html>"""
+        )
+        out = Mail.send(emails, "Verify Your Email - Adflaunt", html_)
 
-        return {"SCC":True,"verificationCode":verificationCode}
-
-
-
-
-
+        return {"SCC": True, "verificationCode": verificationCode}
 
 
 class ReportingSystem:
@@ -993,7 +1116,7 @@ class ReportingSystem:
             "description": description,
             "timereported": timeitreported,
             "reporter": user["_id"],
-            "suspect": userID
+            "suspect": userID,
         }
         reports.insert_one(data)
         data["SCC"] = True
@@ -1016,7 +1139,7 @@ class ReportingSystem:
                 "description": description,
                 "bugImage": bugImage,
                 "phoneNumber": phoneNumber,
-                "_id": IDCREATOR_internal(20)
+                "_id": IDCREATOR_internal(20),
             }
 
             querydata = {}
@@ -1037,7 +1160,10 @@ class ReportingSystem:
 
             return data
         if request.method == "GET":
-            return {"SCC": False, "err": "This endpoint does not support get requests yet."}
+            return {
+                "SCC": False,
+                "err": "This endpoint does not support get requests yet.",
+            }
 
 
 class IDVerification:
@@ -1055,7 +1181,10 @@ class IDVerification:
             if phoneNumber != None:
                 query_cr["phoneNumber"] = phoneNumber
             if email == None and phoneNumber == None:
-                return {"SCC": False, "err": "Email or phonenumber is required for authentication"}
+                return {
+                    "SCC": False,
+                    "err": "Email or phonenumber is required for authentication",
+                }
 
             try:
                 user = users.find(query_cr)[0]
@@ -1068,16 +1197,29 @@ class IDVerification:
             backPhoto = request.form.get("backPhoto")
             deliveryAddress = request.form.get("deliveryAddress")
             if deliveryAddress == None:
-                return {"SCC":False,"err":"Delivery address should be specified"}
+                return {"SCC": False, "err": "Delivery address should be specified"}
             if backPhoto == None:
-                return {"SCC":False,"err":"backPhoto not specified"}
+                return {"SCC": False, "err": "backPhoto not specified"}
             fullName = request.form.get("fullName")
             dateOfBirth = request.form.get("dateOfBirth")
 
             if photoOfId == None:
-                return {"SCC": False, "err": "You need to specify photoOfId as a static filename"}
+                return {
+                    "SCC": False,
+                    "err": "You need to specify photoOfId as a static filename",
+                }
 
-            users.update_one({"_id": UID}, {"$set": {"photoOfId": photoOfId, "idVerified": True,"backPhotoID":backPhoto,"deliveryAddress":deliveryAddress}})
+            users.update_one(
+                {"_id": UID},
+                {
+                    "$set": {
+                        "photoOfId": photoOfId,
+                        "idVerified": True,
+                        "backPhotoID": backPhoto,
+                        "deliveryAddress": deliveryAddress,
+                    }
+                },
+            )
             user["photoOfId"] = photoOfId
             user["idVerified"] = True
             user["SCC"] = True
@@ -1085,7 +1227,7 @@ class IDVerification:
 
 
 class Listings:
-    @app.route("/api/create/listing", methods=["POST","PUT"])
+    @app.route("/api/create/listing", methods=["POST", "PUT"])
     def createlisting():
         email = request.form.get("email")
         password = request.form.get("password")
@@ -1098,22 +1240,25 @@ class Listings:
         if phoneNumber != None:
             query_cr["phoneNumber"] = phoneNumber
         if email == None and phoneNumber == None:
-            return {"SCC": False, "err": "Email or phonenumber is required for authentication"}
+            return {
+                "SCC": False,
+                "err": "Email or phonenumber is required for authentication",
+            }
 
         try:
             user = users.find(query_cr)[0]
         except:
             return {"SCC": False, "err": "Could not authenticate"}
-        if user['idVerified'] == False:
+        if user["idVerified"] == False:
             return {"SCC": False, "err": "ID NOT VERIFIED."}
         if request.method == "PUT":
             listingID = request.form.get("listingID")
             if listingID == None:
-                return {"SCC":False,"err":"listingID is required for editing"}
+                return {"SCC": False, "err": "listingID is required for editing"}
             try:
-                oldListingData= listings.find({"_id":listingID})[0]
+                oldListingData = listings.find({"_id": listingID})[0]
             except:
-                return {"SCC":False,"err":"Listing does not exist"}
+                return {"SCC": False, "err": "Listing does not exist"}
 
         typeOfAd = request.form.get("typeOfAd")  # Number 0-1-2
         """
@@ -1130,8 +1275,8 @@ class Listings:
         location = request.form.get("location")
         revision_limit = request.form.get("revision_limit")  # number integer
 
-        width = request.form.get("width")#Float number
-        length = request.form.get("length")# float number
+        width = request.form.get("width")  # Float number
+        length = request.form.get("length")  # float number
 
         type_of_listing = request.form.get("type")  # number - between 1-6
         check_in = request.form.get("check_in")  # Date
@@ -1146,8 +1291,12 @@ class Listings:
         partial
         """
         tags = request.form.get("tags")
-        extras = request.form.get("extras")  # fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY
-        requirements = request.form.get("requirements")  # fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY
+        extras = request.form.get(
+            "extras"
+        )  # fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY
+        requirements = request.form.get(
+            "requirements"
+        )  # fully custom JSON array IF EMPTY, JUST SEND A EMPTY ARRAY
         description = request.form.get("description")  # STR
         bookingNote = request.form.get("bookingNote")  # STR OPT
         bookingOffset = request.form.get("bookingOffset")  # INT OPT
@@ -1160,7 +1309,26 @@ class Listings:
         country = request.form.get("country")
         state = request.form.get("state")
 
-        if typeOfAd == None or width==None or length==None or images == None or lat == None or long == None or title == None or price == None or revision_limit == None or location == None or type_of_listing == None or check_in == None or check_out == None or population == None or discountAvailable == None or description == None or extras == None or requirements == None:
+        if (
+            typeOfAd == None
+            or width == None
+            or length == None
+            or images == None
+            or lat == None
+            or long == None
+            or title == None
+            or price == None
+            or revision_limit == None
+            or location == None
+            or type_of_listing == None
+            or check_in == None
+            or check_out == None
+            or population == None
+            or discountAvailable == None
+            or description == None
+            or extras == None
+            or requirements == None
+        ):
             return {"SCC": False, "err": "some parameters are required"}
 
         lat = float(lat)
@@ -1184,7 +1352,6 @@ class Listings:
             minimumBookingDuration = 0
 
         try:
-
             population = int(population)
         except:
             return {"SCC": False, "err": "Population should be an integer"}
@@ -1194,7 +1361,7 @@ class Listings:
             return {"SCC": False, "err": "Price should be an integer"}
 
         try:
-            tags = ''.join([i if ord(i) < 128 else ' ' for i in tags])
+            tags = "".join([i if ord(i) < 128 else " " for i in tags])
             # may give some errors
             tags = tags.split("|-|")
         except:
@@ -1238,21 +1405,19 @@ class Listings:
         else:
             return {"SCC": False, "err": "typeOfAd Should be one of those: 0,1,2"}
 
-
         try:
             width = float(width)
 
         except:
-            return {"SCC":False,"err":"width should be a float"}
+            return {"SCC": False, "err": "width should be a float"}
         try:
             height = float(length)
 
         except:
-            return {"SCC":False,"err":"height should be a float"}
+            return {"SCC": False, "err": "height should be a float"}
 
-        inchFootage = width*height 
-        sqfeet = inchFootage*0.006944444
-
+        inchFootage = width * height
+        sqfeet = inchFootage * 0.006944444
 
         data = {
             "title": title,
@@ -1276,22 +1441,22 @@ class Listings:
             "minimumBookingDuration": minimumBookingDuration,
             "BookingImportURL": BookingImportURL,
             "_id": IDCREATOR_internal(40),
-            "user": user['_id'],
+            "user": user["_id"],
             "typeOfAdd": typeOfAd,
             "city": city,
             "state": state,
             "country": country,
-            "width":width,
-            "height":height,
-            "sqfeet":sqfeet,
-            "sqfootage":sqfeet,
-            "inchFootage":inchFootage
+            "width": width,
+            "height": height,
+            "sqfeet": sqfeet,
+            "sqfootage": sqfeet,
+            "inchFootage": inchFootage,
         }
         if request.method == "POST":
             db["Listings"].insert_one(data)
             for t in tags:
                 t = t.strip()
-                if t!= "":
+                if t != "":
                     db[t].insert_one(data)
             db[typeOfAd].insert_one(data)
 
@@ -1299,40 +1464,34 @@ class Listings:
 
             return data
         if request.method == "PUT":
-            storeData= data 
-            
+            storeData = data
+
             oldTags = oldListingData["tags"]
             oldTypeOfAd = oldListingData["typeOfAdd"]
             del data["_id"]
 
-            db["Listings"].update_one({"_id":listingID},{"$set":data})
+            db["Listings"].update_one({"_id": listingID}, {"$set": data})
             for t in oldTags:
                 if t not in tags:
-                    
-                    db[t].delete_one({"_id":listingID})
+                    db[t].delete_one({"_id": listingID})
             for t in tags:
                 if t not in oldTags:
                     data["_id"] = listingID
-                    db[t].insert_one(data )
+                    db[t].insert_one(data)
                     del data["_id"]
                 else:
-                    db[t].update_one({"_id":listingID},{"$set":data})
-
+                    db[t].update_one({"_id": listingID}, {"$set": data})
 
             if typeOfAd != oldTypeOfAd:
-                db[oldTypeOfAd].delete_one({"_id":listingID})
+                db[oldTypeOfAd].delete_one({"_id": listingID})
                 data["_id"] = listingID
                 db[typeOfAd].insert_one(storeData)
             else:
-                db[typeOfAd].update_one({"_id":listingID},{"$set":data})
+                db[typeOfAd].update_one({"_id": listingID}, {"$set": data})
 
-
-
-            data["SCC"] = True 
+            data["SCC"] = True
 
             return data
-        
-
 
     @app.route("/api/get/listings", methods=["GET"])
     def get_listings():
@@ -1348,7 +1507,6 @@ class Listings:
         page = request.args.get("page")
 
         if sessionName == None:
-
             sessionName = IDCREATOR_internal(20)
 
             if distanceAsKm == None:
@@ -1360,11 +1518,17 @@ class Listings:
                 distanceAsKm = 300
 
             if mode == None:
-                return {"SCC": False, "err": "You need to specify mode to use this endpoint"}
+                return {
+                    "SCC": False,
+                    "err": "You need to specify mode to use this endpoint",
+                }
 
             if mode == "near":
                 if lat == None or long == None:
-                    return {"SCC": False, "err": "We need lat and long to use near function."}
+                    return {
+                        "SCC": False,
+                        "err": "We need lat and long to use near function.",
+                    }
                 try:
                     lat = float(lat)
                     long = float(long)
@@ -1376,15 +1540,20 @@ class Listings:
                     listingLocation = (lat_listing, long_listing)
                     originalLocation = (lat, long)
 
-                    distance =geopy.distance.geodesic(listingLocation, originalLocation).km
+                    distance = geopy.distance.geodesic(
+                        listingLocation, originalLocation
+                    ).km
                     l["distance"] = distance
                     if distance < distanceAsKm:
                         output.append(l)
-                output = sorted(output, key=operator.itemgetter('distance'))
+                output = sorted(output, key=operator.itemgetter("distance"))
 
             if mode == "search":
                 if q == None:
-                    return {"SCC": False, "err": "for search mode, you need to send query(q)"}
+                    return {
+                        "SCC": False,
+                        "err": "for search mode, you need to send query(q)",
+                    }
 
                 for l in listings.find({}):
                     title = l["title"].lower()
@@ -1413,34 +1582,32 @@ class Listings:
 
                         if s in city:
                             priority += 0.03
-                    
 
                     try:
                         reviews = l["reviews"]
                     except:
                         reviews = []
-                    reviewsTotal = 0 
+                    reviewsTotal = 0
                     reviewsCount = len(reviews)
                     for rew in reviews:
                         star = rew["star"]
-                        reviewsTotal += star 
+                        reviewsTotal += star
                     try:
-                        average = reviewsTotal/reviewsCount 
+                        average = reviewsTotal / reviewsCount
                     except:
-                        average = 0 
-                    priority += average/6
-
+                        average = 0
+                    priority += average / 6
 
                     if priority > 0:
                         l["priority"] = -priority
 
                         output.append(l)
-                output = sorted(output, key=operator.itemgetter('priority'))
+                output = sorted(output, key=operator.itemgetter("priority"))
 
             sdata = {"output": output, "q": q, "mode": mode}
-            r= redis.Redis()
+            r = redis.Redis()
             r.mset({f"{sessionName}": json.dumps(sdata)})
-            r.expire(sessionName,2500)
+            r.expire(sessionName, 2500)
 
         else:
             if mode == "search":
@@ -1453,13 +1620,14 @@ class Listings:
                         return {"SCC": False, "err": "Send 'page' as INTEGER"}
                     try:
                         if len(output) - (page * 10 - 10) > 10:
-
-                            output = output[(page * 10 - 10):]
+                            output = output[(page * 10 - 10) :]
 
                             output = output[:10]
-                        elif len(output) - (page * 10 - 10) < 10 and len(output) - (page * 10 - 10) > 0:
-
-                            output = output[(page * 10 - 10):]
+                        elif (
+                            len(output) - (page * 10 - 10) < 10
+                            and len(output) - (page * 10 - 10) > 0
+                        ):
+                            output = output[(page * 10 - 10) :]
                         else:
                             return {"SCC": False, "output": []}
 
@@ -1479,13 +1647,14 @@ class Listings:
                         return {"SCC": False, "err": "Send 'page' as INTEGER"}
                     try:
                         if len(output) - (page * 10 - 10) > 10:
-
-                            output = output[(page * 10 - 10):]
+                            output = output[(page * 10 - 10) :]
 
                             output = output[:10]
-                        elif len(output) - (page * 10 - 10) < 10 and len(output) - (page * 10 - 10) > 0:
-
-                            output = output[(page * 10 - 10):]
+                        elif (
+                            len(output) - (page * 10 - 10) < 10
+                            and len(output) - (page * 10 - 10) > 0
+                        ):
+                            output = output[(page * 10 - 10) :]
                         else:
                             return {"SCC": False, "output": []}
 
@@ -1500,7 +1669,12 @@ class Listings:
         if len(output) > 10:
             output = output[:10]
 
-        data = {"SCC": True, "output": output, "session": sessionName, "dataCount": dataCount}
+        data = {
+            "SCC": True,
+            "output": output,
+            "session": sessionName,
+            "dataCount": dataCount,
+        }
         return data
 
     @app.route("/api/home/listings", methods=["GET"])
@@ -1522,7 +1696,7 @@ class Listings:
 
             output.append(l)
 
-        output = sorted(output, key=operator.itemgetter('distance'))
+        output = sorted(output, key=operator.itemgetter("distance"))
         return {"SCC": True, "output": output}
 
     @app.route("/api/listing/<listingID>")
@@ -1533,28 +1707,61 @@ class Listings:
             userData = users.find({"_id": userID})[0]
             listingData["user"] = userData
             listingData["SCC"] = True
+            try:
+                listingData["reviews"] = listingData["reviews"][:3]
+            except:
+                pass
 
             return listingData
         except:
             return {"SCC": False, "err": "Could not find listing"}
 
+    @app.route("/api/reviewSpecific/<listingID>")
+    def reviewSpecific(listingID):
+        try:
+            page = request.args.get("page")
+            if page == None:
+                page = 0
+
+            listingData = listings.find({"_id": listingID})[0]["reviews"]
+            output = []
+            starData = {}
+            for l in listingData:
+                output.append(l)
+                star = l["star"]
+                try:
+                    starData[str(star)]
+                except:
+                    starData[str(star)] = 0
+                starData[str(star)] += 1
+
+            if page != 0:
+                output = output[: page * 10][10 * (page - 1) :]
+            else:
+                output = output[:10]
+
+            outputData = {"SCC": True, "reviews": output, "starsCategorised": starData}
+            return outputData
+        except:
+            return {"SCC": False, "err": "Listing or reviews not found"}, 404
+
     @app.route("/api/get/listingsFilterer")
     def getListingsByCategory():
         current_time = time.time()
-        sessionName =request.args.get("session")
-        page= request.args.get("page")
+        sessionName = request.args.get("session")
+        page = request.args.get("page")
         query = request.args.get("q")
         if query == None:
             query = ""
         if sessionName == None:
             category = request.args.get("category")
             if category == None:
-                category= "Listings"
+                category = "Listings"
             priceStart = request.args.get("priceStart")
             priceEnd = request.args.get("priceEnd")
 
             if priceStart == None:
-                priceStart = 0 
+                priceStart = 0
             if priceEnd == None:
                 priceEnd = 1000000
             try:
@@ -1562,7 +1769,7 @@ class Listings:
                 priceEnd = float(priceEnd)
             except:
                 priceStart = 0
-                priceEnd=1000000            
+                priceEnd = 1000000
             from_date = request.args.get("from")
             to_date = request.args.get("to")
             type_of_listing = request.args.get("type")
@@ -1586,8 +1793,8 @@ class Listings:
             if type_of_listing == "6":
                 type_of_listing = "Digital Signage"
 
-            daysWantToBook = dates2Arr(from_date,to_date)
-            
+            daysWantToBook = dates2Arr(from_date, to_date)
+
             output = []
             categoryData = db[category].find({})
             lat = request.args.get("lat")
@@ -1595,25 +1802,27 @@ class Listings:
             distanced = False
             for c in categoryData:
                 try:
-                    c = listings.find({"_id":c["_id"]})[0]
+                    c = listings.find({"_id": c["_id"]})[0]
                 except:
                     continue
                 lastDay = c["check_out"]
-                
+
                 lat_listing = c["lat"]
                 long_listing = c["long"]
 
                 listingLocation = (lat_listing, long_listing)
                 originalLocation = [lat, long_]
 
-                if lat != None and long_!=None:
+                if lat != None and long_ != None:
                     try:
                         lat = float(lat)
-                        long_ = float(long_ )
+                        long_ = float(long_)
                     except:
-                        return {"SCC":False,"err":"Check lat and long values"}
+                        return {"SCC": False, "err": "Check lat and long values"}
                     originalLocation = (lat, long_)
-                    distance = geopy.distance.geodesic(listingLocation,originalLocation).km
+                    distance = geopy.distance.geodesic(
+                        listingLocation, originalLocation
+                    ).km
                     c["distance"] = distance
                     distanced = True
 
@@ -1622,95 +1831,104 @@ class Listings:
                 except:
                     allReviews = []
                 totalPoints = 0
-                numberOfReviews= len(allReviews)
+                numberOfReviews = len(allReviews)
 
                 for a in allReviews:
                     star = a["star"]
-                    totalPoints += star 
+                    totalPoints += star
                 try:
-                    average = totalPoints/numberOfReviews
+                    average = totalPoints / numberOfReviews
                 except:
                     average = 0
 
                 c["averageRating"] = average
                 c["numberOfReviews"] = numberOfReviews
-                
 
                 try:
                     cbook = c["Bookings"]
                 except:
                     cbook = []
                 ctype = c["type"]
-                
+
                 gonnacontinue = False
                 for d in daysWantToBook:
                     if d in cbook:
-                        gonnacontinue = True 
-                        break 
+                        gonnacontinue = True
+                        break
                 if gonnacontinue:
                     continue
-                        
-                
+
                 price = c["price"]
                 if distanced:
                     try:
-                        searchPoint = c["distance"]/average 
+                        searchPoint = c["distance"] / average
                     except:
-                        searchPoint = c["distance"]/1 
+                        searchPoint = c["distance"] / 1
                     c["searchPoint"] = searchPoint
                 tags = c["tags"]
                 tagsString = ""
                 for t in tags:
-                    tagsString += " "+t
+                    tagsString += " " + t
 
                 titleString = c["title"]
                 description = c["description"]
                 descriptionString = c["description"]
-                if query.lower() in titleString.lower() or query.lower() in tagsString.lower() or query.lower() in description.lower():
-
-                    if price>priceStart and price<priceEnd and type_of_listing in ctype:
+                if (
+                    query.lower() in titleString.lower()
+                    or query.lower() in tagsString.lower()
+                    or query.lower() in description.lower()
+                ):
+                    try:
+                        c["reviews"] = c["reviews"][:3]
+                    except:
+                        pass
+                    if (
+                        price > priceStart
+                        and price < priceEnd
+                        and type_of_listing in ctype
+                    ):
                         output.append(c)
                 else:
                     pass
 
             if distanced:
-                output = sorted(output,key=operator.itemgetter('searchPoint'))
+                output = sorted(output, key=operator.itemgetter("searchPoint"))
             else:
-                output = sorted(output,key=operator.itemgetter('averageRating'))
+                output = sorted(output, key=operator.itemgetter("averageRating"))
             sid = IDCREATOR_internal(20)
-            r= redis.Redis()
-            r.mset({sid:json.dumps(output)})
-            r.expire(sid,2500)
-            return {"SCC":True,"output":output[:10],"sid":sid}
+            r = redis.Redis()
+            r.mset({sid: json.dumps(output)})
+            r.expire(sid, 2500)
+            return {"SCC": True, "output": output[:10], "sid": sid}
         else:
             if page == None:
                 page = 1
             try:
                 output = json.loads(r.get(sessionName))
             except:
-                return {"SCC":False,"err":"Check session you entered"}
-            output = output[:page*10][10*(page-1):]
-            return {"SCC":True,"output":output,"sid":sessionName}
+                return {"SCC": False, "err": "Check session you entered"}
+            output = output[: page * 10][10 * (page - 1) :]
+            return {"SCC": True, "output": output, "sid": sessionName}
 
-            
-    @app.route("/api/get/ListingsOfUser",methods=["POST"])
-    def APIGETLISTINGSOFUSER ():
+    @app.route("/api/get/ListingsOfUser", methods=["POST"])
+    def APIGETLISTINGSOFUSER():
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
         if user == False:
-            return {"SCC":False,"err":"Auth false"}
-        output =  getListingsOfUser(user["_id"])  
-        return {"SCC":True,"output":output}   
+            return {"SCC": False, "err": "Auth false"}
+        output = getListingsOfUser(user["_id"])
+        return {"SCC": True, "output": output}
 
     @app.route("/api/listings/<userID>")
     def getListingsOfUserApp(userID):
-        return {"SCC":True,"output":getListingsOfUser(userID)}
+        return {"SCC": True, "output": getListingsOfUser(userID)}
+
+
 class Favorites:
     @app.route("/api/addto/favorites", methods=["POST", "DELETE"])
     def addFavorites():
-
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
@@ -1721,18 +1939,15 @@ class Favorites:
         UID = user["_id"]
         listingID = request.form.get("listingID")
         if request.method == "POST":
-
             if listingID == None:
-                return {"SCC": False, "err": "listingID form data is required to add that listing to favorites."}
+                return {
+                    "SCC": False,
+                    "err": "listingID form data is required to add that listing to favorites.",
+                }
             try:
                 favDATA = favorites.find({"_id": UID})[0]
             except:
-                favDATA = {
-                    "forUser": UID,
-                    "favorites": [],
-                    "_id": UID
-
-                }
+                favDATA = {"forUser": UID, "favorites": [], "_id": UID}
                 favorites.insert_one(favDATA)
 
             try:
@@ -1752,13 +1967,14 @@ class Favorites:
             AllFavorites = favDATA["favorites"]
 
             for f in AllFavorites:
-
                 if f["_id"] == listingID:
                     cindex = AllFavorites.index(f)
 
                     AllFavorites.pop(cindex)
 
-                    favorites.update_one({"_id": UID}, {"$set": {"favorites": AllFavorites}})
+                    favorites.update_one(
+                        {"_id": UID}, {"$set": {"favorites": AllFavorites}}
+                    )
                     return {"SCC": True, "deleted": listingID}
 
             return {"SCC": False, "err": "Could not find listing in your favorites"}
@@ -1773,14 +1989,9 @@ class Favorites:
             return {"SCC": False, "err": "Login Failed."}
         UID = user["_id"]
         try:
-
             FAVDATA = favorites.find({"_id": user["_id"]})[0]
         except:
-            FAVDATA = {
-                "forUser": UID,
-                "favorites": [],
-                "_id": UID
-            }
+            FAVDATA = {"forUser": UID, "favorites": [], "_id": UID}
         FAVDATA["SCC"] = True
 
         return FAVDATA
@@ -1794,7 +2005,6 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return redirect("/admin/login")
         return render_template("adminIndex.html", adminData=adminData)
 
@@ -1803,7 +2013,6 @@ class Admin:
         if request.method == "GET":
             return render_template("adminLogin.html")
         if request.method == "POST":
-
             expire_date = datetime.datetime.now()
             expire_date = expire_date + datetime.timedelta(days=2)
             username = request.form.get("username")
@@ -1811,7 +2020,9 @@ class Admin:
             try:
                 admin.find({"username": username, "password": password})[0]
             except:
-                return render_template("adminLogin.html", err="Email or password is not correct.")
+                return render_template(
+                    "adminLogin.html", err="Email or password is not correct."
+                )
 
             response = make_response(redirect("/admin"))
             response.set_cookie("username", encrypt(username), expires=expire_date)
@@ -1819,7 +2030,7 @@ class Admin:
 
             return response
 
-    @app.route("/admin/users",methods=["POST","GET"])
+    @app.route("/admin/users", methods=["POST", "GET"])
     def adminViewUsers():
         allUsers = users.find({})
         output = []
@@ -1831,17 +2042,15 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return redirect("/admin/login")
         if request.method == "POST":
             results = []
             query = request.form.get("q")
             for o in output:
-                userString = o["fullName"] + " "+o["email"]
+                userString = o["fullName"] + " " + o["email"]
                 if query.lower() in userString.lower():
                     results.append(o)
             return render_template("adminUser.html", users=results, adminData=adminData)
-
 
         return render_template("adminUser.html", users=output, adminData=adminData)
 
@@ -1856,7 +2065,6 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return redirect("/admin/login")
 
         try:
@@ -1886,13 +2094,18 @@ class Admin:
                 idata = {
                     "lastMessage": lastMessage,
                     "oppositionData": oppositionData,
-                    "chatID": u
+                    "chatID": u,
                 }
                 returnInbox.append(idata)
-            return render_template("userView.html", data=userdata, maploader=maploader, userListings=userListingsArray,
-                                   inbox=returnInbox, ctime=time.ctime)
+            return render_template(
+                "userView.html",
+                data=userdata,
+                maploader=maploader,
+                userListings=userListingsArray,
+                inbox=returnInbox,
+                ctime=time.ctime,
+            )
         except Exception as e:
-
             return render_template("user404.html", error=e)
 
     @app.route("/admin/map")
@@ -1902,7 +2115,6 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return redirect("/admin/login")
 
         countryDict = {}
@@ -1919,7 +2131,11 @@ class Admin:
                 countryDict[countryCode] = []
 
             countryDict[countryCode].append(u["_id"])
-        return render_template("adminMap.html", countryDict=json.dumps(countryDict, indent=4), maploader=maploader)
+        return render_template(
+            "adminMap.html",
+            countryDict=json.dumps(countryDict, indent=4),
+            maploader=maploader,
+        )
 
     @app.route("/admin/booking")
     def adminBooking():
@@ -1928,7 +2144,6 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return redirect("/admin/login")
 
         bookings = db["Bookings"]
@@ -1937,10 +2152,9 @@ class Admin:
         listingData = {}
 
         for a in allBookings:
-            clisting = listings.find({"_id":a["_id"]})
+            clisting = listings.find({"_id": a["_id"]})
             for c in clisting:
                 listingData[c["_id"]] = c
-
 
             activeOrders = a["activeOrders"]
             try:
@@ -1952,32 +2166,29 @@ class Admin:
                 approvalData[a["_id"]].append(ao)
 
             waitingForApproval = a["waitingForApproval"]
-            
+
             for wa in waitingForApproval:
                 wa["status"] = "waitingForApproval"
                 approvalData[a["_id"]].append(wa)
 
+        return render_template(
+            "orderApprovalAdmin.html",
+            approvalData=approvalData,
+            listingData=listingData,
+            printFee=printFee,
+            commisionRate=commisionRate,
+            calcPercentage=calcPercentage,
+            returnWidthLength=returnWidthLength,
+        )
 
-
-        return render_template("orderApprovalAdmin.html",
-                               approvalData=approvalData,
-                               listingData=listingData,
-                               printFee=printFee,
-                               commisionRate=commisionRate,
-                               calcPercentage=calcPercentage,
-                               returnWidthLength=returnWidthLength
-                               )
-
-    @app.route("/admin/listings",methods=["POST","GET"])
+    @app.route("/admin/listings", methods=["POST", "GET"])
     def adminListings():
         try:
             username = decrypt(request.cookies.get("username"))
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return redirect("/admin/login")
-
 
         output = []
         allListings = listings.find({})
@@ -1990,16 +2201,18 @@ class Admin:
             for o in output:
                 tagsString = ""
                 for t in o["tags"]:
-                    tagsString += t+" "
+                    tagsString += t + " "
 
-                allString = o["title"]+" "+o["description"]+" "+tagsString
+                allString = o["title"] + " " + o["description"] + " " + tagsString
                 if query.lower() in allString.lower():
                     searchResults.append(o)
-            return render_template("listingsAdmin.html",listings=json.dumps({"output":searchResults}))
+            return render_template(
+                "listingsAdmin.html", listings=json.dumps({"output": searchResults})
+            )
 
-
-
-        return render_template("listingsAdmin.html",listings=json.dumps({"output":output}))
+        return render_template(
+            "listingsAdmin.html", listings=json.dumps({"output": output})
+        )
 
     @app.route("/admin/api/acceptBooking/<listingID>/<ListIndex>")
     def AcceptBooking(listingID, ListIndex):
@@ -2008,7 +2221,6 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return {"SCC": False, "err": "Authentication Failed"}
 
         bookings = db["Bookings"]
@@ -2023,8 +2235,15 @@ class Admin:
             return {"SCC": False, "err": "Index value is not correct"}
         bookingData["waitingForApproval"].pop(int(ListIndex))
         bookingData["activeOrders"].append(currentData)
-        bookings.update_one({"_id": listingID}, {"$set": {"waitingForApproval": bookingData["waitingForApproval"],
-                                                          "activeOrders": bookingData["activeOrders"]}})
+        bookings.update_one(
+            {"_id": listingID},
+            {
+                "$set": {
+                    "waitingForApproval": bookingData["waitingForApproval"],
+                    "activeOrders": bookingData["activeOrders"],
+                }
+            },
+        )
 
         # sendMSG -> to host for informing that they have a new order
         # sendMSG -> to user for informing their order is accepted by system admin
@@ -2047,7 +2266,6 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return {"SCC": False, "err": "Authentication Failed"}
 
         bookings = db["Bookings"]
@@ -2062,7 +2280,10 @@ class Admin:
             return {"SCC": False, "err": "Index value is not correct"}
         bookingData["waitingForApproval"].pop(int(ListIndex))
         # bookingData["activeOrders"].append(currentData)
-        bookings.update_one({"_id": listingID}, {"$set": {"waitingForApproval": bookingData["waitingForApproval"]}})
+        bookings.update_one(
+            {"_id": listingID},
+            {"$set": {"waitingForApproval": bookingData["waitingForApproval"]}},
+        )
 
         # sendMSG -> DONT INFORM HOST.
         # sendMSG -> Request denied
@@ -2080,7 +2301,9 @@ class Admin:
         for d in daysWantToBook:
             cindex = listingData["Bookings"].index(d)
             listingData["Bookings"].pop(cindex)
-        listings.update_one({"_id": listingID}, {"$set": {"Bookings": listingData["Bookings"]}})
+        listings.update_one(
+            {"_id": listingID}, {"$set": {"Bookings": listingData["Bookings"]}}
+        )
 
         return {"SCC": True, "msg": "Denied successfully"}
 
@@ -2091,7 +2314,6 @@ class Admin:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-
             return redirect("/admin/login")
 
         loadData = db["LoadData"]
@@ -2099,7 +2321,9 @@ class Admin:
         for l in loadData.find({}):
             loadput.append(l)
 
-        return render_template("serverload.html",load=json.dumps(loadput))
+        return render_template("serverload.html", load=json.dumps(loadput))
+
+
 class Booking:
     @app.route("/api/book", methods=["POST"])
     def book_it():
@@ -2112,14 +2336,13 @@ class Booking:
             return {"SCC": False, "err": "Authentication failed"}, 401
         paymentID = request.form.get("paymentID")
         if paymentID == None:
-            return {"SCC":False,"err":"paymentID is required"},401
-
+            return {"SCC": False, "err": "paymentID is required"}, 401
 
         listingID = request.form.get("listingID")
         try:
             listingData = listings.find({"_id": listingID})[0]
         except:
-            return {"SCC": False, "err": "Could not find listing."},404
+            return {"SCC": False, "err": "Could not find listing."}, 404
 
         pricePerDay = listingData["price"]
 
@@ -2129,19 +2352,21 @@ class Booking:
         d1 = request.form.get("from")
         d2 = request.form.get("to")
         if d1 == None or d2 == None:
-            return {"SCC": False,
-                    "err": "'from' and 'to' are not definded, for booking you need to enter those correctly"},401
+            return {
+                "SCC": False,
+                "err": "'from' and 'to' are not definded, for booking you need to enter those correctly",
+            }, 401
         d1 = d1.split("-")
         d1y = int(d1[0])
         try:
             d1m = int(d1[1])
         except:
-            return {"SCC": False, "err": "Date format is invalid"},401
+            return {"SCC": False, "err": "Date format is invalid"}, 401
 
         try:
             d1d = int(d1[2])
         except:
-            return {"SCC": False, "err": "Date format is invalid"},401
+            return {"SCC": False, "err": "Date format is invalid"}, 401
         d1 = date(d1y, d1m, d1d)
 
         d2 = d2.split("-")
@@ -2149,11 +2374,11 @@ class Booking:
         try:
             d2m = int(d2[1])
         except:
-            return {"SCC": False, "err": "Date format is invalid"},401
+            return {"SCC": False, "err": "Date format is invalid"}, 401
         try:
             d2d = int(d2[2])
         except:
-            return {"SCC": False, "err": "Date format is invalid"},401
+            return {"SCC": False, "err": "Date format is invalid"}, 401
         d2 = date(d2y, d2m, d2d)
         d = d2 - d1
         daysWantToBook = []
@@ -2176,8 +2401,7 @@ class Booking:
             "bookingID": IDCREATOR_internal(30),
             "customer": user["_id"],
             "timeStamp": time.time(),
-            "paymentID":paymentID
-
+            "paymentID": paymentID,
         }
 
         print(json.dumps(orderData, indent=4), flush=True)
@@ -2191,28 +2415,34 @@ class Booking:
         orders.append(orderData)
         users.update_one({"_id": user["_id"]}, {"$set": {"orders": orders}})
 
-        host_user = users.find({"_id":listingData["user"]})[0]
+        host_user = users.find({"_id": listingData["user"]})[0]
 
-        html = Mail.generate(f"New order",f"You recieved a new order from {user['fullName']} for {listingData['title']}. Check out the details on the app")
-        Mail.send([host_user["email"]],f"You have a new order",html)
+        html = Mail.generate(
+            f"New order",
+            f"You recieved a new order from {user['fullName']} for {listingData['title']}. Check out the details on the app",
+        )
+        Mail.send([host_user["email"]], f"You have a new order", html)
         orderData["page"] = "bookingPage"
 
-        send_notification(host_user["_id"],orderData,f"New order from {user['fullName']} for {listingData['title']}","Click for more details")
-        
+        send_notification(
+            host_user["_id"],
+            orderData,
+            f"New order from {user['fullName']} for {listingData['title']}",
+            "Click for more details",
+        )
+
         try:
             output = Booker.book(listingID, d1, d2, orderData)
             return output
         except Exception as e:
             return {"SCC": False, "err": str(e)}
 
-        
         return {"SCC": True, "orderData": orderData}
 
     @app.route("/api/booking/calendar/<listingID>")
     def calendarAPI(listingID):
-
         bookings = db["Bookings"]
-        listingData = listings.find({"_id":listingID})[0]
+        listingData = listings.find({"_id": listingID})[0]
         listingType = listingData["type"]
         sqfeet = int(listingData["sqfeet"])
         if "Yard Sign" in listingType:
@@ -2228,12 +2458,10 @@ class Booking:
         if "Digital" in listingType:
             pricePerSqFeet = 0
 
-        printCost = pricePerSqFeet*sqfeet
+        printCost = pricePerSqFeet * sqfeet
 
         try:
             booking_data = bookings.find({"_id": listingID})[0]
-            
-
 
             datesList = []
             activeOrders = booking_data["activeOrders"]
@@ -2255,11 +2483,10 @@ class Booking:
                 for d in daysWantToBook:
                     datesList.append(d)
 
-            return {"SCC": True, "output": datesList, "printFee":printCost}
-
+            return {"SCC": True, "output": datesList, "printFee": printCost}
 
         except:
-            return {"SCC": True,"output":[],"printFee":printCost}
+            return {"SCC": True, "output": [], "printFee": printCost}
 
     @app.route("/api/booking/calendarProfiler/<listingID>")
     def calendarProfiler(listingID):
@@ -2275,8 +2502,15 @@ class Booking:
                 daysWantToBook = a["daysWantToBook"]
                 status = "active"
                 customer = a["customer"]
-                profileImage = users.find({"_id":customer})[0]["profileImage"]
-                datesList.append({"daysWantToBook":daysWantToBook,"status":status,"customer":customer,"profileImage":profileImage})
+                profileImage = users.find({"_id": customer})[0]["profileImage"]
+                datesList.append(
+                    {
+                        "daysWantToBook": daysWantToBook,
+                        "status": status,
+                        "customer": customer,
+                        "profileImage": profileImage,
+                    }
+                )
                 """
                 for d in daysWantToBook:
                     datesList.append(d)
@@ -2286,21 +2520,34 @@ class Booking:
                 daysWantToBook = a["daysWantToBook"]
                 status = "active"
                 customer = a["customer"]
-                profileImage = users.find({"_id":customer})[0]["profileImage"]
-                datesList.append({"daysWantToBook":daysWantToBook,"status":status,"customer":customer,"profileImage":profileImage})
+                profileImage = users.find({"_id": customer})[0]["profileImage"]
+                datesList.append(
+                    {
+                        "daysWantToBook": daysWantToBook,
+                        "status": status,
+                        "customer": customer,
+                        "profileImage": profileImage,
+                    }
+                )
 
             for a in activeOrders:
                 daysWantToBook = a["daysWantToBook"]
                 status = "active"
                 customer = a["customer"]
-                profileImage = users.find({"_id":customer})[0]["profileImage"]
-                datesList.append({"daysWantToBook":daysWantToBook,"status":status,"customer":customer,"profileImage":profileImage})
+                profileImage = users.find({"_id": customer})[0]["profileImage"]
+                datesList.append(
+                    {
+                        "daysWantToBook": daysWantToBook,
+                        "status": status,
+                        "customer": customer,
+                        "profileImage": profileImage,
+                    }
+                )
 
             return {"SCC": True, "output": datesList}
 
-
         except:
-            return {"SCC": True,"output":[]}
+            return {"SCC": True, "output": []}
 
     @app.route("/api/stripe/createPayment/<listingID>", methods=["POST"])
     def createPaymentStripe(listingID):
@@ -2322,8 +2569,10 @@ class Booking:
         d1 = request.form.get("from")
         d2 = request.form.get("to")
         if d1 == None or d2 == None:
-            return {"SCC": False,
-                    "err": "'from' and 'to' are not definded, for booking you need to enter those correctly"}
+            return {
+                "SCC": False,
+                "err": "'from' and 'to' are not definded, for booking you need to enter those correctly",
+            }
         d1 = d1.split("-")
         d1y = int(d1[0])
         try:
@@ -2362,32 +2611,33 @@ class Booking:
         try:
             customerID = user["stripeCustomerID"]
         except:
-
             customer = stripe.Customer.create()
-            users.update_one({"_id":user["_id"]},{"$set":{"stripeCustomerID":customer["id"]}})
+            users.update_one(
+                {"_id": user["_id"]}, {"$set": {"stripeCustomerID": customer["id"]}}
+            )
             customerID = customer["id"]
         ephemeralKey = stripe.EphemeralKey.create(
             customer=customerID,
-            stripe_version='2022-11-15',
+            stripe_version="2022-11-15",
         )
         payment_method = request.form.get("payment_method")
         if payment_method != None:
             paymentIntent = stripe.PaymentIntent.create(
-                amount= int(price*100),
-                currency='usd',
+                amount=int(price * 100),
+                currency="usd",
                 customer=customerID,
                 automatic_payment_methods={
-                    'enabled': True,
+                    "enabled": True,
                 },
-                payment_method=payment_method
+                payment_method=payment_method,
             )
         else:
             paymentIntent = stripe.PaymentIntent.create(
-                amount= int(price*100),
-                currency='usd',
+                amount=int(price * 100),
+                currency="usd",
                 customer=customerID,
                 automatic_payment_methods={
-                    'enabled': True,
+                    "enabled": True,
                 },
             )
 
@@ -2396,106 +2646,105 @@ class Booking:
         logger_payment.close()
         paymentID = paymentIntent["id"]
 
-        return jsonify(paymentIntent=paymentIntent.client_secret,
-                        ephemeralKey=ephemeralKey.secret,
-                        customer=customerID,
-                        paymentID=paymentID,
-                        publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
+        return jsonify(
+            paymentIntent=paymentIntent.client_secret,
+            ephemeralKey=ephemeralKey.secret,
+            customer=customerID,
+            paymentID=paymentID,
+            publishableKey="pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk",
+        )
 
-        
-    @app.route("/api/stripe/setupIntent",methods=["POST"])
+    @app.route("/api/stripe/setupIntent", methods=["POST"])
     def setupIntentStripe():
         email = request.form.get("email")
         phoneNumber = request.form.get("phoneNumber")
         password = request.form.get("password")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
 
         if user == False:
-            return {"SCC":False,"err":"Authentication failed"}
+            return {"SCC": False, "err": "Authentication failed"}
         try:
             customerID = user["stripeCustomerID"]
         except:
-
             customer = stripe.Customer.create()
-            users.update_one({"_id":user["_id"]},{"$set":{"stripeCustomerID":customer["id"]}})
+            users.update_one(
+                {"_id": user["_id"]}, {"$set": {"stripeCustomerID": customer["id"]}}
+            )
             customerID = customer["id"]
         ephemeralKey = stripe.EphemeralKey.create(
             customer=customerID,
-            stripe_version='2022-11-15',
+            stripe_version="2022-11-15",
         )
-        paymentIntent = stripe.SetupIntent.create(
-        customer=customerID
+        paymentIntent = stripe.SetupIntent.create(customer=customerID)
+        return jsonify(
+            paymentIntent=paymentIntent.client_secret,
+            ephemeralKey=ephemeralKey.secret,
+            customer=customerID,
+            publishableKey="pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk",
         )
-        return jsonify(paymentIntent=paymentIntent.client_secret,
-                        ephemeralKey=ephemeralKey.secret,
-                        customer=customerID,
-                        publishableKey='pk_test_51LkdT2BwxpdnO2PUdAlSZzzOM4bAIG9abSAc3e3llUFjDh5KhnlBUrdcfouBgUB2b6JE0WyVUMRgCC6gvF2lTdJp00BgLoJQLk')
 
     @app.route("/api/stripe/attach", methods=["POST"])
     def attachStripe():
         email = request.form.get("email")
         phoneNumber = request.form.get("phoneNumber")
         password = request.form.get("password")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
 
         if user == False:
-            return {"SCC":False,"err":"Authentication failed"}
+            return {"SCC": False, "err": "Authentication failed"}
         try:
             customerID = user["stripeCustomerID"]
         except:
-
             customer = stripe.Customer.create()
-            users.update_one({"_id":user["_id"]},{"$set":{"stripeCustomerID":customer["id"]}})
+            users.update_one(
+                {"_id": user["_id"]}, {"$set": {"stripeCustomerID": customer["id"]}}
+            )
             customerID = customer["id"]
         paymentMethod = request.form.get("paymentMethod")
         if paymentMethod == None:
-            return {"SCC":False,"err":"paymentMethod is not defined"}
+            return {"SCC": False, "err": "paymentMethod is not defined"}
         try:
-            stripe.PaymentMethod.attach(
-            paymentMethod,
-            customer=customerID
-            )
+            stripe.PaymentMethod.attach(paymentMethod, customer=customerID)
         except:
-            return {"SCC":False,"err":"paymentMethod is not valid"}
-        return {"SCC":True}
-    @app.route("/api/stripe/detach",methods=["POST"])
+            return {"SCC": False, "err": "paymentMethod is not valid"}
+        return {"SCC": True}
+
+    @app.route("/api/stripe/detach", methods=["POST"])
     def stripeDetach():
         email = request.form.get("email")
         phoneNumber = request.form.get("phoneNumber")
         password = request.form.get("password")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
 
         if user == False:
-            return {"SCC":False,"err":"Authentication failed"}
-        paymentMethod= request.form.get("paymentMethod")
+            return {"SCC": False, "err": "Authentication failed"}
+        paymentMethod = request.form.get("paymentMethod")
         if paymentMethod == None:
-            return {"SCC":False,"err":"paymentMethod is not defined"}
+            return {"SCC": False, "err": "paymentMethod is not defined"}
         stripe.PaymentMethod.detach(paymentMethod)
-        
-        return {"SCC":True }
 
+        return {"SCC": True}
 
-
-
-    @app.route("/api/stripe/list_methods",methods=["POST"])
+    @app.route("/api/stripe/list_methods", methods=["POST"])
     def list_methods_stripe():
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
         if user == False:
-            return {"SCC":False,"err":"Authentication Failed"}
-        
+            return {"SCC": False, "err": "Authentication Failed"}
+
         try:
             customerID = user["stripeCustomerID"]
         except:
-            return {"SCC":False,"err":"Customer not found"}
+            return {"SCC": False, "err": "Customer not found"}
         output = stripe.PaymentMethod.list(
             customer=customerID,
             type="card",
         )
 
         return output
+
     @app.route("/api/booking/addProof/<listingID>/<bookingID>", methods=["POST"])
     def addProof(listingID, bookingID):
         email = request.form.get("email")
@@ -2507,7 +2756,7 @@ class Booking:
             return {
                 "SCC": False,
                 "error": "images can't be undefined.",
-                "docs": "Send image filenames to 'images'. For multiple images, put |-| between all image names"
+                "docs": "Send image filenames to 'images'. For multiple images, put |-| between all image names",
             }
 
         """
@@ -2516,10 +2765,7 @@ class Booking:
         images = images.split("|-|")
 
         if user == False:
-            return {
-                "SCC": False,
-                "err": "Authentication failed"
-            }
+            return {"SCC": False, "err": "Authentication failed"}
         try:
             listingData = listings.find({"_id": listingID})[0]
         except:
@@ -2548,7 +2794,9 @@ class Booking:
             bookingData["proofs"] = images
         activeOrders.pop(bindex)
         activeOrders.append(bookingData)
-        bookings.update_one({"_id": listingID}, {"$set": {"activeOrders": activeOrders}})
+        bookings.update_one(
+            {"_id": listingID}, {"$set": {"activeOrders": activeOrders}}
+        )
 
         host = listingData["user"]
         customer = bookingData["customer"]
@@ -2563,8 +2811,10 @@ class Booking:
                 hostBookingData = oh
                 break
         if hostBookingData == None:
-            return {"SCC": False,
-                    "err": "Could not find booking on host's profile. Data may be corrupted or order not accepted by site admin"}
+            return {
+                "SCC": False,
+                "err": "Could not find booking on host's profile. Data may be corrupted or order not accepted by site admin",
+            }
 
         customerBookingData = None
         for oc in ordersCustomer:
@@ -2573,7 +2823,10 @@ class Booking:
                 break
 
         if customerBookingData == None:
-            return {"SCC": False, "err": "Could not find customer booking data. Data may be corrupted"}
+            return {
+                "SCC": False,
+                "err": "Could not find customer booking data. Data may be corrupted",
+            }
 
         customerBookingData["proofs"] = images
         hostBookingData["proofs"] = images
@@ -2583,71 +2836,103 @@ class Booking:
         ordersCustomer.pop(cindex)
         ordersHost.append(hostBookingData)
         ordersCustomer.append(customerBookingData)
-        users.update_one({"_id": customer}, {"$set":{"orders": ordersCustomer}})
-        users.update_one({"_id": host}, {"$set":{"orders": ordersHost}})
+        users.update_one({"_id": customer}, {"$set": {"orders": ordersCustomer}})
+        users.update_one({"_id": host}, {"$set": {"orders": ordersHost}})
 
-        html = Mail.generate(f"Proof picture added to order",f"Host added proof picture to your order for {listingData['title']}. Check it out on the app!")
-        Mail.send([customerData["email"]],f"Proof picture added to order",html)
+        html = Mail.generate(
+            f"Proof picture added to order",
+            f"Host added proof picture to your order for {listingData['title']}. Check it out on the app!",
+        )
+        Mail.send([customerData["email"]], f"Proof picture added to order", html)
         customerBookingData["page"] = "bookingPage"
 
-        send_notification(customerBookingData["customer"],customerBookingData,f"{hostData['fullName']} added proof image to your order","Click for more details")
+        send_notification(
+            customerBookingData["customer"],
+            customerBookingData,
+            f"{hostData['fullName']} added proof image to your order",
+            "Click for more details",
+        )
         return {"SCC": True, "bookingData": bookingData}
-    
 
     """
     Update for booking confirmation by host
     """
-    @app.route("/api/approve/<bookingID>",methods=["POST"])
+
+    @app.route("/api/approve/<bookingID>", methods=["POST"])
     def approveBooking(bookingID):
         "NOTE: In order to approve a booking it needs to be in waitingForApproval state"
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
         if user == False:
-            return {"SCC":False,"err":"Authentication failed"},401
+            return {"SCC": False, "err": "Authentication failed"}, 401
         bookingData = getBookingData(bookingID)
         if bookingData["status"] == "Not found":
-            return {"SCC":False,"err":"Could not find booking"},404
+            return {"SCC": False, "err": "Could not find booking"}, 404
         if bookingData["status"] != "waitingForApproval":
-            return {"SCC":False,"err":"This listing is not waiting for approval","data":bookingData},401
+            return {
+                "SCC": False,
+                "err": "This listing is not waiting for approval",
+                "data": bookingData,
+            }, 401
 
         listingData = bookingData["listingData"]
         if user["_id"] != listingData["user"]:
-            return {"SCC":False,"err":"This listing does not belong to this user."}
+            return {"SCC": False, "err": "This listing does not belong to this user."}
         bookings = db["Bookings"]
         try:
-            allBookingData = bookings.find({"_id":listingData["_id"]})[0]
+            allBookingData = bookings.find({"_id": listingData["_id"]})[0]
         except:
-            return {"SCC":False,"err":"database corrupted"},500
+            return {"SCC": False, "err": "database corrupted"}, 500
         allWaitingForApproval = allBookingData["waitingForApproval"]
         allActive = allBookingData["activeOrders"]
         waindex = -1
         counter = 0
         for w in allWaitingForApproval:
-            
             if w["bookingID"] == bookingData["data"]["bookingID"]:
-                
                 waindex = counter
 
                 bookingData = w
                 break
             counter += 1
         if waindex == -1:
-            return {"SCC":False,"err":"There is an error with our side"},500
+            return {"SCC": False, "err": "There is an error with our side"}, 500
         allWaitingForApproval.pop(waindex)
         allActive.append(bookingData)
-        bookings.update_one({"_id":listingData["_id"]},{"$set":{"activeOrders":allActive,"waitingForApproval":allWaitingForApproval}})
-        #Send user Successfull message
-        customerEmail = users.find({"_id":bookingData["customer"]})[0]["email"]
+        bookings.update_one(
+            {"_id": listingData["_id"]},
+            {
+                "$set": {
+                    "activeOrders": allActive,
+                    "waitingForApproval": allWaitingForApproval,
+                }
+            },
+        )
+        # Send user Successfull message
+        customerEmail = users.find({"_id": bookingData["customer"]})[0]["email"]
         msgTitle = "Your booking request is accepted by the host"
         msgBody = f"{user['fullName']} accepted your booking request for {listingData['title']}. You can follow updates on the app."
-        Mail.send([customerEmail],"Your booking is approved by host",'<!DOCTYPE html><html><head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>'+msgTitle+'</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 400; src: local(\'Source Sans Pro Regular\'), local(\'SourceSansPro-Regular\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format(\'woff\'); } @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 700; src: local(\'Source Sans Pro Bold\'), local(\'SourceSansPro-Bold\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format(\'woff\'); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style></head><body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Make fast, cheap, easy advertisements with Adflaunt! </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">'+msgTitle+'</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">'+msgBody+'</p> </td> </tr> <!-- start button --> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px">Kentel <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --></body></html>')
-        
+        Mail.send(
+            [customerEmail],
+            "Your booking is approved by host",
+            '<!DOCTYPE html><html><head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>'
+            + msgTitle
+            + '</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 400; src: local(\'Source Sans Pro Regular\'), local(\'SourceSansPro-Regular\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format(\'woff\'); } @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 700; src: local(\'Source Sans Pro Bold\'), local(\'SourceSansPro-Bold\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format(\'woff\'); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style></head><body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Make fast, cheap, easy advertisements with Adflaunt! </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">'
+            + msgTitle
+            + '</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">'
+            + msgBody
+            + '</p> </td> </tr> <!-- start button --> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px">Kentel <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --></body></html>',
+        )
 
         bookingData["page"] = "bookingPage"
 
-        send_notification(bookingData["customer"],bookingData,f"{user['fullName']} accepted your order","Click for more details")
+        send_notification(
+            bookingData["customer"],
+            bookingData,
+            f"{user['fullName']} accepted your order",
+            "Click for more details",
+        )
 
         del bookingData["page"]
         try:
@@ -2655,60 +2940,70 @@ class Booking:
         except:
             hostOrders = []
         hostOrders.append(bookingData)
-        users.update_one({"_id":user["_id"]},{"$set":{"orders":hostOrders}})
-        return {"SCC":True,"bookingData":bookingData}
+        users.update_one({"_id": user["_id"]}, {"$set": {"orders": hostOrders}})
+        return {"SCC": True, "bookingData": bookingData}
 
-    @app.route("/api/decline/<bookingID>",methods=["POST"])
+    @app.route("/api/decline/<bookingID>", methods=["POST"])
     def declineBooking(bookingID):
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
 
         if user == False:
-            return {"SCC":False,"err":"Authentication failed"},403
+            return {"SCC": False, "err": "Authentication failed"}, 403
 
         bookingData = getBookingData(bookingID)
-        
+
         listingData = bookingData["listingData"]
         if bookingData["status"] == "Not found":
-            return {"SCC":False,"err":"Could not find listing"},404
+            return {"SCC": False, "err": "Could not find listing"}, 404
 
         if bookingData["listingData"]["user"] != user["_id"]:
-            return {"SCC":False,"err":"This listing does not belong to you!"},403
-
+            return {"SCC": False, "err": "This listing does not belong to you!"}, 403
 
         if bookingData["status"] != "waitingForApproval":
-            return {"SCC":False,"err":"This listing is not waiting for host approval"},403
+            return {
+                "SCC": False,
+                "err": "This listing is not waiting for host approval",
+            }, 403
 
         bookings = db["Bookings"]
         try:
-            allBookingData = bookings.find({"_id":bookingData["listingData"]["_id"]})[0]
+            allBookingData = bookings.find({"_id": bookingData["listingData"]["_id"]})[
+                0
+            ]
         except Exception as e:
-            return {"SCC":False,"err":"Corruption in database","e":str(e),"data":bookingData},500
+            return {
+                "SCC": False,
+                "err": "Corruption in database",
+                "e": str(e),
+                "data": bookingData,
+            }, 500
         allWaitingForApproval = allBookingData["waitingForApproval"]
         counter = 0
         waindex = -1
         for w in allWaitingForApproval:
-
             if w["bookingID"] == bookingData["data"]["bookingID"]:
-                
                 waindex = counter
                 bookingData = w
-                break 
+                break
 
             counter += 1
         if waindex == -1:
-            return {"SCC":False,"err":"There is an error on our side"},500
+            return {"SCC": False, "err": "There is an error on our side"}, 500
         allWaitingForApproval.pop(waindex)
-        bookings.update_one({"_id":allBookingData["_id"]},{"$set":{"waitingForApproval":allWaitingForApproval}})
+        bookings.update_one(
+            {"_id": allBookingData["_id"]},
+            {"$set": {"waitingForApproval": allWaitingForApproval}},
+        )
 
         customer = bookingData["customer"]
-        customersProfile = users.find({"_id":customer})[0]
+        customersProfile = users.find({"_id": customer})[0]
         try:
             ordersCustomer = customersProfile["orders"]
         except:
-            ordersCustomer = [] 
+            ordersCustomer = []
 
         counter = 0
         oindex = -1
@@ -2716,40 +3011,57 @@ class Booking:
             if o["bookingID"] == bookingData["bookingID"]:
                 oindex = counter
                 break
-            counter +=1
+            counter += 1
         ordersCustomer.pop(counter)
 
-        users.update_one({"_id":customer},{"$set":{"orders":ordersCustomer}})
+        users.update_one({"_id": customer}, {"$set": {"orders": ordersCustomer}})
 
         BookingPaymentID = bookingData["paymentID"]
         bookingPrice = bookingData["price"]
         refundData = stripe.Refund.create(
-          payment_intent=BookingPaymentID,
+            payment_intent=BookingPaymentID,
         )
 
-
-
-        customerEmail = users.find({"_id":bookingData["customer"]})[0]["email"]
+        customerEmail = users.find({"_id": bookingData["customer"]})[0]["email"]
         msgTitle = "Your booking request is declined by the host"
         msgBody = f"{user['fullName']} declined your booking request for {listingData['title']}. You can try talk with them on chat."
-        Mail.send([customerEmail],"Your booking is approved by host",'<!DOCTYPE html><html><head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>'+msgTitle+'</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 400; src: local(\'Source Sans Pro Regular\'), local(\'SourceSansPro-Regular\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format(\'woff\'); } @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 700; src: local(\'Source Sans Pro Bold\'), local(\'SourceSansPro-Bold\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format(\'woff\'); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style></head><body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Make fast, cheap, easy advertisements with Adflaunt! </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">'+msgTitle+'</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">'+msgBody+'</p> </td> </tr> <!-- start button --> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px">Kentel <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --></body></html>')
-        
+        Mail.send(
+            [customerEmail],
+            "Your booking is approved by host",
+            '<!DOCTYPE html><html><head> <meta charset="utf-8"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <title>'
+            + msgTitle
+            + '</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style type="text/css"> /** * Google webfonts. Recommended to include the .woff version for cross-client compatibility. */ @media screen { @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 400; src: local(\'Source Sans Pro Regular\'), local(\'SourceSansPro-Regular\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format(\'woff\'); } @font-face { font-family: \'Source Sans Pro\'; font-style: normal; font-weight: 700; src: local(\'Source Sans Pro Bold\'), local(\'SourceSansPro-Bold\'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format(\'woff\'); } } /** * Avoid browser level font resizing. * 1. Windows Mobile * 2. iOS / OSX */ body, table, td, a { -ms-text-size-adjust: 100%; /* 1 */ -webkit-text-size-adjust: 100%; /* 2 */ } /** * Remove extra space added to tables and cells in Outlook. */ table, td { mso-table-rspace: 0pt; mso-table-lspace: 0pt; } /** * Better fluid images in Internet Explorer. */ img { -ms-interpolation-mode: bicubic; } /** * Remove blue links for iOS devices. */ a[x-apple-data-detectors] { font-family: inherit !important; font-size: inherit !important; font-weight: inherit !important; line-height: inherit !important; color: inherit !important; text-decoration: none !important; } /** * Fix centering issues in Android 4.4. */ div[style*="margin: 16px 0;"] { margin: 0 !important; } body { width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important; } /** * Collapse table borders to avoid space between cells. */ table { border-collapse: collapse !important; } a { color: #1a82e2; } img { height: auto; line-height: 100%; text-decoration: none; border: 0; outline: none; } </style></head><body style="background-color: #e9ecef;"> <!-- start preheader --> <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;"> Make fast, cheap, easy advertisements with Adflaunt! </div> <!-- end preheader --> <!-- start body --> <table border="0" cellpadding="0" cellspacing="0" width="100%"> <!-- start logo --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="center" valign="top" style="padding: 36px 24px;"> <a href="" target="_blank" style="display: inline-block;"> <img src="https://adflaunt.com/static/adflaunt.png" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;"> </a> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end logo --> <!-- start hero --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <tr> <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;"> <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">'
+            + msgTitle
+            + '</h1> </td> </tr> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end hero --> <!-- start copy block --> <tr> <td align="center" bgcolor="#e9ecef"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> <!-- start copy --> <tr> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"> <p style="margin: 0;">'
+            + msgBody
+            + '</p> </td> </tr> <!-- start button --> <!-- end button --> <!-- start copy --> <tr style="position: relative;"> <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: \'Source Sans Pro\', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf"> <p style="margin: 0;">Adflaunt <svg style="transform: rotate(180deg);" height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> <p style="margin: 0;font-size:10px;position:absolute;right:20px;bottom:25px">Kentel <svg height="10" preserveAspectRatio="xMidYMid" viewBox="0 0 256 256" width="10" xmlns="http://www.w3.org/2000/svg"><path d="m128 256c70.692448 0 128-57.307552 128-128s-57.307552-128-128-128-128 57.307552-128 128 57.307552 128 128 128zm0-26.122449c-56.2654178 0-101.877551-45.612133-101.877551-101.877551 0-56.2654178 45.6121332-101.877551 101.877551-101.877551 56.265418 0 101.877551 45.6121332 101.877551 101.877551 0 56.265418-45.612133 101.877551-101.877551 101.877551zm-1.044898-173.7142857c-33.9591836 0-62.432653 23.7714286-69.7469387 55.6408167h34.2204081c6.2693878-13.5836738 19.8530616-22.9877555 35.5265306-22.9877555 21.681633 0 39.183674 17.5020405 39.183674 39.1836735s-17.502041 39.183673-39.183674 39.183673c-15.673469 0-29.2571428-9.404081-35.5265306-22.72653h-34.2204081c7.3142857 31.608163 35.7877551 55.379592 69.7469387 55.379592 39.706122 0 71.836735-32.130613 71.836735-71.836735 0-39.7061224-32.130613-71.8367347-71.836735-71.8367347z"/></svg></p> </td> </tr> <!-- end copy --> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end copy block --> <!-- start footer --> <tr> <td align="center" bgcolor="#e9ecef" style="padding: 24px;"> <!--[if (gte mso 9)|(IE)]> <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"> <tr> <td align="center" valign="top" width="600"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;"> </table> <!--[if (gte mso 9)|(IE)]> </td> </tr> </table> <![endif]--> </td> </tr> <!-- end footer --> </table> <!-- end body --></body></html>',
+        )
 
         bookingData["page"] = "bookingPage"
 
-        send_notification(bookingData["customer"],bookingData,f"{user['fullName']} declined your order","Your order is declined by host")
+        send_notification(
+            bookingData["customer"],
+            bookingData,
+            f"{user['fullName']} declined your order",
+            "Your order is declined by host",
+        )
         del bookingData["page"]
 
         return bookingData
+
+
 class Scaling:
     @app.route("/static/<filename>/s<scale>")
     def staticScaler(filename, scale):
         try:
             scale = float(scale)
             try:
-                img = cv2.imread('static/{}'.format(filename), cv2.IMREAD_UNCHANGED)
+                img = cv2.imread("static/{}".format(filename), cv2.IMREAD_UNCHANGED)
             except:
-                return {"SCC": False, "err": "file not found or could not be opened by cv2"}
+                return {
+                    "SCC": False,
+                    "err": "file not found or could not be opened by cv2",
+                }
 
             scale_percent = scale
 
@@ -2757,19 +3069,21 @@ class Scaling:
             height = int(img.shape[0] * scale_percent / 100)
             dim = (width, height)
             resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-            retval, buffer = cv2.imencode('.png', resized)
+            retval, buffer = cv2.imencode(".png", resized)
             response = make_response(buffer.tobytes())
-            response.headers['Content-Type'] = 'image/png'
+            response.headers["Content-Type"] = "image/png"
             return response
 
         except:
-            return {"SCC": False, "err": "Scale should be a valid number like: s50 -> it means 50%"}
+            return {
+                "SCC": False,
+                "err": "Scale should be a valid number like: s50 -> it means 50%",
+            }
 
 
 class Reviews:
     @app.route("/api/reviews/add/<listingID>/<bookingID>", methods=["POST"])
     def addReview(listingID, bookingID):
-
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
@@ -2803,7 +3117,7 @@ class Reviews:
         for a in activeOrders:
             if bookingID == a["bookingID"]:
                 current = a
-                cindex= counter
+                cindex = counter
 
                 break
             counter += 1
@@ -2819,7 +3133,10 @@ class Reviews:
         try:
             hostProfile = users.find({"_id": listingData["user"]})[0]
         except:
-            return {"SCC": False, "err": "Could not find host's profile, instead made the booking DONE."}
+            return {
+                "SCC": False,
+                "err": "Could not find host's profile, instead made the booking DONE.",
+            }
         del user["password"]
 
         reviewdata = {
@@ -2836,7 +3153,9 @@ class Reviews:
         except:
             hostProfile["reviews"] = []
         hostProfile["reviews"].append(reviewdata)
-        users.update_one({"_id": listingData["user"]}, {"$set": {"reviews": hostProfile["reviews"]}})
+        users.update_one(
+            {"_id": listingData["user"]}, {"$set": {"reviews": hostProfile["reviews"]}}
+        )
         try:
             balance = hostProfile["balance"]
         except:
@@ -2851,40 +3170,55 @@ class Reviews:
             listingData["reviews"] = []
 
         listingData["reviews"].append(reviewdata)
-        listings.update_one({"_id": listingID}, {"$set": {"reviews": listingData["reviews"]}})
+        listings.update_one(
+            {"_id": listingID}, {"$set": {"reviews": listingData["reviews"]}}
+        )
 
         reviewdata["SCC"] = True
-        html = Mail.generate(f"{user['fullName']} gave you a {stars} review",f"{user['fullName']} {stars}<br>'{review}'<br>For your listing {listingData['title']}")
-        Mail.send([hostProfile["email"]],f"{user['fullName']} gave you a {stars} review",html)
+        html = Mail.generate(
+            f"{user['fullName']} gave you a {stars} review",
+            f"{user['fullName']} {stars}<br>'{review}'<br>For your listing {listingData['title']}",
+        )
+        Mail.send(
+            [hostProfile["email"]],
+            f"{user['fullName']} gave you a {stars} review",
+            html,
+        )
 
-        
         mbd = getBookingData(bookingID)
         mbd["page"] = "bookingPage"
-        send_notification(hostProfile["_id"],mbd,f"{user['fullName']} gave you a {stars} review","View your review for {listingData['title']")
+        send_notification(
+            hostProfile["_id"],
+            mbd,
+            f"{user['fullName']} gave you a {stars} review",
+            "View your review for {listingData['title']",
+        )
         return reviewdata
+
 
 class OrdersAndSellerBalance:
     @app.route("/api/getorders/<listingID>")
     def getOrdersWithListingID(listingID):
         bookings = db["Bookings"]
         try:
-            bookingData = bookings.find({"_id":listingID})[0]
+            bookingData = bookings.find({"_id": listingID})[0]
         except:
-            return {"SCC":False,"err":"Could not find listing"}
-        
-        bookingData["SCC"] = True 
+            return {"SCC": False, "err": "Could not find listing"}
+
+        bookingData["SCC"] = True
 
         return bookingData
-    @app.route("/api/orders",methods=["POST"])
+
+    @app.route("/api/orders", methods=["POST"])
     def getOrdersUser():
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
         if user == False:
-            return {"SCC":False,"err":"Authentication failed"}
+            return {"SCC": False, "err": "Authentication failed"}
         userListings = getListingsOfUser(user["_id"])
-        if len(userListings)>0:
+        if len(userListings) > 0:
             type_user = "seller"
         else:
             type_user = "buyer"
@@ -2898,42 +3232,39 @@ class OrdersAndSellerBalance:
                     p = getBookingData(p["bookingID"])
                     asCustomer.append(p)
 
-
         except:
             pass
         usersListings = getListingsOfUser(user["_id"])
         bookings = db["Bookings"]
         for l in usersListings:
             try:
-                bookingData = bookings.find({"_id":l["_id"]})[0]
+                bookingData = bookings.find({"_id": l["_id"]})[0]
             except:
-                continue 
+                continue
             activeOrders = bookingData["activeOrders"]
             waitingForApproval = bookingData["waitingForApproval"]
             doneOrders = bookingData["doneOrders"]
             for a in activeOrders:
-                a= getBookingData(a["bookingID"])
+                a = getBookingData(a["bookingID"])
                 asHost.append(a)
 
             for w in waitingForApproval:
-                w= getBookingData(w["bookingID"])
+                w = getBookingData(w["bookingID"])
                 asHost.append(w)
-
 
             for d in doneOrders:
                 d = getBookingData(d["bookingID"])
                 asHost.append(d)
 
-
-        
         returnData = {
-            "userData":user,
-            "user_type":type_user,
-            "asHost":asHost,
-            "asCustomer":asCustomer,
-            "SCC":True
+            "userData": user,
+            "user_type": type_user,
+            "asHost": asHost,
+            "asCustomer": asCustomer,
+            "SCC": True,
         }
         return returnData
+
     @app.route("/api/order/<bookingID>")
     def getOrderWithBookingID(bookingID):
         bookings = db["Bookings"]
@@ -2941,30 +3272,36 @@ class OrdersAndSellerBalance:
         for b in allBookings:
             activeOrders = b["activeOrders"]
             waitingForApproval = b["waitingForApproval"]
-            doneOrders= b["doneOrders"]
+            doneOrders = b["doneOrders"]
             for a in activeOrders:
                 if a["bookingID"] == bookingID:
-                    return {"SCC":True,"status":"Active","data":a}
+                    return {"SCC": True, "status": "Active", "data": a}
             for w in waitingForApproval:
                 if w["bookingID"] == bookingID:
-                    return {"SCC":True,"status":"Waiting for Administrator Approval","data":w}
+                    return {
+                        "SCC": True,
+                        "status": "Waiting for Administrator Approval",
+                        "data": w,
+                    }
             for d in doneOrders:
                 if d["bookingID"] == bookingID:
-                    return {"SCC":True,"status":"Completed","data":d}
-        return {"SCC":False,"err":"Could not find booking"}   
-    @app.route("/api/getBalance",methods=["POST"])
+                    return {"SCC": True, "status": "Completed", "data": d}
+        return {"SCC": False, "err": "Could not find booking"}
+
+    @app.route("/api/getBalance", methods=["POST"])
     def getUserBalance():
         email = request.form.get("email")
         password = request.form.get("password")
         phoneNumber = request.form.get("phoneNumber")
-        user = login_internal(email,phoneNumber,password)
+        user = login_internal(email, phoneNumber, password)
         if user == False:
-            return {"SCC":False,"err":"Authentication Failed"}
+            return {"SCC": False, "err": "Authentication Failed"}
         try:
-            balance =user["balance"]
+            balance = user["balance"]
         except:
-            balance = 0 
-        return {"SCC":True,"user":user,"balance":balance}
+            balance = 0
+        return {"SCC": True, "user": user, "balance": balance}
+
 
 class UserMapper:
     @app.route("/api/usermap")
@@ -2974,8 +3311,8 @@ class UserMapper:
             password = decrypt(request.cookies.get("password"))
             adminData = admin.find({"username": username, "password": password})[0]
         except Exception as e:
-            return {"SCC":False,"err":"Login error"}
-        output={}
+            return {"SCC": False, "err": "Login error"}
+        output = {}
         allUsers = users.find({})
         for a in allUsers:
             try:
@@ -2984,10 +3321,11 @@ class UserMapper:
             except:
                 lat = a["IPDATA"]["lat"]
                 long_ = a["IPDATA"]["lon"]
-            email =  a["email"]
-            output[email] = [lat,long_]
+            email = a["email"]
+            output[email] = [lat, long_]
 
         return output
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")

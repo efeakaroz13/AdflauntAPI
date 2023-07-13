@@ -1308,7 +1308,8 @@ class Listings:
         city = request.form.get("city")
         country = request.form.get("country")
         state = request.form.get("state")
-
+        zipCode = request.form.get("zip")
+        address = request.form.get("address")
         if (
             typeOfAd == None
             or width == None
@@ -1328,6 +1329,8 @@ class Listings:
             or description == None
             or extras == None
             or requirements == None
+            or zipCode == None
+            or address ==None
         ):
             return {"SCC": False, "err": "some parameters are required"}
 
@@ -1451,6 +1454,8 @@ class Listings:
             "sqfeet": sqfeet,
             "sqfootage": sqfeet,
             "inchFootage": inchFootage,
+            "address":address,
+            "zipCode":zipCode
         }
         if request.method == "POST":
             db["Listings"].insert_one(data)
